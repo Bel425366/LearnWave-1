@@ -1,9 +1,17 @@
 function Dashboard({ user, onNavigate }) {
   const areas = [
-    { id: 'gramatica', nome: 'Gramática', descricao: 'Sintaxe, morfologia e fonética' },
-    { id: 'literatura', nome: 'Literatura', descricao: 'Obras e autores brasileiros' },
-    { id: 'redacao', nome: 'Redação', descricao: 'Técnicas de escrita e dissertação' },
-    { id: 'interpretacao', nome: 'Interpretação de Texto', descricao: 'Compreensão e análise textual' }
+    { id: 'gramatica', nome: 'Gramática', descricao: 'Sintaxe, morfologia e fonética', icone: '📝' },
+    { id: 'literatura', nome: 'Literatura', descricao: 'Obras e autores brasileiros', icone: '📚' },
+    { id: 'redacao', nome: 'Redação', descricao: 'Técnicas de escrita e dissertação', icone: '✍️' },
+    { id: 'interpretacao', nome: 'Interpretação de Texto', descricao: 'Compreensão e análise textual', icone: '🔍' },
+    { id: 'ortografia', nome: 'Ortografia', descricao: 'Regras de escrita e acentuação', icone: '✏️' },
+    { id: 'fonetica', nome: 'Fonética', descricao: 'Sons da fala e pronúncia', icone: '🗣️' },
+    { id: 'semantica', nome: 'Semântica', descricao: 'Significado das palavras', icone: '💭' },
+    { id: 'estilistica', nome: 'Estilística', descricao: 'Recursos expressivos da linguagem', icone: '🎨' },
+    { id: 'morfologia', nome: 'Morfologia', descricao: 'Estrutura e formação das palavras', icone: '🔤' },
+    { id: 'sintaxe', nome: 'Sintaxe', descricao: 'Organização das palavras na frase', icone: '🔗' },
+    { id: 'pontuacao', nome: 'Pontuação', descricao: 'Sinais gráficos e suas funções', icone: '❗' },
+    { id: 'versificacao', nome: 'Versificação', descricao: 'Métrica e estrutura poética', icone: '🎭' }
   ]
 
   return (
@@ -21,6 +29,7 @@ function Dashboard({ user, onNavigate }) {
       <div className="areas-grid">
         {areas.map(area => (
           <div key={area.id} className="area-card">
+            <div className="area-icon">{area.icone}</div>
             <h3>{area.nome}</h3>
             <p>{area.descricao}</p>
             <div className="area-buttons">

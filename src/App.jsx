@@ -12,6 +12,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('login')
   const [user, setUser] = useState(null)
   const [selectedArea, setSelectedArea] = useState('')
+  const [isDarkTheme, setIsDarkTheme] = useState(true)
 
   const navigate = (page, area = '') => {
     setCurrentPage(page)
@@ -40,15 +41,29 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
       <header className="header">
-        <h1>LearnWave - Português</h1>
-        {user && (
-          <div className="user-info">
-            <span>Olá, {user.nome}!</span>
-            <button onClick={() => { setUser(null); navigate('login') }}>Sair</button>
+        <div className="header-content">
+          <h1>
+            <span className="graduation-cap">🎓</span>
+            LearnWave - Português
+          </h1>
+          <div className="header-actions">
+            <button 
+              className="theme-toggle" 
+              onClick={() => setIsDarkTheme(!isDarkTheme)}
+              title={isDarkTheme ? 'Tema Claro' : 'Tema Escuro'}
+            >
+              {isDarkTheme ? '☀️' : '🌙'}
+            </button>
+            {user && (
+              <div className="user-info">
+                <span>Olá, {user.nome}!</span>
+                <button onClick={() => { setUser(null); navigate('login') }}>Sair</button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </header>
       <main>{renderPage()}</main>
     </div>
