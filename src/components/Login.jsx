@@ -9,11 +9,11 @@ function Login({ userType, onLogin, onNavigate }) {
     database.init()
   }, [])
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault()
     if (email && senha) {
       try {
-        const usuario = await database.login(email.trim(), senha.trim(), userType)
+        const usuario = database.login(email.trim(), senha.trim(), userType)
         onLogin(usuario)
         
         if (userType === 'aluno') {

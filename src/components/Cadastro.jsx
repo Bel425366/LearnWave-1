@@ -20,11 +20,11 @@ function Cadastro({ userType, onNavigate }) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     if (formData.senha === formData.confirmarSenha) {
       try {
-        await database.cadastrarUsuario({
+        database.cadastrarUsuario({
           nome: formData.nome,
           email: formData.email,
           senha: formData.senha,

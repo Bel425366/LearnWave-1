@@ -1,47 +1,82 @@
-const API_URL = 'http://localhost:3001/api';
-
 export const database = {
-  init() {},
-
-  async cadastrarUsuario(dadosUsuario) {
-    try {
-      const response = await fetch(`${API_URL}/cadastro`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dadosUsuario),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      return data;
-    } catch (error) {
-      if (error.name === 'TypeError') {
-        throw new Error('Servidor não está rodando. Execute: cd server && npm start');
+  init() {
+    const usuarios = JSON.parse(localStorage.getItem('usuarios_db')) || []
+    
+    const admins = [
+      {
+        id: 1,
+        nome: 'Administrador 1',
+        email: 'pereiraisabelly585@gmail.com',
+        senha: 'admin123',
+        tipo: 'administrador',
+        dataCadastro: new Date().toISOString()
+      },
+      {
+        id: 2,
+        nome: 'Administrador 2',
+        email: 'jusf.2909@gmail.com',
+        senha: 'admin123',
+        tipo: 'administrador',
+        dataCadastro: new Date().toISOString()
       }
-      throw error;
-    }
+    ]
+    
+    admins.forEach(admin => {
+      if (!usuarios.find(u => u.email === admin.email)) {
+        usuarios.push(admin)
+      }
+    })
+    
+    localStorage.setItem('usuarios_db', JSON.stringify(usuarios))
   },
 
-  async login(email, senha, tipo) {
-    try {
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha, tipo }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      localStorage.setItem('token', data.token);
-      return data.user;
-    } catch (error) {
-      if (error.name === 'TypeError') {
-        throw new Error('Servidor não está rodando. Execute: cd server && npm start');
-      }
-      throw error;
+  cadastrarUsuario(dadosUsuario) {
+    this.init()
+    const usuarios = JSON.parse(localStorage.getItem('usuarios_db')) || []
+    
+    if (usuarios.find(u => u.email.trim() === dadosUsuario.email.trim())) {
+      throw new Error('Este email já está cadastrado no sistema!')
     }
+
+    const novoUsuario = {
+      id: Date.now(),
+      nome: dadosUsuario.nome.trim(),
+      email: dadosUsuario.email.trim(),
+      senha: dadosUsuario.senha.trim(),
+      tipo: dadosUsuario.tipo,
+      areaEnsino: dadosUsuario.areaEnsino?.trim(),
+      formacao: dadosUsuario.formacao?.trim(),
+      experiencia: dadosUsuario.experiencia?.trim(),
+      dataCadastro: new Date().toISOString()
+    }
+
+    usuarios.push(novoUsuario)
+    localStorage.setItem('usuarios_db', JSON.stringify(usuarios))
+    return novoUsuario
   },
 
-  async listarUsuarios() {
-    const response = await fetch(`${API_URL}/usuarios`);
-    return response.json();
+  login(email, senha, tipo) {
+    this.init()
+    const usuarios = JSON.parse(localStorage.getItem('usuarios_db')) || []
+    
+    const usuario = usuarios.find(u => 
+      u.email.trim() === email.trim() && 
+      u.senha.trim() === senha.trim() && 
+      u.tipo === tipo
+    )
+
+    if (!usuario) {
+      throw new Error('Email ou senha incorretos!')
+    }
+
+    return usuario
+  },
+
+  listarUsuarios() {
+    return JSON.parse(localStorage.getItem('usuarios_db')) || []
   }
-};
+}
+
+if (typeof window !== 'undefined') {
+  database.init()
+}

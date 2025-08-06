@@ -10,6 +10,7 @@ import Atividades from './components/Atividades'
 import Materiais from './components/Materiais'
 import AreaAluno from './components/AreaAluno'
 import './App.css'
+import './admin-styles.css'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('user-type-selection')
@@ -59,10 +60,41 @@ function App() {
     <div className={`app ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
       <header className="header">
         <div className="header-content">
-          <h1>
-            <span className="graduation-cap">🎓</span>
-            LearnWave - Português
-          </h1>
+          <div className="logo-container">
+            <input 
+              type="file" 
+              id="logo-upload" 
+              accept="image/*" 
+              style={{display: 'none'}}
+              onChange={(e) => {
+                const file = e.target.files[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.onload = (e) => {
+                    localStorage.setItem('site-logo', e.target.result)
+                    window.location.reload()
+                  }
+                  reader.readAsDataURL(file)
+                }
+              }}
+            />
+            {localStorage.getItem('site-logo') ? (
+              <img 
+                src={localStorage.getItem('site-logo')} 
+                alt="Logo" 
+                className="site-logo"
+                onClick={() => document.getElementById('logo-upload').click()}
+              />
+            ) : (
+              <div 
+                className="logo-placeholder"
+                onClick={() => document.getElementById('logo-upload').click()}
+              >
+                📷 Clique para adicionar logo
+              </div>
+            )}
+            <h1>LearnWave - Português</h1>
+          </div>
           <div className="header-actions">
             <button 
               className="theme-toggle" 

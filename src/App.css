@@ -42,6 +42,45 @@
   padding: 0 2rem;
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.site-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.site-logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-placeholder {
+  width: 50px;
+  height: 50px;
+  background: rgba(255,255,255,0.1);
+  border: 2px dashed rgba(255,255,255,0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  text-align: center;
+  transition: all 0.2s ease;
+  padding: 2px;
+}
+
+.logo-placeholder:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.5);
+}
+
 .header-actions {
   display: flex;
   align-items: center;
