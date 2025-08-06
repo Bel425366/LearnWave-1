@@ -1,7 +1,10 @@
 import { useState } from 'react'
+import UserTypeSelection from './components/UserTypeSelection'
 import Login from './components/Login'
 import Cadastro from './components/Cadastro'
 import Dashboard from './components/Dashboard'
+import PainelProfessor from './components/PainelProfessor'
+import PainelAdmin from './components/PainelAdmin'
 import Videoaulas from './components/Videoaulas'
 import Atividades from './components/Atividades'
 import Materiais from './components/Materiais'
@@ -9,7 +12,8 @@ import AreaAluno from './components/AreaAluno'
 import './App.css'
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('login')
+  const [currentPage, setCurrentPage] = useState('user-type-selection')
+  const [userType, setUserType] = useState('')
   const [user, setUser] = useState(null)
   const [selectedArea, setSelectedArea] = useState('')
   const [isDarkTheme, setIsDarkTheme] = useState(true)
@@ -19,14 +23,25 @@ function App() {
     if (area) setSelectedArea(area)
   }
 
+  const handleUserTypeSelection = (type) => {
+    setUserType(type)
+    navigate('login')
+  }
+
   const renderPage = () => {
     switch (currentPage) {
+      case 'user-type-selection':
+        return <UserTypeSelection onSelectUserType={handleUserTypeSelection} />
       case 'login':
-        return <Login onLogin={setUser} onNavigate={navigate} />
+        return <Login userType={userType} onLogin={setUser} onNavigate={navigate} />
       case 'cadastro':
-        return <Cadastro onNavigate={navigate} />
+        return <Cadastro userType={userType} onNavigate={navigate} />
       case 'dashboard':
-        return <Dashboard user={user} onNavigate={navigate} />
+        return <Dashboard user={user} userType={user?.tipo || userType} onNavigate={navigate} />
+      case 'painel-professor':
+        return <PainelProfessor user={user} onNavigate={navigate} />
+      case 'painel-admin':
+        return <PainelAdmin user={user} onNavigate={navigate} />
       case 'videoaulas':
         return <Videoaulas area={selectedArea} onNavigate={navigate} />
       case 'atividades':
@@ -36,7 +51,7 @@ function App() {
       case 'area-aluno':
         return <AreaAluno user={user} onNavigate={navigate} />
       default:
-        return <Login onLogin={setUser} onNavigate={navigate} />
+        return <UserTypeSelection onSelectUserType={handleUserTypeSelection} />
     }
   }
 
@@ -58,8 +73,8 @@ function App() {
             </button>
             {user && (
               <div className="user-info">
-                <span>Olá, {user.nome}!</span>
-                <button onClick={() => { setUser(null); navigate('login') }}>Sair</button>
+                <span>Olá, {user.nome}! ({user.tipo})</span>
+                <button onClick={() => { setUser(null); setUserType(''); navigate('user-type-selection') }}>Sair</button>
               </div>
             )}
           </div>

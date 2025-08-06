@@ -1,12 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { database } from '../utils/database'
 
-function Cadastro({ onNavigate }) {
+function Cadastro({ userType, onNavigate }) {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     senha: '',
-    confirmarSenha: ''
+    confirmarSenha: '',
+    areaEnsino: '',
+    formacao: '',
+    experiencia: ''
   })
+
+  useEffect(() => {
+    database.init()
+  }, [])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -15,17 +23,81 @@ function Cadastro({ onNavigate }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (formData.senha === formData.confirmarSenha) {
-      alert('Cadastro realizado com sucesso!')
-      onNavigate('login')
+      try {
+        database.init()
+        const novoUsuario = database.cadastrarUsuario({
+          nome: formData.nome,
+          email: formData.email,
+          senha: formData.senha,
+          tipo: userType,
+          areaEnsino: formData.areaEnsino,
+          formacao: formData.formacao,
+          experiencia: formData.experiencia
+        })
+        console.log('Usuário cadastrado:', novoUsuario)
+        console.log('Banco após cadastro:', JSON.parse(localStorage.getItem('usuarios_db')))
+        alert('Cadastro realizado com sucesso!')
+        onNavigate('login')
+      } catch (error) {
+        console.log('Erro no cadastro:', error.message)
+        console.log('Banco após erro:', JSON.parse(localStorage.getItem('usuarios_db')))
+        alert(error.message)
+      }
     } else {
       alert('Senhas não coincidem!')
     }
   }
 
+  const renderCamposEspecificos = () => {
+    if (userType === 'professor') {
+      return (
+        <>
+          <select
+            name="areaEnsino"
+            value={formData.areaEnsino}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Área de Ensino</option>
+            <option value="Gramática">Gramática</option>
+            <option value="Literatura">Literatura</option>
+            <option value="Redação">Redação</option>
+            <option value="Interpretação de Texto">Interpretação de Texto</option>
+            <option value="Ortografia">Ortografia</option>
+            <option value="Fonética">Fonética</option>
+            <option value="Semântica">Semântica</option>
+            <option value="Estilística">Estilística</option>
+            <option value="Morfologia">Morfologia</option>
+            <option value="Sintaxe">Sintaxe</option>
+            <option value="Pontuação">Pontuação</option>
+            <option value="Versificação">Versificação</option>
+          </select>
+          <input
+            type="text"
+            name="formacao"
+            placeholder="Formação acadêmica"
+            value={formData.formacao}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="experiencia"
+            placeholder="Anos de experiência"
+            value={formData.experiencia}
+            onChange={handleChange}
+            required
+          />
+        </>
+      )
+    }
+    return null
+  }
+
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h2>Cadastro</h2>
+        <h2>Cadastro - {userType.charAt(0).toUpperCase() + userType.slice(1)}</h2>
         <input
           type="text"
           name="nome"
@@ -58,11 +130,17 @@ function Cadastro({ onNavigate }) {
           onChange={handleChange}
           required
         />
+        {renderCamposEspecificos()}
         <button type="submit">Cadastrar</button>
         <p>
           Já tem conta? 
           <button type="button" onClick={() => onNavigate('login')}>
             Faça login
+          </button>
+        </p>
+        <p>
+          <button type="button" onClick={() => onNavigate('user-type-selection')}>
+            Voltar à seleção
           </button>
         </p>
       </form>
