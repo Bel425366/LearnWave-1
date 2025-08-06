@@ -9,14 +9,11 @@ function Login({ userType, onLogin, onNavigate }) {
     database.init()
   }, [])
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     if (email && senha) {
       try {
-        database.init()
-        console.log('Tentando login com:', { email: email.trim(), senha: senha.trim(), tipo: userType })
-        const usuario = database.login(email.trim(), senha.trim(), userType)
-        console.log('Login bem-sucedido:', usuario)
+        const usuario = await database.login(email.trim(), senha.trim(), userType)
         onLogin(usuario)
         
         if (userType === 'aluno') {
@@ -27,10 +24,7 @@ function Login({ userType, onLogin, onNavigate }) {
           onNavigate('painel-admin')
         }
       } catch (error) {
-        console.log('Erro no login:', error.message)
-        const usuarios = JSON.parse(localStorage.getItem('usuarios_db')) || []
-        console.log('Todos os usuários no banco:', usuarios)
-        alert('Email ou senha incorretos!')
+        alert(error.message)
       }
     }
   }

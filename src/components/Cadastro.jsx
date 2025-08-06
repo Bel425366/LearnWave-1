@@ -20,12 +20,11 @@ function Cadastro({ userType, onNavigate }) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (formData.senha === formData.confirmarSenha) {
       try {
-        database.init()
-        const novoUsuario = database.cadastrarUsuario({
+        await database.cadastrarUsuario({
           nome: formData.nome,
           email: formData.email,
           senha: formData.senha,
@@ -34,13 +33,9 @@ function Cadastro({ userType, onNavigate }) {
           formacao: formData.formacao,
           experiencia: formData.experiencia
         })
-        console.log('Usuário cadastrado:', novoUsuario)
-        console.log('Banco após cadastro:', JSON.parse(localStorage.getItem('usuarios_db')))
         alert('Cadastro realizado com sucesso!')
         onNavigate('login')
       } catch (error) {
-        console.log('Erro no cadastro:', error.message)
-        console.log('Banco após erro:', JSON.parse(localStorage.getItem('usuarios_db')))
         alert(error.message)
       }
     } else {
