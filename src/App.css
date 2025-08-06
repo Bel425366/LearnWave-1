@@ -217,6 +217,12 @@
   transition: all 0.3s;
 }
 
+.auth-form select option {
+  background: #2d3748;
+  color: #ffffff;
+  padding: 0.5rem;
+}
+
 .auth-form input::placeholder, .auth-form textarea::placeholder {
   color: #b0b0b0;
 }
@@ -327,6 +333,12 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+}
+
+.form-atividade select option {
+  background: #2d3748;
+  color: #ffffff;
+  padding: 0.5rem;
 }
 
 .form-atividade textarea {
