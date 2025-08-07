@@ -1,5 +1,11 @@
 import { useState } from 'react'
 
+const USER_TYPES = [
+  { id: 'aluno', label: 'Aluno', icon: '🎓' },
+  { id: 'professor', label: 'Professor', icon: '👨‍🏫' },
+  { id: 'administrador', label: 'Administrador', icon: '⚙️' }
+]
+
 function UserTypeSelection({ onSelectUserType }) {
   const [selectedType, setSelectedType] = useState('')
 
@@ -20,7 +26,7 @@ function UserTypeSelection({ onSelectUserType }) {
       <div className="user-type-selection">
         <h2>Você é:</h2>
         <div className="user-type-options">
-          {userTypes.map(type => (
+          {USER_TYPES.map(type => (
             <button
               key={type.id}
               className={`user-type-option ${selectedType === type.id ? 'selected' : ''}`}

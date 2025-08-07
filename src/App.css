@@ -913,6 +913,210 @@
   border: 2px solid #cccccc !important;
 }
 
+/* Estilos específicos para modo claro */
+.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme h5, .light-theme h6 {
+  color: #2d3748 !important;
+}
+
+.light-theme p {
+  color: #4a5568 !important;
+}
+
+.light-theme .user-type-selection h2 {
+  color: #2d3748 !important;
+}
+
+.light-theme .user-type-option {
+  color: #2d3748 !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .user-type-option:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(102, 126, 234, 0.4) !important;
+}
+
+.light-theme .auth-form h2 {
+  color: #2d3748 !important;
+}
+
+.light-theme .auth-form p {
+  color: #4a5568 !important;
+}
+
+.light-theme .auth-form button[type="button"] {
+  color: #667eea !important;
+}
+
+.light-theme .painel-professor h2, .light-theme .painel-admin h2, .light-theme .area-aluno h2 {
+  color: #2d3748 !important;
+}
+
+.light-theme .tabs button {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  color: #2d3748 !important;
+}
+
+.light-theme .tabs button:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.light-theme .tab-content {
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+.light-theme .gerenciar-atividades, .light-theme .gerenciar-videoaulas, .light-theme .gerenciar-materiais, .light-theme .acompanhar-progresso {
+  color: #2d3748 !important;
+}
+
+.light-theme .atividade-item {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .atividade-item h4 {
+  color: #2d3748 !important;
+}
+
+.light-theme .atividade-item p {
+  color: #4a5568 !important;
+}
+
+.light-theme .atividades-disponiveis, .light-theme .videoaulas-disponiveis, .light-theme .materiais-disponiveis, .light-theme .meu-progresso {
+  color: #2d3748 !important;
+}
+
+.light-theme .atividade-card, .light-theme .video-card, .light-theme .material-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .atividade-card h4, .light-theme .video-card h4, .light-theme .material-card h4 {
+  color: #2d3748 !important;
+}
+
+.light-theme .atividade-card p, .light-theme .video-card p, .light-theme .material-card p {
+  color: #4a5568 !important;
+}
+
+.light-theme .stat-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .stat-card h4 {
+  color: #2d3748 !important;
+}
+
+.light-theme .detalhes-progresso {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .detalhes-progresso h4 {
+  color: #2d3748 !important;
+}
+
+.light-theme .atividade-concluida span:first-child {
+  color: #2d3748 !important;
+}
+
+.light-theme .progresso-item {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .progresso-item h4 {
+  color: #2d3748 !important;
+}
+
+.light-theme .progresso-stats span {
+  color: #4a5568 !important;
+}
+
+.light-theme .lixeira {
+  color: #2d3748 !important;
+}
+
+.light-theme .lixeira-tabs button {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  color: #2d3748 !important;
+}
+
+.light-theme .lixeira-tabs button:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.light-theme .secao-correcao h4 {
+  color: #2d3748 !important;
+}
+
+.light-theme .submissao-item {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .submissao-info h5 {
+  color: #2d3748 !important;
+}
+
+.light-theme .submissao-info p {
+  color: #4a5568 !important;
+}
+
+.light-theme .btn-voltar {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #2d3748 !important;
+}
+
+.light-theme .atividade-container {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .descricao-atividade {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+.light-theme .opcao-label {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #2d3748 !important;
+}
+
+.light-theme .opcao-label:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.light-theme .aluno-progresso {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .aluno-progresso h5 {
+  color: #2d3748 !important;
+}
+
+.light-theme .aluno-progresso p {
+  color: #4a5568 !important;
+}
+
+.light-theme .form-atividade {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .form-actions button[type="button"] {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #2d3748 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+
+
 .aluno-progresso {
   background: rgba(255, 255, 255, 0.1);
   padding: 1rem;
@@ -931,22 +1135,221 @@
   margin-bottom: 0.3rem;
 }
 
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h3 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.modal-content p {
+  color: #b0b0b0;
+  margin-bottom: 2rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.btn-confirm {
+  background: #dc3545 !important;
+  border: none !important;
+  color: white !important;
+}
+
+.light-theme .modal-content {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.light-theme .modal-content h3 {
+  color: #2d3748;
+}
+
+.light-theme .modal-content p {
+  color: #4a5568;
+}
+
+.light-theme .btn-cancel {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  color: #2d3748 !important;
+}
+
+/* Loading Spinner */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-container.small .loading-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+.loading-container.medium .loading-spinner {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-container.large .loading-spinner {
+  width: 60px;
+  height: 60px;
+}
+
+.loading-container p {
+  margin-top: 1rem;
+  color: #b0b0b0;
+}
+
+.light-theme .loading-spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #667eea;
+}
+
+.light-theme .loading-container p {
+  color: #4a5568;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Acessibilidade */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.tabs button:focus-visible {
+  outline: 2px solid #ff6b9d;
+}
+
+/* Melhor contraste para modo claro */
+.light-theme button:focus-visible,
+.light-theme input:focus-visible,
+.light-theme textarea:focus-visible,
+.light-theme select:focus-visible {
+  outline: 2px solid #4a5568;
+}
+
+/* Skip link para navegação por teclado */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #667eea;
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1001;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .tabs button {
+    padding: 1rem 1.5rem;
+  }
+  
+  input, textarea, select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
 /* Responsividade */
+@media (max-width: 1024px) {
+  .header-content {
+    padding: 0 1rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+    padding: 0 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
   }
   
   .tabs {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .tabs button {
+    padding: 1rem;
+    font-size: 0.9rem;
   }
   
   .atividade-item {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
+    padding: 1rem;
   }
   
   .painel-professor, .painel-admin, .area-aluno {
@@ -961,6 +1364,16 @@
     flex-direction: column;
     gap: 0.5rem;
   }
+  
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -970,9 +1383,28 @@
   
   .user-type-option {
     padding: 1rem;
+    font-size: 0.9rem;
   }
   
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .auth-form {
+    padding: 1.5rem;
+  }
+  
+  .form-atividade {
+    padding: 1rem;
+  }
+  
+  .theme-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1rem !important;
   }
 }

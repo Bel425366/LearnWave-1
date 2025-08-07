@@ -4,15 +4,26 @@
   font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: dark;
-  color: #e0e0e0;
-  background-color: #1a1a2e;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    color: #e0e0e0;
+    background-color: #1a1a2e;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    color: #2d3748;
+    background-color: #f5f7fa;
+  }
 }
 
 a {
@@ -107,4 +118,14 @@ h1, h2, h3, h4, h5, h6 {
 
 p {
   color: #b0b0b0;
+}
+
+/* Cores para modo claro */
+@media (prefers-color-scheme: light) {
+  h1, h2, h3, h4, h5, h6 {
+    color: #2d3748;
+  }
+  p {
+    color: #4a5568;
+  }
 }

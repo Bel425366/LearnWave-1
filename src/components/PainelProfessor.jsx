@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { database } from '../utils/database'
+import Modal from './Modal'
+
+const AREAS = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Texto', 'Ortografia', 'Fonética', 'Semântica', 'Estilística', 'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação']
 
 function PainelProfessor({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
@@ -37,40 +40,55 @@ function PainelProfessor({ user, onNavigate }) {
     <div className="painel-professor">
       <h2>Painel do Professor - {user.nome}</h2>
       
-      <div className="tabs">
+      <div className="tabs" role="tablist" aria-label="Navegação do painel">
         <button 
           className={activeTab === 'atividades' ? 'active' : ''}
           onClick={() => setActiveTab('atividades')}
+          role="tab"
+          aria-selected={activeTab === 'atividades'}
+          aria-controls="tab-content"
         >
           Atividades
         </button>
         <button 
           className={activeTab === 'videoaulas' ? 'active' : ''}
           onClick={() => setActiveTab('videoaulas')}
+          role="tab"
+          aria-selected={activeTab === 'videoaulas'}
+          aria-controls="tab-content"
         >
           Videoaulas
         </button>
         <button 
           className={activeTab === 'materiais' ? 'active' : ''}
           onClick={() => setActiveTab('materiais')}
+          role="tab"
+          aria-selected={activeTab === 'materiais'}
+          aria-controls="tab-content"
         >
           Materiais
         </button>
         <button 
           className={activeTab === 'progresso' ? 'active' : ''}
           onClick={() => setActiveTab('progresso')}
+          role="tab"
+          aria-selected={activeTab === 'progresso'}
+          aria-controls="tab-content"
         >
           Progresso dos Alunos
         </button>
         <button 
           className={activeTab === 'lixeira' ? 'active' : ''}
           onClick={() => setActiveTab('lixeira')}
+          role="tab"
+          aria-selected={activeTab === 'lixeira'}
+          aria-controls="tab-content"
         >
           Lixeira
         </button>
       </div>
 
-      <div className="tab-content">
+      <div className="tab-content" role="tabpanel" id="tab-content" aria-labelledby={`tab-${activeTab}`}>
         {renderContent()}
       </div>
     </div>
@@ -82,22 +100,20 @@ function GerenciarAtividades({ atividades, setAtividades }) {
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa' })
 
-  const areas = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Texto', 'Ortografia', 'Fonética', 'Semântica', 'Estilística', 'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação']
-
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault()
     let newAtividades
     if (editingId) {
       newAtividades = atividades.map(a => a.id === editingId ? { ...a, ...formData } : a)
     } else {
-      newAtividades = [...atividades, { id: Date.now(), ...formData, excluido: false }]
+      newAtividades = [...atividades, { id: crypto.randomUUID ? crypto.randomUUID() : Date.now(), ...formData, excluido: false }]
     }
     setAtividades(newAtividades)
     localStorage.setItem('atividades', JSON.stringify(newAtividades))
     setFormData({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa' })
     setShowForm(false)
     setEditingId(null)
-  }
+  }, [editingId, atividades, formData, setAtividades])
 
   const handleEdit = (atividade) => {
     setFormData(atividade)
@@ -105,12 +121,17 @@ function GerenciarAtividades({ atividades, setAtividades }) {
     setShowForm(true)
   }
 
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null })
+
   const handleDelete = (id) => {
-    if (confirm('Mover para lixeira?')) {
-      const newAtividades = atividades.map(a => a.id === id ? { ...a, excluido: true } : a)
-      setAtividades(newAtividades)
-      localStorage.setItem('atividades', JSON.stringify(newAtividades))
-    }
+    setDeleteModal({ isOpen: true, id })
+  }
+
+  const confirmDelete = () => {
+    const newAtividades = atividades.map(a => a.id === deleteModal.id ? { ...a, excluido: true } : a)
+    setAtividades(newAtividades)
+    localStorage.setItem('atividades', JSON.stringify(newAtividades))
+    setDeleteModal({ isOpen: false, id: null })
   }
 
   return (
@@ -127,6 +148,7 @@ function GerenciarAtividades({ atividades, setAtividades }) {
             placeholder="Título da atividade"
             value={formData.titulo}
             onChange={(e) => setFormData({...formData, titulo: e.target.value})}
+            aria-label="Título da atividade"
             required
           />
           <select
@@ -135,7 +157,7 @@ function GerenciarAtividades({ atividades, setAtividades }) {
             required
           >
             <option value="">Área</option>
-            {areas.map(area => <option key={area} value={area}>{area}</option>)}
+            {AREAS.map(area => <option key={area} value={area}>{area}</option>)}
           </select>
           <textarea
             placeholder="Descrição da atividade"
@@ -222,6 +244,14 @@ function GerenciarAtividades({ atividades, setAtividades }) {
           </div>
         ))}
       </div>
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={confirmDelete}
+        title="Confirmar Exclusão"
+        message="Deseja mover esta atividade para a lixeira?"
+        confirmText="Mover"
+      />
     </div>
   )
 }
@@ -230,8 +260,6 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({ titulo: '', area: '', duracao: '', url: '' })
-
-  const areas = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Texto', 'Ortografia', 'Fonética', 'Semântica', 'Estilística', 'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação']
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -284,7 +312,7 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas }) {
             required
           >
             <option value="">Área</option>
-            {areas.map(area => <option key={area} value={area}>{area}</option>)}
+            {AREAS.map(area => <option key={area} value={area}>{area}</option>)}
           </select>
           <input
             type="text"
@@ -330,8 +358,6 @@ function GerenciarMateriais({ materiais, setMateriais }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({ titulo: '', area: '', tipo: 'PDF', arquivo: '' })
-
-  const areas = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Texto', 'Ortografia', 'Fonética', 'Semântica', 'Estilística', 'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação']
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -384,7 +410,7 @@ function GerenciarMateriais({ materiais, setMateriais }) {
             required
           >
             <option value="">Área</option>
-            {areas.map(area => <option key={area} value={area}>{area}</option>)}
+            {AREAS.map(area => <option key={area} value={area}>{area}</option>)}
           </select>
           <select
             value={formData.tipo}
@@ -436,12 +462,19 @@ function AcompanharProgresso() {
   })
 
   const darNota = (submissaoId, nota) => {
-    if (nota >= 0 && nota <= 10) {
+    const notaNum = parseFloat(nota)
+    if (isNaN(notaNum) || notaNum < 0 || notaNum > 10) {
+      alert('Nota deve ser um número entre 0 e 10')
+      return
+    }
+    try {
       const novasSubmissoes = submissoes.map(s => 
-        s.id === submissaoId ? { ...s, nota: parseFloat(nota), status: 'corrigida' } : s
+        s.id === submissaoId ? { ...s, nota: notaNum, status: 'corrigida' } : s
       )
       setSubmissoes(novasSubmissoes)
       localStorage.setItem('submissoes', JSON.stringify(novasSubmissoes))
+    } catch (error) {
+      alert('Erro ao salvar nota. Tente novamente.')
     }
   }
 

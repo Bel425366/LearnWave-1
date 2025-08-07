@@ -9,6 +9,7 @@ import Videoaulas from './components/Videoaulas'
 import Atividades from './components/Atividades'
 import Materiais from './components/Materiais'
 import AreaAluno from './components/AreaAluno'
+// import logo from './assets/logo.png' // Descomente se usar assets
 import './App.css'
 import './admin-styles.css'
 
@@ -61,38 +62,11 @@ function App() {
       <header className="header">
         <div className="header-content">
           <div className="logo-container">
-            <input 
-              type="file" 
-              id="logo-upload" 
-              accept="image/*" 
-              style={{display: 'none'}}
-              onChange={(e) => {
-                const file = e.target.files[0]
-                if (file) {
-                  const reader = new FileReader()
-                  reader.onload = (e) => {
-                    localStorage.setItem('site-logo', e.target.result)
-                    window.location.reload()
-                  }
-                  reader.readAsDataURL(file)
-                }
-              }}
+            <img 
+              src="/image.png" 
+              alt="LearnWave Logo" 
+              className="site-logo"
             />
-            {localStorage.getItem('site-logo') ? (
-              <img 
-                src={localStorage.getItem('site-logo')} 
-                alt="Logo" 
-                className="site-logo"
-                onClick={() => document.getElementById('logo-upload').click()}
-              />
-            ) : (
-              <div 
-                className="logo-placeholder"
-                onClick={() => document.getElementById('logo-upload').click()}
-              >
-                📷 Clique para adicionar logo
-              </div>
-            )}
             <h1>LearnWave - Português</h1>
           </div>
           <div className="header-actions">

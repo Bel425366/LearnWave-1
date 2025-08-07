@@ -4,18 +4,45 @@ function AreaAluno({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
   const [atividadeAtual, setAtividadeAtual] = useState(null)
   const [progressoAluno, setProgressoAluno] = useState(() => {
-    const saved = localStorage.getItem(`progresso_${user.email}`)
-    return saved ? JSON.parse(saved) : {
-      atividadesConcluidas: [],
-      videoaulasAssistidas: [],
-      materiaisBaixados: [],
-      notas: {}
+    try {
+      const saved = localStorage.getItem(`progresso_${user.email}`)
+      return saved ? JSON.parse(saved) : {
+        atividadesConcluidas: [],
+        videoaulasAssistidas: [],
+        materiaisBaixados: [],
+        notas: {}
+      }
+    } catch {
+      return {
+        atividadesConcluidas: [],
+        videoaulasAssistidas: [],
+        materiaisBaixados: [],
+        notas: {}
+      }
     }
   })
   
-  const todasAtividades = (JSON.parse(localStorage.getItem('atividades')) || []).filter(a => !a.excluido)
-  const todasVideoaulas = (JSON.parse(localStorage.getItem('videoaulas')) || []).filter(v => !v.excluido)
-  const todosMateriais = (JSON.parse(localStorage.getItem('materiais')) || []).filter(m => !m.excluido)
+  const todasAtividades = (() => {
+    try {
+      return (JSON.parse(localStorage.getItem('atividades')) || []).filter(a => !a.excluido)
+    } catch {
+      return []
+    }
+  })()
+  const todasVideoaulas = (() => {
+    try {
+      return (JSON.parse(localStorage.getItem('videoaulas')) || []).filter(v => !v.excluido)
+    } catch {
+      return []
+    }
+  })()
+  const todosMateriais = (() => {
+    try {
+      return (JSON.parse(localStorage.getItem('materiais')) || []).filter(m => !m.excluido)
+    } catch {
+      return []
+    }
+  })()
 
   useEffect(() => {
     localStorage.setItem(`progresso_${user.email}`, JSON.stringify(progressoAluno))
@@ -26,19 +53,24 @@ function AreaAluno({ user, onNavigate }) {
   }
 
   const enviarAtividade = (resposta) => {
-    const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
-    const novaSubmissao = {
-      id: Date.now(),
-      atividadeId: atividadeAtual.id,
-      alunoEmail: user.email,
-      alunoNome: user.nome,
-      resposta,
-      data: new Date().toLocaleString(),
-      status: 'pendente',
-      nota: null
+    try {
+      const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
+      const novaSubmissao = {
+        id: Date.now(),
+        atividadeId: atividadeAtual.id,
+        alunoEmail: user.email,
+        alunoNome: user.nome,
+        resposta,
+        data: new Date().toLocaleString(),
+        status: 'pendente',
+        nota: null
+      }
+      submissoes.push(novaSubmissao)
+      localStorage.setItem('submissoes', JSON.stringify(submissoes))
+    } catch (error) {
+      alert('Erro ao enviar atividade. Tente novamente.')
+      return
     }
-    submissoes.push(novaSubmissao)
-    localStorage.setItem('submissoes', JSON.stringify(submissoes))
     
     setProgressoAluno(prev => ({
       ...prev,
