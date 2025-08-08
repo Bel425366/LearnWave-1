@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { database } from '../utils/database'
+import VerificacaoProfessores from './VerificacaoProfessores'
 
 function PainelAdmin({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('usuarios')
@@ -8,6 +9,8 @@ function PainelAdmin({ user, onNavigate }) {
     switch (activeTab) {
       case 'usuarios':
         return <GerenciarUsuarios />
+      case 'verificacao':
+        return <VerificacaoProfessores />
       case 'configuracoes':
         return <ConfiguracoesSite />
       case 'relatorios':
@@ -33,6 +36,12 @@ function PainelAdmin({ user, onNavigate }) {
           onClick={() => setActiveTab('usuarios')}
         >
           👥 Usuários
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'verificacao' ? 'active' : ''}`}
+          onClick={() => setActiveTab('verificacao')}
+        >
+          ✅ Verificar Professores
         </button>
         <button 
           className={`tab-btn ${activeTab === 'configuracoes' ? 'active' : ''}`}

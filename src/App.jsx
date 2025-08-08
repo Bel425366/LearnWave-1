@@ -2,6 +2,7 @@ import { useState } from 'react'
 import UserTypeSelection from './components/UserTypeSelection'
 import Login from './components/Login'
 import Cadastro from './components/Cadastro'
+import CadastroProfessor from './components/CadastroProfessor'
 import Dashboard from './components/Dashboard'
 import PainelProfessor from './components/PainelProfessor'
 import PainelAdmin from './components/PainelAdmin'
@@ -27,7 +28,11 @@ function App() {
 
   const handleUserTypeSelection = (type) => {
     setUserType(type)
-    navigate('login')
+    if (type === 'professor') {
+      navigate('cadastro-professor')
+    } else {
+      navigate('login')
+    }
   }
 
   const renderPage = () => {
@@ -38,6 +43,8 @@ function App() {
         return <Login userType={userType} onLogin={setUser} onNavigate={navigate} />
       case 'cadastro':
         return <Cadastro userType={userType} onNavigate={navigate} />
+      case 'cadastro-professor':
+        return <CadastroProfessor onNavigate={navigate} />
       case 'dashboard':
         return <Dashboard user={user} userType={user?.tipo || userType} onNavigate={navigate} />
       case 'painel-professor':
