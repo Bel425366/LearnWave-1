@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { database } from '../utils/database'
+import { localDB } from '../services/localDatabase'
 import VerificacaoProfessores from './VerificacaoProfessores'
 
 function PainelAdmin({ user, onNavigate }) {
@@ -65,12 +65,14 @@ function PainelAdmin({ user, onNavigate }) {
 }
 
 function GerenciarUsuarios() {
-  const [usuarios, setUsuarios] = useState(() => database.listarUsuarios())
+  const [usuarios, setUsuarios] = useState(() => JSON.parse(localStorage.getItem('learnwave_users') || '[]'))
 
   const removerUsuario = (id) => {
     if (confirm('Tem certeza que deseja remover este usuário?')) {
-      database.removerUsuario(id)
-      setUsuarios(database.listarUsuarios())
+      const users = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
+      const updatedUsers = users.filter(u => u.id !== id)
+      localStorage.setItem('learnwave_users', JSON.stringify(updatedUsers))
+      setUsuarios(updatedUsers)
     }
   }
 
@@ -87,7 +89,7 @@ function GerenciarUsuarios() {
     <div className="usuarios-section">
       <div className="section-header">
         <h2>👥 Gerenciar Usuários</h2>
-        <button className="refresh-btn" onClick={() => setUsuarios(database.listarUsuarios())}>🔄 Atualizar</button>
+        <button className="refresh-btn" onClick={() => setUsuarios(JSON.parse(localStorage.getItem('learnwave_users') || '[]'))}>🔄 Atualizar</button>
       </div>
       
       <div className="usuarios-grid">
@@ -156,7 +158,7 @@ function ConfiguracoesSite() {
 }
 
 function RelatoriosGerais() {
-  const usuarios = database.listarUsuarios()
+  const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
   const totalUsuarios = usuarios.length
   const alunos = usuarios.filter(u => u.tipo === 'aluno').length
   const professores = usuarios.filter(u => u.tipo === 'professor').length

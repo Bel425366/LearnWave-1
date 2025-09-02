@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { database } from '../utils/database'
+import { useState } from 'react'
+import { localDB } from '../services/localDatabase'
 
 function Cadastro({ userType, onNavigate }) {
   const [formData, setFormData] = useState({
@@ -12,9 +12,7 @@ function Cadastro({ userType, onNavigate }) {
     experiencia: ''
   })
 
-  useEffect(() => {
-    database.init()
-  }, [])
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -24,7 +22,7 @@ function Cadastro({ userType, onNavigate }) {
     e.preventDefault()
     if (formData.senha === formData.confirmarSenha) {
       try {
-        database.cadastrarUsuario({
+        localDB.register({
           nome: formData.nome,
           email: formData.email,
           senha: formData.senha,

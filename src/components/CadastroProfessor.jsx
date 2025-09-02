@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { localDB } from '../services/localDatabase'
 
 function CadastroProfessor({ onNavigate }) {
   const [formData, setFormData] = useState({
@@ -48,30 +49,39 @@ function CadastroProfessor({ onNavigate }) {
     setLoading(true)
 
     try {
-      const formDataToSend = new FormData()
-      Object.keys(formData).forEach(key => {
-        if (key !== 'confirmarSenha') {
-          formDataToSend.append(key, formData[key])
-        }
-      })
-      formDataToSend.append('documento', documento)
-      formDataToSend.append('tipo', 'professor')
-
-      const response = await fetch('http://localhost:3001/api/cadastro-professor', {
-        method: 'POST',
-        body: formDataToSend
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        alert('Cadastro enviado! Aguarde a verificação dos documentos.')
-        onNavigate('login')
-      } else {
-        alert(data.error || 'Erro no cadastro')
+      if (!documento) {
+        alert('É obrigatório enviar um documento comprobatório')
+        return
       }
+
+      // Converter imagem para base64
+      const reader = new FileReader()
+      reader.onload = function(e) {
+        try {
+          localDB.register({
+            nome: formData.nome,
+            email: formData.email,
+            senha: formData.senha,
+            cpf: formData.cpf,
+            escola: formData.escola,
+            telefone: formData.telefone,
+            documento: documento.name,
+            documentoImagem: e.target.result,
+            tipo: 'professor',
+            dataEnvio: new Date().toISOString()
+          })
+          alert('Cadastro enviado com sucesso! Aguarde a verificação dos documentos pelo administrador.')
+          onNavigate('login')
+        } catch (error) {
+          alert('Erro ao salvar: ' + error.message)
+        }
+      }
+      reader.onerror = function() {
+        alert('Erro ao processar o arquivo')
+      }
+      reader.readAsDataURL(documento)
     } catch (error) {
-      alert('Erro de conexão')
+      alert('Erro: ' + error.message)
     } finally {
       setLoading(false)
     }

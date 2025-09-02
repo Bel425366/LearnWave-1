@@ -1,19 +1,17 @@
-import { useState, useEffect } from 'react'
-import { database } from '../utils/database'
+import { useState } from 'react'
+import { localDB } from '../services/localDatabase'
 
 function Login({ userType, onLogin, onNavigate }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
 
-  useEffect(() => {
-    database.init()
-  }, [])
+
 
   const handleLogin = (e) => {
     e.preventDefault()
     if (email && senha) {
       try {
-        const usuario = database.login(email.trim(), senha.trim(), userType)
+        const usuario = localDB.login(email.trim(), senha.trim(), userType)
         onLogin(usuario)
         
         if (userType === 'aluno') {

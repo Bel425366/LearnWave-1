@@ -10,7 +10,6 @@ import Videoaulas from './components/Videoaulas'
 import Atividades from './components/Atividades'
 import Materiais from './components/Materiais'
 import AreaAluno from './components/AreaAluno'
-// import logo from './assets/logo.png' // Descomente se usar assets
 import './App.css'
 import './admin-styles.css'
 
@@ -74,7 +73,7 @@ function App() {
               alt="LearnWave Logo" 
               className="site-logo"
             />
-            <h1>LearnWave - Português</h1>
+            <h1>LearnWave - Plataforma Educacional</h1>
           </div>
           <div className="header-actions">
             <button 

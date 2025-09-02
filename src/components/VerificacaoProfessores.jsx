@@ -1,99 +1,151 @@
 import { useState, useEffect } from 'react'
+import { localDB } from '../services/localDatabase'
 
 function VerificacaoProfessores() {
   const [professoresPendentes, setProfessoresPendentes] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedProfessor, setSelectedProfessor] = useState(null)
+  const [imagemModal, setImagemModal] = useState(null)
 
   useEffect(() => {
     carregarProfessoresPendentes()
   }, [])
 
-  const carregarProfessoresPendentes = async () => {
-    try {
-      const response = await fetch('http://localhost:3001/api/professores-pendentes')
-      const data = await response.json()
-      setProfessoresPendentes(data)
-    } catch (error) {
-      console.error('Erro ao carregar professores:', error)
-    } finally {
-      setLoading(false)
+  const carregarProfessoresPendentes = () => {
+    const pendentes = localDB.getPendingTeachers()
+    console.log('Professores pendentes:', pendentes)
+    setProfessoresPendentes(pendentes)
+  }
+
+  const aprovarProfessor = (professorId) => {
+    if (localDB.approveTeacher(professorId)) {
+      alert('Professor aprovado com sucesso!')
+      carregarProfessoresPendentes()
     }
   }
 
-  const verificarProfessor = async (professorId, status) => {
-    try {
-      const response = await fetch('http://localhost:3001/api/verificar-professor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ professorId, status })
-      })
-
-      if (response.ok) {
-        alert(`Professor ${status} com sucesso!`)
-        carregarProfessoresPendentes()
-        setSelectedProfessor(null)
-      } else {
-        alert('Erro na verificação')
-      }
-    } catch (error) {
-      alert('Erro de conexão')
+  const rejeitarProfessor = (professorId) => {
+    if (localDB.rejectTeacher(professorId)) {
+      alert('Professor rejeitado!')
+      carregarProfessoresPendentes()
     }
   }
-
-  const visualizarDocumento = (caminhoArquivo) => {
-    window.open(`http://localhost:3001/${caminhoArquivo}`, '_blank')
-  }
-
-  if (loading) return <div>Carregando...</div>
 
   return (
     <div className="verificacao-professores">
-      <h2>Verificação de Professores</h2>
+      <div className="section-header">
+        <h2>📋 Verificação de Credenciais Docentes</h2>
+        <p className="section-subtitle">Analise e aprove os cadastros de professores pendentes</p>
+      </div>
       
       {professoresPendentes.length === 0 ? (
-        <p>Nenhum professor pendente de verificação.</p>
+        <div className="empty-state">
+          <div className="empty-icon">📄</div>
+          <h3>Nenhuma solicitação pendente</h3>
+          <p>Todas as solicitações de cadastro foram processadas.</p>
+        </div>
       ) : (
-        <div className="professores-lista">
+        <div className="professores-grid">
           {professoresPendentes.map(professor => (
-            <div key={professor.id} className="professor-card">
-              <div className="professor-info">
-                <h3>{professor.nome}</h3>
-                <p><strong>Email:</strong> {professor.email}</p>
-                <p><strong>CPF:</strong> {professor.cpf}</p>
-
-                <p><strong>Escola:</strong> {professor.escola}</p>
-                {professor.telefone && <p><strong>Telefone:</strong> {professor.telefone}</p>}
-                <p><strong>Data do cadastro:</strong> {new Date(professor.data_criacao).toLocaleDateString()}</p>
+            <div key={professor.id} className="professor-card-formal">
+              <div className="card-header">
+                <div className="professor-avatar">
+                  👨‍🏫
+                </div>
+                <div className="professor-basic-info">
+                  <h3 className="professor-nome">{professor.nome}</h3>
+                  <p className="professor-email">{professor.email}</p>
+                  <span className="status-badge pending">Pendente de Aprovação</span>
+                </div>
               </div>
               
-              <div className="professor-actions">
-                {professor.caminho_arquivo && (
-                  <button 
-                    onClick={() => visualizarDocumento(professor.caminho_arquivo)}
-                    className="btn-documento"
-                  >
-                    Ver Documento
-                  </button>
-                )}
+              <div className="card-body">
+                <div className="info-grid">
+                  <div className="info-item">
+                    <label>CPF:</label>
+                    <span>{professor.cpf}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Instituição:</label>
+                    <span>{professor.escola}</span>
+                  </div>
+                  {professor.telefone && (
+                    <div className="info-item">
+                      <label>Telefone:</label>
+                      <span>{professor.telefone}</span>
+                    </div>
+                  )}
+                  <div className="info-item">
+                    <label>Data da Solicitação:</label>
+                    <span>{new Date().toLocaleDateString('pt-BR')}</span>
+                  </div>
+                </div>
                 
-                <div className="verification-buttons">
+                {professor.documentoImagem && (
+                  <div className="documento-section">
+                    <label>Documento Comprobatório:</label>
+                    <div className="documento-preview">
+                      <img 
+                        src={professor.documentoImagem} 
+                        alt="Documento do professor" 
+                        className="documento-img"
+                        onClick={() => window.open(professor.documentoImagem, '_blank')}
+                      />
+                      <p className="documento-nome">{professor.documento}</p>
+                      <button 
+                        className="btn-visualizar"
+                        onClick={() => setImagemModal(professor.documentoImagem)}
+                      >
+                        🔍 Visualizar em Tela Cheia
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="card-footer">
+                <div className="acoes-formais">
                   <button 
-                    onClick={() => verificarProfessor(professor.id, 'aprovado')}
-                    className="btn-aprovar"
+                    className="btn-aprovar-formal"
+                    onClick={() => aprovarProfessor(professor.id)}
                   >
-                    Aprovar
+                    ✅ Aprovar Cadastro
                   </button>
                   <button 
-                    onClick={() => verificarProfessor(professor.id, 'rejeitado')}
-                    className="btn-rejeitar"
+                    className="btn-rejeitar-formal"
+                    onClick={() => rejeitarProfessor(professor.id)}
                   >
-                    Rejeitar
+                    ❌ Rejeitar Solicitação
                   </button>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+      
+      {imagemModal && (
+        <div className="modal-overlay" onClick={() => setImagemModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Documento Comprobatório</h3>
+              <button className="modal-close" onClick={() => setImagemModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <img src={imagemModal} alt="Documento" className="modal-image" />
+            </div>
+            <div className="modal-footer">
+              <button className="btn-download" onClick={() => {
+                const link = document.createElement('a')
+                link.href = imagemModal
+                link.download = 'documento-professor.jpg'
+                link.click()
+              }}>
+                📥 Baixar Documento
+              </button>
+              <button className="btn-fechar" onClick={() => setImagemModal(null)}>
+                Fechar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
