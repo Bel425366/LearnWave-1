@@ -16,7 +16,21 @@ function CadastroProfessor({ onNavigate }) {
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    
+    if (name === 'cpf') {
+      // Remove tudo que não é número
+      const numericValue = value.replace(/\D/g, '')
+      
+      // Limita a 11 dígitos
+      if (numericValue.length <= 11) {
+        setFormData({ ...formData, [name]: numericValue })
+      }
+    } else {
+      // Sanitiza entrada do usuário
+      const sanitizedValue = typeof value === 'string' ? value.replace(/[<>]/g, '').trim() : value
+      setFormData({ ...formData, [name]: sanitizedValue })
+    }
   }
 
   const handleFileChange = (e) => {
@@ -24,6 +38,9 @@ function CadastroProfessor({ onNavigate }) {
   }
 
   const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) return false
+    
     const institutionalDomains = ['.edu.br', '.gov.br', '.escola.', '.colegio.']
     return institutionalDomains.some(domain => email.includes(domain))
   }
@@ -38,6 +55,16 @@ function CadastroProfessor({ onNavigate }) {
 
     if (!validateEmail(formData.email)) {
       alert('Use um e-mail institucional (.edu.br, .gov.br, etc.)')
+      return
+    }
+
+    if (formData.senha.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres')
+      return
+    }
+
+    if (formData.cpf.length !== 11) {
+      alert('CPF deve conter exatamente 11 números')
       return
     }
 
@@ -113,9 +140,10 @@ function CadastroProfessor({ onNavigate }) {
         <input
           type="text"
           name="cpf"
-          placeholder="CPF"
+          placeholder="CPF (apenas números)"
           value={formData.cpf}
           onChange={handleChange}
+          maxLength="11"
           required
         />
         

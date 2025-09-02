@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { localDB } from '../services/localDatabase'
+import { Security } from '../utils/security'
 
 function Cadastro({ userType, onNavigate }) {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ function Cadastro({ userType, onNavigate }) {
     e.preventDefault()
     if (formData.senha === formData.confirmarSenha) {
       try {
-        localDB.register({
+        const userData = {
           nome: formData.nome,
           email: formData.email,
           senha: formData.senha,
@@ -30,9 +31,18 @@ function Cadastro({ userType, onNavigate }) {
           areaEnsino: formData.areaEnsino,
           formacao: formData.formacao,
           experiencia: formData.experiencia
-        })
-        alert('Cadastro realizado com sucesso!')
-        onNavigate('login')
+        }
+        localDB.register(userData)
+        
+        if (userType === 'aluno') {
+          // Login automático para alunos
+          Security.createSession(userData)
+          alert('Cadastro realizado com sucesso! Bem-vindo!')
+          onNavigate('area-aluno')
+        } else {
+          alert('Cadastro realizado com sucesso!')
+          onNavigate('login')
+        }
       } catch (error) {
         alert(error.message)
       }

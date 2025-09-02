@@ -1,13 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -67,18 +68,19 @@ h1 {
 }
 
 button {
-  border-radius: 25px;
+  border-radius: 12px;
   border: none;
   padding: 0.8em 1.5em;
-  font-size: 1em;
-  font-weight: bold;
+  font-size: 0.95em;
+  font-weight: 600;
   font-family: inherit;
-  background: linear-gradient(135deg, #ff6b9d, #87ceeb);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: white;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
+  letter-spacing: 0.01em;
 }
 
 button::before {
@@ -93,8 +95,8 @@ button::before {
 }
 
 button:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
 button:hover::before {
@@ -109,7 +111,7 @@ button:active {
 button:focus,
 button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 
 h1, h2, h3, h4, h5, h6 {

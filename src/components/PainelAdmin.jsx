@@ -15,6 +15,8 @@ function PainelAdmin({ user, onNavigate }) {
         return <ConfiguracoesSite />
       case 'relatorios':
         return <RelatoriosGerais />
+      case 'perfil':
+        return <PerfilAdmin user={user} />
       default:
         return <GerenciarUsuarios />
     }
@@ -54,6 +56,12 @@ function PainelAdmin({ user, onNavigate }) {
           onClick={() => setActiveTab('relatorios')}
         >
           📊 Relatórios
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'perfil' ? 'active' : ''}`}
+          onClick={() => setActiveTab('perfil')}
+        >
+          👤 Meu Perfil
         </button>
       </div>
 
@@ -109,7 +117,6 @@ function GerenciarUsuarios() {
               <p className="data">📅 {new Date(usuario.dataCadastro).toLocaleDateString()}</p>
             </div>
             <div className="usuario-actions">
-              <button className="edit-btn">✏️ Editar</button>
               {usuario.tipo !== 'administrador' && (
                 <button className="delete-btn" onClick={() => removerUsuario(usuario.id)}>🗑️ Remover</button>
               )}
@@ -224,3 +231,109 @@ function RelatoriosGerais() {
 }
 
 export default PainelAdmin
+function PerfilAdmin({ user }) {
+  const [perfilData, setPerfilData] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`perfil_${user.email}`)
+      return saved ? JSON.parse(saved) : {
+        apelido: user.nome,
+        bio: '',
+        fotoPerfil: null
+      }
+    } catch {
+      return {
+        apelido: user.nome,
+        bio: '',
+        fotoPerfil: null
+      }
+    }
+  })
+
+  const [formData, setFormData] = useState(perfilData)
+  const [previewFoto, setPreviewFoto] = useState(perfilData.fotoPerfil)
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const fotoBase64 = e.target.result
+        setPreviewFoto(fotoBase64)
+        setFormData({ ...formData, fotoPerfil: fotoBase64 })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setPerfilData(formData)
+    localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
+    alert('Perfil atualizado com sucesso!')
+    window.dispatchEvent(new Event('storage'))
+  }
+
+  return (
+    <div className="perfil-aluno">
+      <h3>👨‍💼 Meu Perfil de Administrador</h3>
+      <form onSubmit={handleSubmit} className="form-perfil">
+        <div className="foto-perfil-section">
+          <div className="foto-preview">
+            {previewFoto ? (
+              <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
+            ) : (
+              <div className="foto-placeholder">
+                <span>📷</span>
+                <p>Adicionar foto</p>
+              </div>
+            )}
+          </div>
+          <input
+            type="file"
+            id="fotoPerfil"
+            accept="image/*"
+            onChange={handleFotoChange}
+            className="foto-input"
+          />
+          <label htmlFor="fotoPerfil" className="btn-foto">
+            {previewFoto ? 'Alterar Foto' : 'Adicionar Foto'}
+          </label>
+        </div>
+
+        <div className="campo-perfil">
+          <label>Apelido:</label>
+          <input
+            type="text"
+            name="apelido"
+            value={formData.apelido}
+            onChange={handleChange}
+            placeholder="Como você gostaria de ser chamado?"
+            maxLength="30"
+            required
+          />
+        </div>
+
+        <div className="campo-perfil">
+          <label>Bio:</label>
+          <textarea
+            name="bio"
+            value={formData.bio}
+            onChange={handleChange}
+            placeholder="Conte um pouco sobre você..."
+            maxLength="200"
+            rows="4"
+          />
+          <small>{formData.bio.length}/200 caracteres</small>
+        </div>
+
+        <button type="submit" className="btn-salvar-perfil">
+          Salvar Perfil
+        </button>
+      </form>
+    </div>
+  )
+}

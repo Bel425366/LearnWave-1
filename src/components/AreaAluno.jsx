@@ -3,6 +3,22 @@ import { useState, useEffect } from 'react'
 function AreaAluno({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
   const [atividadeAtual, setAtividadeAtual] = useState(null)
+  const [perfilData, setPerfilData] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`perfil_${user.email}`)
+      return saved ? JSON.parse(saved) : {
+        apelido: user.nome,
+        bio: '',
+        fotoPerfil: null
+      }
+    } catch {
+      return {
+        apelido: user.nome,
+        bio: '',
+        fotoPerfil: null
+      }
+    }
+  })
   const [progressoAluno, setProgressoAluno] = useState(() => {
     try {
       const saved = localStorage.getItem(`progresso_${user.email}`)
@@ -47,6 +63,10 @@ function AreaAluno({ user, onNavigate }) {
   useEffect(() => {
     localStorage.setItem(`progresso_${user.email}`, JSON.stringify(progressoAluno))
   }, [progressoAluno, user.email])
+
+  useEffect(() => {
+    localStorage.setItem(`perfil_${user.email}`, JSON.stringify(perfilData))
+  }, [perfilData, user.email])
 
   const abrirAtividade = (atividade) => {
     setAtividadeAtual(atividade)
@@ -94,6 +114,13 @@ function AreaAluno({ user, onNavigate }) {
       materiaisBaixados: [...prev.materiaisBaixados, materialId]
     }))
     alert('Material baixado!')
+  }
+
+  const salvarPerfil = (novosDados) => {
+    setPerfilData(novosDados)
+    alert('Perfil atualizado com sucesso!')
+    // Força re-render do componente pai sem recarregar a página
+    window.dispatchEvent(new Event('storage'))
   }
 
   const renderContent = () => {
@@ -211,6 +238,8 @@ function AreaAluno({ user, onNavigate }) {
             </div>
           </div>
         )
+      case 'perfil':
+        return <PerfilAluno perfilData={perfilData} onSalvar={salvarPerfil} user={user} />
       default:
         return null
     }
@@ -249,11 +278,106 @@ function AreaAluno({ user, onNavigate }) {
         >
           Meu Progresso
         </button>
+        <button 
+          className={activeTab === 'perfil' ? 'active' : ''}
+          onClick={() => setActiveTab('perfil')}
+        >
+          Meu Perfil
+        </button>
       </div>
 
       <div className="tab-content">
         {renderContent()}
       </div>
+    </div>
+  )
+}
+
+function PerfilAluno({ perfilData, onSalvar, user }) {
+  const [formData, setFormData] = useState(perfilData || { apelido: '', bio: '', fotoPerfil: null })
+  const [previewFoto, setPreviewFoto] = useState(perfilData?.fotoPerfil || null)
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const fotoBase64 = e.target.result
+        setPreviewFoto(fotoBase64)
+        setFormData({ ...formData, fotoPerfil: fotoBase64 })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSalvar(formData)
+  }
+
+  return (
+    <div className="perfil-aluno">
+      <h3>Meu Perfil</h3>
+      <form onSubmit={handleSubmit} className="form-perfil">
+        <div className="foto-perfil-section">
+          <div className="foto-preview">
+            {previewFoto ? (
+              <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
+            ) : (
+              <div className="foto-placeholder">
+                <span>📷</span>
+                <p>Adicionar foto</p>
+              </div>
+            )}
+          </div>
+          <input
+            type="file"
+            id="fotoPerfil"
+            accept="image/*"
+            onChange={handleFotoChange}
+            className="foto-input"
+          />
+          <label htmlFor="fotoPerfil" className="btn-foto">
+            {previewFoto ? 'Alterar Foto' : 'Adicionar Foto'}
+          </label>
+        </div>
+
+        <div className="campo-perfil">
+          <label>Apelido:</label>
+          <input
+            type="text"
+            name="apelido"
+            value={formData.apelido}
+            onChange={handleChange}
+            placeholder="Como você gostaria de ser chamado?"
+            maxLength="30"
+            required
+          />
+        </div>
+
+        <div className="campo-perfil">
+          <label>Bio:</label>
+          <textarea
+            name="bio"
+            value={formData.bio}
+            onChange={handleChange}
+            placeholder="Conte um pouco sobre você..."
+            maxLength="200"
+            rows="4"
+          />
+          <small>{formData.bio?.length || 0}/200 caracteres</small>
+        </div>
+
+        <button type="submit" className="btn-salvar-perfil">
+          Salvar Perfil
+        </button>
+      </form>
+      
+      {user && <AlterarSenha userEmail={user.email} />}
     </div>
   )
 }
@@ -311,6 +435,96 @@ function FazerAtividade({ atividade, onEnviar, onVoltar }) {
         
         <button onClick={handleEnviar} className="btn-enviar">Enviar Atividade</button>
       </div>
+    </div>
+  )
+}
+
+function AlterarSenha({ userEmail }) {
+  const [senhaData, setSenhaData] = useState({
+    senhaAtual: '',
+    novaSenha: '',
+    confirmarSenha: ''
+  })
+
+  const handleChange = (e) => {
+    setSenhaData({ ...senhaData, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    
+    if (senhaData.novaSenha !== senhaData.confirmarSenha) {
+      alert('Nova senha e confirmação não coincidem!')
+      return
+    }
+
+    if (senhaData.novaSenha.length < 6) {
+      alert('Nova senha deve ter pelo menos 6 caracteres!')
+      return
+    }
+
+    try {
+      const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
+      const usuarioIndex = usuarios.findIndex(u => u.email === userEmail)
+      
+      if (usuarioIndex === -1) {
+        alert('Usuário não encontrado!')
+        return
+      }
+
+      if (usuarios[usuarioIndex].senha !== senhaData.senhaAtual) {
+        alert('Senha atual incorreta!')
+        return
+      }
+
+      usuarios[usuarioIndex].senha = senhaData.novaSenha
+      localStorage.setItem('learnwave_users', JSON.stringify(usuarios))
+      
+      setSenhaData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
+      alert('Senha alterada com sucesso!')
+    } catch (error) {
+      alert('Erro ao alterar senha. Tente novamente.')
+    }
+  }
+
+  return (
+    <div className="alterar-senha-section">
+      <h4>🔒 Alterar Senha</h4>
+      <form onSubmit={handleSubmit} className="form-senha">
+        <div className="campo-perfil">
+          <input
+            type="password"
+            name="senhaAtual"
+            value={senhaData.senhaAtual}
+            onChange={handleChange}
+            placeholder="Senha atual"
+            required
+          />
+        </div>
+        <div className="campo-perfil">
+          <input
+            type="password"
+            name="novaSenha"
+            value={senhaData.novaSenha}
+            onChange={handleChange}
+            placeholder="Nova senha (mín. 6 caracteres)"
+            required
+          />
+        </div>
+        <div className="campo-perfil">
+          <input
+            type="password"
+            name="confirmarSenha"
+            value={senhaData.confirmarSenha}
+            onChange={handleChange}
+            placeholder="Confirmar nova senha"
+            required
+          />
+        </div>
+        <button type="submit" className="btn-alterar-senha">
+          Alterar Senha
+        </button>
+      </form>
     </div>
   )
 }
