@@ -120,19 +120,45 @@ function PainelProfessor({ user, onNavigate }) {
 function GerenciarAtividades({ atividades, setAtividades }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [formData, setFormData] = useState({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa' })
+  const [formData, setFormData] = useState({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa', questoes: [] })
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault()
+    
+    // Validação para múltipla escolha
+    if (formData.tipo === 'multipla_escolha') {
+      if (formData.questoes && formData.questoes.length > 0) {
+        // Validar múltiplas questões
+        for (let i = 0; i < formData.questoes.length; i++) {
+          const q = formData.questoes[i]
+          if (!q.pergunta || !q.opcaoA || !q.opcaoB || !q.opcaoC || !q.opcaoD || !q.respostaCorreta) {
+            alert(`Questão ${i + 1}: Todos os campos são obrigatórios.`)
+            return
+          }
+        }
+      } else {
+        // Validar questão única
+        if (!formData.opcaoA || !formData.opcaoB || !formData.opcaoC || !formData.opcaoD || !formData.respostaCorreta) {
+          alert('Para atividades de múltipla escolha, todas as opções e a resposta correta devem ser preenchidas.')
+          return
+        }
+      }
+    }
+    
     let newAtividades
     if (editingId) {
       newAtividades = atividades.map(a => a.id === editingId ? { ...a, ...formData } : a)
     } else {
-      newAtividades = [...atividades, { id: crypto.randomUUID ? crypto.randomUUID() : Date.now(), ...formData, excluido: false }]
+      const novaAtividade = { 
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now(), 
+        ...formData, 
+        excluido: false
+      }
+      newAtividades = [...atividades, novaAtividade]
     }
     setAtividades(newAtividades)
     localStorage.setItem('atividades', JSON.stringify(newAtividades))
-    setFormData({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa' })
+    setFormData({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa', questoes: [] })
     setShowForm(false)
     setEditingId(null)
   }, [editingId, atividades, formData, setAtividades])
@@ -195,47 +221,7 @@ function GerenciarAtividades({ atividades, setAtividades }) {
             <option value="multipla_escolha">Múltipla Escolha</option>
           </select>
           {formData.tipo === 'multipla_escolha' && (
-            <div className="opcoes-multipla">
-              <input
-                type="text"
-                placeholder="Opção A"
-                value={formData.opcaoA || ''}
-                onChange={(e) => setFormData({...formData, opcaoA: e.target.value})}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Opção B"
-                value={formData.opcaoB || ''}
-                onChange={(e) => setFormData({...formData, opcaoB: e.target.value})}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Opção C"
-                value={formData.opcaoC || ''}
-                onChange={(e) => setFormData({...formData, opcaoC: e.target.value})}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Opção D"
-                value={formData.opcaoD || ''}
-                onChange={(e) => setFormData({...formData, opcaoD: e.target.value})}
-                required
-              />
-              <select
-                value={formData.respostaCorreta || ''}
-                onChange={(e) => setFormData({...formData, respostaCorreta: e.target.value})}
-                required
-              >
-                <option value="">Resposta Correta</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-              </select>
-            </div>
+            <FormularioQuestoes formData={formData} setFormData={setFormData} />
           )}
           <select
             value={formData.status}
@@ -246,7 +232,7 @@ function GerenciarAtividades({ atividades, setAtividades }) {
           </select>
           <div className="form-actions">
             <button type="submit">{editingId ? 'Atualizar' : 'Criar'}</button>
-            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa' }); }}>Cancelar</button>
+            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa', questoes: [] }); }}>Cancelar</button>
           </div>
         </form>
       )}
@@ -901,6 +887,150 @@ function AlterarSenhaProfessor({ userEmail }) {
           Alterar Senha
         </button>
       </form>
+    </div>
+  )
+}
+
+function FormularioQuestoes({ formData, setFormData }) {
+  const adicionarQuestao = () => {
+    const novaQuestao = {
+      pergunta: '',
+      opcaoA: '',
+      opcaoB: '',
+      opcaoC: '',
+      opcaoD: '',
+      respostaCorreta: ''
+    }
+    const questoesAtuais = formData.questoes || []
+    setFormData({...formData, questoes: [...questoesAtuais, novaQuestao]})
+  }
+
+  const removerQuestao = (index) => {
+    const novasQuestoes = formData.questoes.filter((_, i) => i !== index)
+    setFormData({...formData, questoes: novasQuestoes})
+  }
+
+  const atualizarQuestao = (index, campo, valor) => {
+    const novasQuestoes = [...formData.questoes]
+    novasQuestoes[index] = {...novasQuestoes[index], [campo]: valor}
+    setFormData({...formData, questoes: novasQuestoes})
+  }
+
+  return (
+    <div className="formulario-questoes">
+      <div className="questoes-header">
+        <h4>Questões ({formData.questoes?.length || 0})</h4>
+        <button type="button" onClick={adicionarQuestao} className="btn-adicionar">
+          + Adicionar Questão
+        </button>
+      </div>
+      
+      {formData.questoes?.map((questao, index) => (
+        <div key={index} className="questao-item">
+          <div className="questao-header">
+            <h5>Questão {index + 1}</h5>
+            <button type="button" onClick={() => removerQuestao(index)} className="btn-remover">
+              ×
+            </button>
+          </div>
+          
+          <input
+            type="text"
+            placeholder="Digite a pergunta"
+            value={questao.pergunta || ''}
+            onChange={(e) => atualizarQuestao(index, 'pergunta', e.target.value)}
+            required
+          />
+          
+          <div className="opcoes-grid">
+            <input
+              type="text"
+              placeholder="Opção A"
+              value={questao.opcaoA || ''}
+              onChange={(e) => atualizarQuestao(index, 'opcaoA', e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Opção B"
+              value={questao.opcaoB || ''}
+              onChange={(e) => atualizarQuestao(index, 'opcaoB', e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Opção C"
+              value={questao.opcaoC || ''}
+              onChange={(e) => atualizarQuestao(index, 'opcaoC', e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Opção D"
+              value={questao.opcaoD || ''}
+              onChange={(e) => atualizarQuestao(index, 'opcaoD', e.target.value)}
+              required
+            />
+          </div>
+          
+          <select
+            value={questao.respostaCorreta || ''}
+            onChange={(e) => atualizarQuestao(index, 'respostaCorreta', e.target.value)}
+            required
+          >
+            <option value="">Resposta Correta</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      ))}
+      
+      {(!formData.questoes || formData.questoes.length === 0) && (
+        <div className="opcoes-multipla">
+          <h4>Questão Única</h4>
+          <input
+            type="text"
+            placeholder="Opção A"
+            value={formData.opcaoA || ''}
+            onChange={(e) => setFormData({...formData, opcaoA: e.target.value})}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Opção B"
+            value={formData.opcaoB || ''}
+            onChange={(e) => setFormData({...formData, opcaoB: e.target.value})}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Opção C"
+            value={formData.opcaoC || ''}
+            onChange={(e) => setFormData({...formData, opcaoC: e.target.value})}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Opção D"
+            value={formData.opcaoD || ''}
+            onChange={(e) => setFormData({...formData, opcaoD: e.target.value})}
+            required
+          />
+          <select
+            value={formData.respostaCorreta || ''}
+            onChange={(e) => setFormData({...formData, respostaCorreta: e.target.value})}
+            required
+          >
+            <option value="">Resposta Correta</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      )}
     </div>
   )
 }

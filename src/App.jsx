@@ -8,6 +8,7 @@ import PainelProfessor from './components/PainelProfessor'
 import PainelAdmin from './components/PainelAdmin'
 import Videoaulas from './components/Videoaulas'
 import Atividades from './components/Atividades'
+import AtividadesSimples from './components/AtividadesSimples'
 import Materiais from './components/Materiais'
 import AreaAluno from './components/AreaAluno'
 import { Security } from './utils/security'
@@ -96,7 +97,7 @@ function App() {
       case 'videoaulas':
         return <Videoaulas area={selectedArea} onNavigate={navigate} />
       case 'atividades':
-        return <Atividades area={selectedArea} onNavigate={navigate} />
+        return <AtividadesSimples />
       case 'materiais':
         return <Materiais area={selectedArea} onNavigate={navigate} />
       case 'area-aluno':
