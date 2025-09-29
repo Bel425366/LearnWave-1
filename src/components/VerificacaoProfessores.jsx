@@ -32,13 +32,13 @@ function VerificacaoProfessores() {
   return (
     <div className="verificacao-professores">
       <div className="section-header">
-        <h2>📋 Verificação de Credenciais Docentes</h2>
+        <h2>Verificação de Credenciais Docentes</h2>
         <p className="section-subtitle">Analise e aprove os cadastros de professores pendentes</p>
       </div>
       
       {professoresPendentes.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">📄</div>
+          <div className="empty-icon">-</div>
           <h3>Nenhuma solicitação pendente</h3>
           <p>Todas as solicitações de cadastro foram processadas.</p>
         </div>
@@ -48,7 +48,7 @@ function VerificacaoProfessores() {
             <div key={professor.id} className="professor-card-formal">
               <div className="card-header">
                 <div className="professor-avatar">
-                  👨‍🏫
+                  P
                 </div>
                 <div className="professor-basic-info">
                   <h3 className="professor-nome">{professor.nome}</h3>
@@ -94,7 +94,7 @@ function VerificacaoProfessores() {
                         className="btn-visualizar"
                         onClick={() => setImagemModal(professor.documentoImagem)}
                       >
-                        🔍 Visualizar em Tela Cheia
+                        Visualizar em Tela Cheia
                       </button>
                     </div>
                   </div>
@@ -107,13 +107,13 @@ function VerificacaoProfessores() {
                     className="btn-aprovar-formal"
                     onClick={() => aprovarProfessor(professor.id)}
                   >
-                    ✅ Aprovar Cadastro
+                    Aprovar Cadastro
                   </button>
                   <button 
                     className="btn-rejeitar-formal"
                     onClick={() => rejeitarProfessor(professor.id)}
                   >
-                    ❌ Rejeitar Solicitação
+                    Rejeitar Solicitação
                   </button>
                 </div>
               </div>
@@ -139,7 +139,7 @@ function VerificacaoProfessores() {
                 link.download = 'documento-professor.jpg'
                 link.click()
               }}>
-                📥 Baixar Documento
+                Baixar Documento
               </button>
               <button className="btn-fechar" onClick={() => setImagemModal(null)}>
                 Fechar

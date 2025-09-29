@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { localDB } from '../services/localDatabase'
 import { Security } from '../utils/security'
+import PasswordValidator from './PasswordValidator'
 
 function Cadastro({ userType, onNavigate }) {
   const [formData, setFormData] = useState({
@@ -13,88 +14,81 @@ function Cadastro({ userType, onNavigate }) {
     experiencia: ''
   })
 
-
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (formData.senha === formData.confirmarSenha) {
-      try {
-        const userData = {
-          nome: formData.nome,
-          email: formData.email,
-          senha: formData.senha,
-          tipo: userType,
-          areaEnsino: formData.areaEnsino,
-          formacao: formData.formacao,
-          experiencia: formData.experiencia
-        }
-        localDB.register(userData)
-        
-        if (userType === 'aluno') {
-          // Login automático para alunos
-          Security.createSession(userData)
-          alert('Cadastro realizado com sucesso! Bem-vindo!')
-          onNavigate('area-aluno')
-        } else {
-          alert('Cadastro realizado com sucesso!')
-          onNavigate('login')
-        }
-      } catch (error) {
-        alert(error.message)
-      }
-    } else {
+    
+    if (formData.senha !== formData.confirmarSenha) {
       alert('Senhas não coincidem!')
+      return
+    }
+
+    try {
+      const userData = {
+        nome: formData.nome,
+        email: formData.email,
+        senha: formData.senha,
+        tipo: userType,
+        areaEnsino: formData.areaEnsino,
+        formacao: formData.formacao,
+        experiencia: formData.experiencia
+      }
+      
+      localDB.register(userData)
+      
+      if (userType === 'aluno') {
+        Security.createSession(userData)
+        alert('Cadastro realizado com sucesso! Bem-vindo!')
+        onNavigate('area-aluno')
+      } else {
+        alert('Cadastro realizado com sucesso!')
+        onNavigate('login')
+      }
+    } catch (error) {
+      alert(error.message)
     }
   }
 
+  const areasEnsino = [
+    'Gramática', 'Literatura', 'Redação', 'Interpretação de Texto',
+    'Ortografia', 'Fonética', 'Semântica', 'Estilística',
+    'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação'
+  ]
+
   const renderCamposEspecificos = () => {
-    if (userType === 'professor') {
-      return (
-        <>
-          <select
-            name="areaEnsino"
-            value={formData.areaEnsino}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Área de Ensino</option>
-            <option value="Gramática">Gramática</option>
-            <option value="Literatura">Literatura</option>
-            <option value="Redação">Redação</option>
-            <option value="Interpretação de Texto">Interpretação de Texto</option>
-            <option value="Ortografia">Ortografia</option>
-            <option value="Fonética">Fonética</option>
-            <option value="Semântica">Semântica</option>
-            <option value="Estilística">Estilística</option>
-            <option value="Morfologia">Morfologia</option>
-            <option value="Sintaxe">Sintaxe</option>
-            <option value="Pontuação">Pontuação</option>
-            <option value="Versificação">Versificação</option>
-          </select>
-          <input
-            type="text"
-            name="formacao"
-            placeholder="Formação acadêmica"
-            value={formData.formacao}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="experiencia"
-            placeholder="Anos de experiência"
-            value={formData.experiencia}
-            onChange={handleChange}
-            required
-          />
-        </>
-      )
-    }
-    return null
+    if (userType !== 'professor') return null
+
+    return (
+      <>
+        <select name="areaEnsino" value={formData.areaEnsino} onChange={handleChange} required>
+          <option value="">Área de Ensino</option>
+          {areasEnsino.map(area => (
+            <option key={area} value={area}>{area}</option>
+          ))}
+        </select>
+        
+        <input
+          type="text"
+          name="formacao"
+          placeholder="Formação acadêmica"
+          value={formData.formacao}
+          onChange={handleChange}
+          required
+        />
+        
+        <input
+          type="text"
+          name="experiencia"
+          placeholder="Anos de experiência"
+          value={formData.experiencia}
+          onChange={handleChange}
+          required
+        />
+      </>
+    )
   }
 
   return (
@@ -125,6 +119,7 @@ function Cadastro({ userType, onNavigate }) {
           onChange={handleChange}
           required
         />
+        {formData.senha && <PasswordValidator password={formData.senha} />}
         <input
           type="password"
           name="confirmarSenha"

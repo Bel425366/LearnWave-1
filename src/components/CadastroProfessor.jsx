@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { localDB } from '../services/localDatabase'
+import PasswordValidator from './PasswordValidator'
 
 function CadastroProfessor({ onNavigate }) {
   const [formData, setFormData] = useState({
@@ -19,94 +20,86 @@ function CadastroProfessor({ onNavigate }) {
     const { name, value } = e.target
     
     if (name === 'cpf') {
-      // Remove tudo que não é número
       const numericValue = value.replace(/\D/g, '')
-      
-      // Limita a 11 dígitos
       if (numericValue.length <= 11) {
         setFormData({ ...formData, [name]: numericValue })
       }
-    } else {
-      // Sanitiza entrada do usuário
-      const sanitizedValue = typeof value === 'string' ? value.replace(/[<>]/g, '').trim() : value
-      setFormData({ ...formData, [name]: sanitizedValue })
+      return
     }
+    
+    const sanitizedValue = typeof value === 'string' ? value.replace(/[<>]/g, '').trim() : value
+    setFormData({ ...formData, [name]: sanitizedValue })
   }
 
   const handleFileChange = (e) => {
     setDocumento(e.target.files[0])
   }
 
+  const institutionalDomains = ['.edu.br', '.gov.br', '.escola.', '.colegio.']
+  
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) return false
-    
-    const institutionalDomains = ['.edu.br', '.gov.br', '.escola.', '.colegio.']
-    return institutionalDomains.some(domain => email.includes(domain))
+    return emailRegex.test(email) && institutionalDomains.some(domain => email.includes(domain))
+  }
+
+  const validateForm = () => {
+    if (formData.senha !== formData.confirmarSenha) {
+      alert('Senhas não coincidem!')
+      return false
+    }
+    if (!validateEmail(formData.email)) {
+      alert('Use um e-mail institucional (.edu.br, .gov.br, etc.)')
+      return false
+    }
+    if (formData.senha.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres')
+      return false
+    }
+    if (formData.cpf.length !== 11) {
+      alert('CPF deve conter exatamente 11 números')
+      return false
+    }
+    if (!documento) {
+      alert('É obrigatório enviar um documento comprobatório')
+      return false
+    }
+    return true
+  }
+
+  const processFile = () => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => resolve(e.target.result)
+      reader.onerror = () => reject(new Error('Erro ao processar o arquivo'))
+      reader.readAsDataURL(documento)
+    })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (formData.senha !== formData.confirmarSenha) {
-      alert('Senhas não coincidem!')
-      return
-    }
-
-    if (!validateEmail(formData.email)) {
-      alert('Use um e-mail institucional (.edu.br, .gov.br, etc.)')
-      return
-    }
-
-    if (formData.senha.length < 6) {
-      alert('A senha deve ter pelo menos 6 caracteres')
-      return
-    }
-
-    if (formData.cpf.length !== 11) {
-      alert('CPF deve conter exatamente 11 números')
-      return
-    }
-
-    if (!documento) {
-      alert('É obrigatório enviar um documento comprobatório')
-      return
-    }
-
+    if (!validateForm()) return
+    
     setLoading(true)
-
+    
     try {
-      if (!documento) {
-        alert('É obrigatório enviar um documento comprobatório')
-        return
-      }
-
-      // Converter imagem para base64
-      const reader = new FileReader()
-      reader.onload = function(e) {
-        try {
-          localDB.register({
-            nome: formData.nome,
-            email: formData.email,
-            senha: formData.senha,
-            cpf: formData.cpf,
-            escola: formData.escola,
-            telefone: formData.telefone,
-            documento: documento.name,
-            documentoImagem: e.target.result,
-            tipo: 'professor',
-            dataEnvio: new Date().toISOString()
-          })
-          alert('Cadastro enviado com sucesso! Aguarde a verificação dos documentos pelo administrador.')
-          onNavigate('login')
-        } catch (error) {
-          alert('Erro ao salvar: ' + error.message)
-        }
-      }
-      reader.onerror = function() {
-        alert('Erro ao processar o arquivo')
-      }
-      reader.readAsDataURL(documento)
+      const documentoImagem = await processFile()
+      
+      localDB.register({
+        nome: formData.nome,
+        email: formData.email,
+        senha: formData.senha,
+        cpf: formData.cpf,
+        escola: formData.escola,
+        telefone: formData.telefone,
+        documento: documento.name,
+        documentoImagem,
+        tipo: 'professor',
+        dataEnvio: new Date().toISOString()
+      })
+      
+      alert('Cadastro enviado com sucesso! Aguarde a verificação dos documentos pelo administrador.')
+      onNavigate('login')
     } catch (error) {
       alert('Erro: ' + error.message)
     } finally {
@@ -174,6 +167,7 @@ function CadastroProfessor({ onNavigate }) {
           onChange={handleChange}
           required
         />
+        {formData.senha && <PasswordValidator password={formData.senha} />}
         
         <input
           type="password"
@@ -196,7 +190,7 @@ function CadastroProfessor({ onNavigate }) {
               className="file-input"
             />
             <label htmlFor="documento" className="file-upload-button">
-              <span className="upload-icon">📎</span>
+              <span className="upload-icon">+</span>
               <span className="upload-text">
                 {documento ? documento.name : 'Escolher arquivo'}
               </span>

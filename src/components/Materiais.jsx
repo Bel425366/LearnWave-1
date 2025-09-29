@@ -40,7 +40,7 @@ function Materiais({ area, onNavigate }) {
       <div className="materials-list">
         {materiais[area]?.map(material => (
           <div key={material.id} className="material-card">
-            <div className="material-icon">📄</div>
+            <div className="material-icon">M</div>
             <div className="material-info">
               <h3>{material.titulo}</h3>
               <p>Tipo: {material.tipo}</p>

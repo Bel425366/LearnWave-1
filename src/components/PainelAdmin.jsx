@@ -25,9 +25,9 @@ function PainelAdmin({ user, onNavigate }) {
   return (
     <div className="admin-container">
       <div className="admin-header">
-        <h1>🛠️ Painel Administrativo</h1>
+        <h1>Painel Administrativo</h1>
         <div className="admin-user-info">
-          <span>👨‍💼 {user.nome}</span>
+          <span>{user.nome}</span>
           <button className="logout-btn" onClick={() => onNavigate('user-type-selection')}>Sair</button>
         </div>
       </div>
@@ -37,31 +37,31 @@ function PainelAdmin({ user, onNavigate }) {
           className={`tab-btn ${activeTab === 'usuarios' ? 'active' : ''}`}
           onClick={() => setActiveTab('usuarios')}
         >
-          👥 Usuários
+          Usuários
         </button>
         <button 
           className={`tab-btn ${activeTab === 'verificacao' ? 'active' : ''}`}
           onClick={() => setActiveTab('verificacao')}
         >
-          ✅ Verificar Professores
+          Verificar Professores
         </button>
         <button 
           className={`tab-btn ${activeTab === 'configuracoes' ? 'active' : ''}`}
           onClick={() => setActiveTab('configuracoes')}
         >
-          ⚙️ Configurações
+          Configurações
         </button>
         <button 
           className={`tab-btn ${activeTab === 'relatorios' ? 'active' : ''}`}
           onClick={() => setActiveTab('relatorios')}
         >
-          📊 Relatórios
+          Relatórios
         </button>
         <button 
           className={`tab-btn ${activeTab === 'perfil' ? 'active' : ''}`}
           onClick={() => setActiveTab('perfil')}
         >
-          👤 Meu Perfil
+          Meu Perfil
         </button>
       </div>
 
@@ -86,18 +86,18 @@ function GerenciarUsuarios() {
 
   const getTipoIcon = (tipo) => {
     switch(tipo) {
-      case 'aluno': return '👨‍🎓'
-      case 'professor': return '👨‍🏫'
-      case 'administrador': return '👨‍💼'
-      default: return '👤'
+      case 'aluno': return 'A'
+      case 'professor': return 'P'
+      case 'administrador': return 'ADM'
+      default: return 'U'
     }
   }
 
   return (
     <div className="usuarios-section">
       <div className="section-header">
-        <h2>👥 Gerenciar Usuários</h2>
-        <button className="refresh-btn" onClick={() => setUsuarios(JSON.parse(localStorage.getItem('learnwave_users') || '[]'))}>🔄 Atualizar</button>
+        <h2>Gerenciar Usuários</h2>
+        <button className="refresh-btn" onClick={() => setUsuarios(JSON.parse(localStorage.getItem('learnwave_users') || '[]'))}>Atualizar</button>
       </div>
       
       <div className="usuarios-grid">
@@ -114,11 +114,11 @@ function GerenciarUsuarios() {
               <h3>{usuario.nome}</h3>
               <p className="email">{usuario.email}</p>
               <span className={`tipo-badge tipo-${usuario.tipo}`}>{usuario.tipo}</span>
-              <p className="data">📅 {new Date(usuario.dataCadastro).toLocaleDateString()}</p>
+              <p className="data">{new Date(usuario.dataCadastro).toLocaleDateString()}</p>
             </div>
             <div className="usuario-actions">
               {usuario.tipo !== 'administrador' && (
-                <button className="delete-btn" onClick={() => removerUsuario(usuario.id)}>🗑️ Remover</button>
+                <button className="delete-btn" onClick={() => removerUsuario(usuario.id)}>Remover</button>
               )}
             </div>
           </div>
@@ -131,10 +131,10 @@ function GerenciarUsuarios() {
 function ConfiguracoesSite() {
   return (
     <div className="config-section">
-      <h2>⚙️ Configurações do Sistema</h2>
+      <h2>Configurações do Sistema</h2>
       
       <div className="config-card">
-        <h3>🏢 Configurações Gerais</h3>
+        <h3>Configurações Gerais</h3>
         <div className="form-group">
           <label>Nome do Site:</label>
           <input type="text" defaultValue="LearnWave - Português" className="config-input" />
@@ -146,20 +146,20 @@ function ConfiguracoesSite() {
       </div>
       
       <div className="config-card">
-        <h3>👥 Configurações de Usuário</h3>
+        <h3>Configurações de Usuário</h3>
         <div className="checkbox-group">
           <label className="checkbox-label">
             <input type="checkbox" defaultChecked />
-            <span>✅ Permitir auto-cadastro de alunos</span>
+            <span>Permitir auto-cadastro de alunos</span>
           </label>
           <label className="checkbox-label">
             <input type="checkbox" defaultChecked />
-            <span>✅ Permitir auto-cadastro de professores</span>
+            <span>Permitir auto-cadastro de professores</span>
           </label>
         </div>
       </div>
       
-      <button className="save-btn">💾 Salvar Configurações</button>
+      <button className="save-btn">Salvar Configurações</button>
     </div>
   )
 }
@@ -173,11 +173,11 @@ function RelatoriosGerais() {
 
   return (
     <div className="relatorios-section">
-      <h2>📊 Relatórios e Estatísticas</h2>
+      <h2>Relatórios e Estatísticas</h2>
       
       <div className="stats-grid">
         <div className="stat-card total">
-          <div className="stat-icon">👥</div>
+          <div className="stat-icon">U</div>
           <div className="stat-info">
             <h3>{totalUsuarios}</h3>
             <p>Total de Usuários</p>
@@ -185,7 +185,7 @@ function RelatoriosGerais() {
         </div>
         
         <div className="stat-card alunos">
-          <div className="stat-icon">👨‍🎓</div>
+          <div className="stat-icon">A</div>
           <div className="stat-info">
             <h3>{alunos}</h3>
             <p>Alunos</p>
@@ -193,7 +193,7 @@ function RelatoriosGerais() {
         </div>
         
         <div className="stat-card professores">
-          <div className="stat-icon">👨‍🏫</div>
+          <div className="stat-icon">P</div>
           <div className="stat-info">
             <h3>{professores}</h3>
             <p>Professores</p>
@@ -201,7 +201,7 @@ function RelatoriosGerais() {
         </div>
         
         <div className="stat-card admins">
-          <div className="stat-icon">👨‍💼</div>
+          <div className="stat-icon">ADM</div>
           <div className="stat-info">
             <h3>{admins}</h3>
             <p>Administradores</p>
@@ -210,18 +210,18 @@ function RelatoriosGerais() {
       </div>
       
       <div className="activity-summary">
-        <h3>📈 Resumo de Atividades</h3>
+        <h3>Resumo de Atividades</h3>
         <div className="activity-stats">
           <div className="activity-item">
-            <span>📚 Atividades Criadas:</span>
+            <span>Atividades Criadas:</span>
             <strong>0</strong>
           </div>
           <div className="activity-item">
-            <span>🎥 Videoaulas:</span>
+            <span>Videoaulas:</span>
             <strong>0</strong>
           </div>
           <div className="activity-item">
-            <span>📄 Materiais:</span>
+            <span>Materiais:</span>
             <strong>0</strong>
           </div>
         </div>
@@ -231,6 +231,7 @@ function RelatoriosGerais() {
 }
 
 export default PainelAdmin
+
 function PerfilAdmin({ user }) {
   const [perfilData, setPerfilData] = useState(() => {
     try {
@@ -279,7 +280,7 @@ function PerfilAdmin({ user }) {
 
   return (
     <div className="perfil-aluno">
-      <h3>👨‍💼 Meu Perfil de Administrador</h3>
+      <h3>Meu Perfil de Administrador</h3>
       <form onSubmit={handleSubmit} className="form-perfil">
         <div className="foto-perfil-section">
           <div className="foto-preview">
@@ -287,7 +288,7 @@ function PerfilAdmin({ user }) {
               <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
             ) : (
               <div className="foto-placeholder">
-                <span>📷</span>
+                <span>+</span>
                 <p>Adicionar foto</p>
               </div>
             )}

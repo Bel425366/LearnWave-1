@@ -763,7 +763,7 @@ function VisualizarAlunos() {
 
   return (
     <div className="visualizar-alunos">
-      <h3>👨🎓 Perfis dos Alunos</h3>
+      <h3>Perfis dos Alunos</h3>
       <div className="alunos-grid">
         {alunos.map(aluno => {
           const perfil = obterPerfilAluno(aluno.email)
@@ -774,7 +774,7 @@ function VisualizarAlunos() {
                   <img src={perfil.fotoPerfil} alt="Foto do aluno" className="foto-aluno" />
                 ) : (
                   <div className="foto-placeholder-aluno">
-                    <span>👨🎓</span>
+                    <span>A</span>
                   </div>
                 )}
               </div>

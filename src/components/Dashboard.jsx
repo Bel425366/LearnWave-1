@@ -1,16 +1,16 @@
 const AREAS = [
-  { id: 'gramatica', nome: 'Gramática', descricao: 'Sintaxe, morfologia e fonética', icone: '📝' },
-  { id: 'literatura', nome: 'Literatura', descricao: 'Obras e autores brasileiros', icone: '📚' },
-  { id: 'redacao', nome: 'Redação', descricao: 'Técnicas de escrita e dissertação', icone: '✍️' },
-  { id: 'interpretacao', nome: 'Interpretação de Texto', descricao: 'Compreensão e análise textual', icone: '🔍' },
-  { id: 'ortografia', nome: 'Ortografia', descricao: 'Regras de escrita e acentuação', icone: '✏️' },
-  { id: 'fonetica', nome: 'Fonética', descricao: 'Sons da fala e pronúncia', icone: '🗣️' },
-  { id: 'semantica', nome: 'Semântica', descricao: 'Significado das palavras', icone: '💭' },
-  { id: 'estilistica', nome: 'Estilística', descricao: 'Recursos expressivos da linguagem', icone: '🎨' },
-  { id: 'morfologia', nome: 'Morfologia', descricao: 'Estrutura e formação das palavras', icone: '🔤' },
-  { id: 'sintaxe', nome: 'Sintaxe', descricao: 'Organização das palavras na frase', icone: '🔗' },
-  { id: 'pontuacao', nome: 'Pontuação', descricao: 'Sinais gráficos e suas funções', icone: '❗' },
-  { id: 'versificacao', nome: 'Versificação', descricao: 'Métrica e estrutura poética', icone: '🎭' }
+  { id: 'gramatica', nome: 'Gramática', descricao: 'Sintaxe, morfologia e fonética', icone: 'G' },
+  { id: 'literatura', nome: 'Literatura', descricao: 'Obras e autores brasileiros', icone: 'L' },
+  { id: 'redacao', nome: 'Redação', descricao: 'Técnicas de escrita e dissertação', icone: 'R' },
+  { id: 'interpretacao', nome: 'Interpretação de Texto', descricao: 'Compreensão e análise textual', icone: 'I' },
+  { id: 'ortografia', nome: 'Ortografia', descricao: 'Regras de escrita e acentuação', icone: 'O' },
+  { id: 'fonetica', nome: 'Fonética', descricao: 'Sons da fala e pronúncia', icone: 'F' },
+  { id: 'semantica', nome: 'Semântica', descricao: 'Significado das palavras', icone: 'S' },
+  { id: 'estilistica', nome: 'Estilística', descricao: 'Recursos expressivos da linguagem', icone: 'E' },
+  { id: 'morfologia', nome: 'Morfologia', descricao: 'Estrutura e formação das palavras', icone: 'M' },
+  { id: 'sintaxe', nome: 'Sintaxe', descricao: 'Organização das palavras na frase', icone: 'SX' },
+  { id: 'pontuacao', nome: 'Pontuação', descricao: 'Sinais gráficos e suas funções', icone: 'P' },
+  { id: 'versificacao', nome: 'Versificação', descricao: 'Métrica e estrutura poética', icone: 'V' }
 ]
 
 function Dashboard({ user, onNavigate }) {

@@ -278,12 +278,12 @@ function Atividades({ area, onNavigate, user }) {
                   // Questão única
                   resultado.acertou ? (
                     <div className="resultado-correto">
-                      <p>✅ Parabéns! Você acertou!</p>
+                      <p>Parabéns! Você acertou!</p>
                       <p><strong>Nota: {resultado.nota}/10</strong></p>
                     </div>
                   ) : (
                     <div className="resultado-incorreto">
-                      <p>❌ Resposta incorreta.</p>
+                      <p>Resposta incorreta.</p>
                       <p>Resposta correta: {resultado.respostaCorreta}</p>
                       <p><strong>Nota: {resultado.nota}/10</strong></p>
                     </div>
