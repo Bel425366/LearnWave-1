@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { UsuarioAPI } from '../services/api-learnwave'
+import UsuarioAPI from '../services/api-learnwave'
 
 function CrudUsuarios() {
   const [usuarios, setUsuarios] = useState([])

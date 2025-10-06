@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { UsuarioAPI } from '../services/api-learnwave'
+import UsuarioAPI from '../services/api-learnwave'
 
 function Login({ userType, onLogin, onNavigate }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [showEsqueceuSenha, setShowEsqueceuSenha] = useState(false)
-
-
 
   const handleLogin = async (e) => {
     e.preventDefault()

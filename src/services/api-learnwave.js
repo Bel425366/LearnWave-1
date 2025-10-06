@@ -106,20 +106,5 @@ const UsuarioAPI = {
     }
 };
 
-// EXEMPLO DE USO:
-/*
-// Cadastrar usuário
-const novoUsuario = {
-    nome: "João Silva",
-    email: "joao@email.com",
-    senha: "123456",
-    tipo: "ALUNO"
-};
-UsuarioAPI.cadastrar(novoUsuario);
-
-// Listar usuários
-const usuarios = await UsuarioAPI.listar();
-
-// Login
-const usuario = await UsuarioAPI.login("joao@email.com", "123456");
-*/
+export default UsuarioAPI
+UsuarioAPI

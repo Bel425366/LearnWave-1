@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { UsuarioAPI } from '../services/api-learnwave'
+import UsuarioAPI from '../services/api-learnwave'
 import PasswordValidator from './PasswordValidator'
 
 function Cadastro({ userType, onNavigate }) {
