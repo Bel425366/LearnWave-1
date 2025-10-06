@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { localDB } from '../services/localDatabase'
 import VerificacaoProfessores from './VerificacaoProfessores'
+import CrudUsuarios from './CrudUsuarios'
 
 function PainelAdmin({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('usuarios')
@@ -8,7 +9,7 @@ function PainelAdmin({ user, onNavigate }) {
   const renderContent = () => {
     switch (activeTab) {
       case 'usuarios':
-        return <GerenciarUsuarios />
+        return <CrudUsuarios />
       case 'verificacao':
         return <VerificacaoProfessores />
       case 'configuracoes':
@@ -72,61 +73,7 @@ function PainelAdmin({ user, onNavigate }) {
   )
 }
 
-function GerenciarUsuarios() {
-  const [usuarios, setUsuarios] = useState(() => JSON.parse(localStorage.getItem('learnwave_users') || '[]'))
 
-  const removerUsuario = (id) => {
-    if (confirm('Tem certeza que deseja remover este usuário?')) {
-      const users = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
-      const updatedUsers = users.filter(u => u.id !== id)
-      localStorage.setItem('learnwave_users', JSON.stringify(updatedUsers))
-      setUsuarios(updatedUsers)
-    }
-  }
-
-  const getTipoIcon = (tipo) => {
-    switch(tipo) {
-      case 'aluno': return 'A'
-      case 'professor': return 'P'
-      case 'administrador': return 'ADM'
-      default: return 'U'
-    }
-  }
-
-  return (
-    <div className="usuarios-section">
-      <div className="section-header">
-        <h2>Gerenciar Usuários</h2>
-        <button className="refresh-btn" onClick={() => setUsuarios(JSON.parse(localStorage.getItem('learnwave_users') || '[]'))}>Atualizar</button>
-      </div>
-      
-      <div className="usuarios-grid">
-        {usuarios.map(usuario => (
-          <div key={usuario.id} className="usuario-card">
-            <div className="usuario-avatar">
-              {usuario.imagem ? (
-                <img src={usuario.imagem} alt={usuario.nome} className="avatar-img" />
-              ) : (
-                getTipoIcon(usuario.tipo)
-              )}
-            </div>
-            <div className="usuario-info">
-              <h3>{usuario.nome}</h3>
-              <p className="email">{usuario.email}</p>
-              <span className={`tipo-badge tipo-${usuario.tipo}`}>{usuario.tipo}</span>
-              <p className="data">{new Date(usuario.dataCadastro).toLocaleDateString()}</p>
-            </div>
-            <div className="usuario-actions">
-              {usuario.tipo !== 'administrador' && (
-                <button className="delete-btn" onClick={() => removerUsuario(usuario.id)}>Remover</button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function ConfiguracoesSite() {
   return (

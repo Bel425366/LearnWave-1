@@ -11,6 +11,7 @@ import Atividades from './components/Atividades'
 import AtividadesSimples from './components/AtividadesSimples'
 import Materiais from './components/Materiais'
 import AreaAluno from './components/AreaAluno'
+import GerenciarUsuarios from './components/GerenciarUsuarios'
 import Preloader from './components/Preloader'
 import { Security } from './utils/security'
 import './App.css'
@@ -112,6 +113,8 @@ function App() {
         return <Materiais area={selectedArea} onNavigate={navigate} />
       case 'area-aluno':
         return <AreaAluno user={user} onNavigate={navigate} />
+      case 'gerenciar-usuarios':
+        return <GerenciarUsuarios />
       default:
         return <UserTypeSelection onSelectUserType={handleUserTypeSelection} />
     }

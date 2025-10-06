@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste API</title>
+</head>
+<body>
+    <h1>Teste da API LearnWave</h1>
+    <button onclick="testarAPI()">Testar Conexão</button>
+    <div id="resultado"></div>
+
+    <script>
+        async function testarAPI() {
+            const resultado = document.getElementById('resultado');
+            
+            try {
+                // Teste 1: Verificar se API está rodando
+                resultado.innerHTML = 'Testando conexão...';
+                
+                const response = await fetch('http://localhost:8080/api/usuarios');
+                
+                if (response.ok) {
+                    resultado.innerHTML = '✅ API está funcionando!';
+                } else {
+                    resultado.innerHTML = `❌ Erro ${response.status}: ${response.statusText}`;
+                }
+                
+            } catch (error) {
+                resultado.innerHTML = `❌ Erro de conexão: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

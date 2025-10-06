@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { localDB } from '../services/localDatabase'
-import { Security } from '../utils/security'
+import { UsuarioAPI } from '../services/api-learnwave'
 import PasswordValidator from './PasswordValidator'
 
 function Cadastro({ userType, onNavigate }) {
@@ -18,7 +17,7 @@ function Cadastro({ userType, onNavigate }) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (formData.senha !== formData.confirmarSenha) {
@@ -31,16 +30,15 @@ function Cadastro({ userType, onNavigate }) {
         nome: formData.nome,
         email: formData.email,
         senha: formData.senha,
-        tipo: userType,
-        areaEnsino: formData.areaEnsino,
-        formacao: formData.formacao,
-        experiencia: formData.experiencia
+        tipoUsuario: userType === 'aluno' ? 'ALUNO' : userType === 'professor' ? 'PROFESSOR' : 'ADMIN',
+        areaEnsino: formData.areaEnsino || null,
+        formacao: formData.formacao || null,
+        experiencia: formData.experiencia || null
       }
       
-      localDB.register(userData)
+      await UsuarioAPI.cadastrar(userData)
       
       if (userType === 'aluno') {
-        Security.createSession(userData)
         alert('Cadastro realizado com sucesso! Bem-vindo!')
         onNavigate('area-aluno')
       } else {

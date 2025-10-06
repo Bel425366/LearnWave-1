@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { localDB } from '../services/localDatabase'
+import { UsuarioAPI } from '../services/api-learnwave'
 
 function Login({ userType, onLogin, onNavigate }) {
   const [email, setEmail] = useState('')
@@ -8,18 +8,18 @@ function Login({ userType, onLogin, onNavigate }) {
 
 
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     if (email && senha) {
       try {
-        const usuario = localDB.login(email.trim(), senha.trim(), userType)
+        const usuario = await UsuarioAPI.login(email.trim(), senha.trim())
         onLogin(usuario)
         
-        if (userType === 'aluno') {
+        if (usuario.tipoUsuario === 'ALUNO' || userType === 'aluno') {
           onNavigate('area-aluno')
-        } else if (userType === 'professor') {
+        } else if (usuario.tipoUsuario === 'PROFESSOR' || userType === 'professor') {
           onNavigate('painel-professor')
-        } else if (userType === 'administrador') {
+        } else if (usuario.tipoUsuario === 'ADMIN' || userType === 'administrador') {
           onNavigate('painel-admin')
         }
       } catch (error) {
