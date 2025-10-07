@@ -10,14 +10,16 @@ function Login({ userType, onLogin, onNavigate }) {
     e.preventDefault()
     if (email && senha) {
       try {
-        const usuario = await UsuarioAPI.login(email.trim(), senha.trim())
+        const tipoUsuario = userType.toUpperCase()
+        const usuario = await UsuarioAPI.login(email.trim(), senha.trim(), tipoUsuario)
         onLogin(usuario)
         
-        if (usuario.tipoUsuario === 'ALUNO' || userType === 'aluno') {
+        const tipo = usuario.tipoUsuario?.toLowerCase() || userType
+        if (tipo === 'aluno') {
           onNavigate('area-aluno')
-        } else if (usuario.tipoUsuario === 'PROFESSOR' || userType === 'professor') {
+        } else if (tipo === 'professor') {
           onNavigate('painel-professor')
-        } else if (usuario.tipoUsuario === 'ADMIN' || userType === 'administrador') {
+        } else if (tipo === 'administrador') {
           onNavigate('painel-admin')
         }
       } catch (error) {

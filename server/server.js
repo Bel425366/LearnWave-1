@@ -5,10 +5,10 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { db, initDatabase } from './database.js';
+// import { db, initDatabase } from './database.js';
 
 const app = express();
-const PORT = 3001;
+const PORT = 8080;
 const JWT_SECRET = 'learnwave_secret_key';
 
 // Configurar multer para upload de arquivos
@@ -47,7 +47,25 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 // Inicializar banco
-initDatabase();
+// try {
+//   initDatabase();
+//   console.log('Banco de dados inicializado com sucesso!');
+// } catch (error) {
+//   console.error('Erro ao inicializar banco:', error);
+//   process.exit(1);
+// }
+
+// Dados temporários em memória
+let usuarios = [
+  {
+    id: 1,
+    nome: 'Yasmin Teste',
+    email: 'yasmincunegundes25@gmail.com',
+    senha: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+    tipo: 'aluno',
+    status_verificacao: 'aprovado'
+  }
+];
 
 // Cadastro de professor com verificação
 app.post('/api/cadastro-professor', upload.single('documento'), (req, res) => {
@@ -118,7 +136,7 @@ app.post('/api/cadastro', (req, res) => {
   );
 });
 
-// Login
+// Login (endpoint principal)
 app.post('/api/login', (req, res) => {
   const { email, senha, tipo } = req.body;
   
@@ -205,6 +223,109 @@ app.post('/api/verificar-professor', (req, res) => {
       res.json({ message: `Professor ${status} com sucesso!` });
     }
   );
+});
+
+// Endpoint alternativo para compatibilidade
+app.post('/api/usuarios/login', (req, res) => {
+  console.log('Login request received:', req.body);
+  const { email, senha, tipo } = req.body;
+  
+  if (!email || !senha) {
+    console.log('Missing required fields:', { email: !!email, senha: !!senha });
+    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+  }
+  
+  // Buscar usuário em memória
+  console.log('Searching for user by email:', email);
+  const user = usuarios.find(u => u.email === email);
+  
+  console.log('User found:', !!user);
+  if (!user) {
+    return res.status(401).json({ error: 'Email ou senha incorretos!' });
+  }
+  
+  // Se tipo foi fornecido, verificar se bate
+  if (tipo && user.tipo !== tipo) {
+    console.log('Type mismatch:', { expected: tipo, actual: user.tipo });
+    return res.status(401).json({ error: 'Email ou senha incorretos!' });
+  }
+  
+  const passwordMatch = bcrypt.compareSync(senha, user.senha);
+  console.log('Password match:', passwordMatch);
+  
+  if (!passwordMatch) {
+    return res.status(401).json({ error: 'Email ou senha incorretos!' });
+  }
+  
+  if (user.tipo === 'professor' && user.status_verificacao !== 'aprovado') {
+    return res.status(403).json({ 
+      error: 'Conta pendente de verificação. Aguarde a aprovação dos documentos.' 
+    });
+  }
+  
+  const token = jwt.sign({ id: user.id, email: user.email, tipo: user.tipo }, JWT_SECRET);
+  
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      nome: user.nome,
+      email: user.email,
+      tipo: user.tipo,
+      statusVerificacao: user.status_verificacao,
+      areaEnsino: user.area_ensino,
+      formacao: user.formacao,
+      experiencia: user.experiencia
+    }
+  });
+});
+
+// Endpoint para cadastro de usuários
+app.post('/api/usuarios', (req, res) => {
+  console.log('Cadastro request received:', req.body);
+  const { nome, email, senha, tipo, areaEnsino, formacao, experiencia } = req.body;
+  
+  if (!nome || !email || !senha || !tipo) {
+    console.log('Missing required fields:', { nome: !!nome, email: !!email, senha: !!senha, tipo: !!tipo });
+    return res.status(400).json({ error: 'Nome, email, senha e tipo são obrigatórios' });
+  }
+  
+  try {
+    // Verificar se email já existe
+    const existingUser = usuarios.find(u => u.email === email);
+    if (existingUser) {
+      return res.status(400).json({ error: 'Este email já está cadastrado!' });
+    }
+    
+    const hashedPassword = bcrypt.hashSync(senha, 10);
+    const status = (tipo === 'aluno' || tipo === 'administrador') ? 'aprovado' : 'pendente';
+    
+    const newUser = {
+      id: usuarios.length + 1,
+      nome,
+      email,
+      senha: hashedPassword,
+      tipo,
+      area_ensino: areaEnsino,
+      formacao,
+      experiencia,
+      status_verificacao: status
+    };
+    
+    usuarios.push(newUser);
+    
+    console.log('User created successfully:', { id: newUser.id, nome, email, tipo });
+    res.json({ 
+      id: newUser.id,
+      nome,
+      email,
+      tipo,
+      message: 'Usuário cadastrado com sucesso!'
+    });
+  } catch (error) {
+    console.error('Cadastro error:', error);
+    res.status(500).json({ error: 'Erro ao processar cadastro: ' + error.message });
+  }
 });
 
 app.listen(PORT, () => {

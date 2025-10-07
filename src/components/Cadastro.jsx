@@ -26,26 +26,39 @@ function Cadastro({ userType, onNavigate }) {
     }
 
     try {
+      // Mapear userType para o valor correto do enum
+      let tipoUsuarioEnum;
+      switch(userType) {
+        case 'aluno':
+          tipoUsuarioEnum = 'ALUNO';
+          break;
+        case 'professor':
+          tipoUsuarioEnum = 'PROFESSOR';
+          break;
+        case 'administrador':
+          tipoUsuarioEnum = 'ADMINISTRADOR';
+          break;
+        default:
+          tipoUsuarioEnum = userType.toUpperCase();
+      }
+      
       const userData = {
         nome: formData.nome,
         email: formData.email,
         senha: formData.senha,
-        tipoUsuario: userType === 'aluno' ? 'ALUNO' : userType === 'professor' ? 'PROFESSOR' : 'ADMIN',
+        tipoUsuario: tipoUsuarioEnum,
+        tipo: tipoUsuarioEnum, // Tentativa adicional
         areaEnsino: formData.areaEnsino || null,
         formacao: formData.formacao || null,
         experiencia: formData.experiencia || null
       }
       
+      console.log('Enviando dados:', userData);
       await UsuarioAPI.cadastrar(userData)
-      
-      if (userType === 'aluno') {
-        alert('Cadastro realizado com sucesso! Bem-vindo!')
-        onNavigate('area-aluno')
-      } else {
-        alert('Cadastro realizado com sucesso!')
-        onNavigate('login')
-      }
+      alert('Cadastro realizado com sucesso! Faça login para continuar.')
+      onNavigate('login')
     } catch (error) {
+      console.error('Erro completo:', error);
       alert(error.message)
     }
   }

@@ -13,11 +13,11 @@ const UsuarioAPI = {
             });
             
             if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                const errorText = await response.text();
+                throw new Error(errorText || `Erro ${response.status}`);
             }
             
-            const text = await response.text();
-            return text ? JSON.parse(text) : {};
+            return await response.json();
         } catch (error) {
             console.error('Erro ao cadastrar:', error);
             throw error;
@@ -87,18 +87,24 @@ const UsuarioAPI = {
     },
 
     // Login
-    async login(email, senha) {
+    async login(email, senha, tipoUsuario) {
         try {
-            const response = await fetch(`${API_BASE}/usuarios/login?email=${email}&senha=${senha}`, {
+            const params = new URLSearchParams({
+                email: email,
+                senha: senha,
+                tipoUsuario: tipoUsuario
+            });
+            
+            const response = await fetch(`${API_BASE}/usuarios/login?${params}`, {
                 method: 'POST'
             });
             
             if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                const errorText = await response.text();
+                throw new Error(errorText || `Erro ${response.status}`);
             }
             
-            const text = await response.text();
-            return text ? JSON.parse(text) : {};
+            return await response.json();
         } catch (error) {
             console.error('Erro ao fazer login:', error);
             throw error;
