@@ -109,8 +109,54 @@ const UsuarioAPI = {
             console.error('Erro ao fazer login:', error);
             throw error;
         }
+    },
+
+    // Listar professores pendentes
+    async getPendingTeachers() {
+        try {
+            const response = await fetch(`${API_BASE}/usuarios/professores/pendentes`);
+            if (!response.ok) {
+                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Erro ao buscar professores pendentes:', error);
+            throw error;
+        }
+    },
+
+    // Aprovar professor
+    async approveTeacher(id) {
+        try {
+            const response = await fetch(`${API_BASE}/usuarios/${id}/aprovar`, {
+                method: 'PATCH'
+            });
+            if (!response.ok) {
+                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            }
+            return true;
+        } catch (error) {
+            console.error('Erro ao aprovar professor:', error);
+            throw error;
+        }
+    },
+
+    // Rejeitar professor
+    async rejectTeacher(id) {
+        try {
+            const response = await fetch(`${API_BASE}/usuarios/${id}/rejeitar`, {
+                method: 'PATCH'
+            });
+            if (!response.ok) {
+                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            }
+            return true;
+        } catch (error) {
+            console.error('Erro ao rejeitar professor:', error);
+            throw error;
+        }
     }
 };
 
-export default UsuarioAPI
-UsuarioAPI
+export const api = UsuarioAPI;
+export default UsuarioAPI;

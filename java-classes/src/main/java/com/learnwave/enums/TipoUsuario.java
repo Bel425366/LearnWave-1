@@ -3,7 +3,8 @@ package com.learnwave.enums;
 public enum TipoUsuario {
     ALUNO("aluno"),
     PROFESSOR("professor"),
-    ADMINISTRADOR("administrador");
+    ADMINISTRADOR("administrador"),
+    ADMIN("admin");
     
     private final String valor;
     

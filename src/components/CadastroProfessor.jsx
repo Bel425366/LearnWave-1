@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { localDB } from '../services/localDatabase'
+import UsuarioAPI from '../services/api-learnwave'
 import PasswordValidator from './PasswordValidator'
 
 function CadastroProfessor({ onNavigate }) {
@@ -85,17 +85,14 @@ function CadastroProfessor({ onNavigate }) {
     try {
       const documentoImagem = await processFile()
       
-      localDB.register({
+      await UsuarioAPI.cadastrar({
         nome: formData.nome,
         email: formData.email,
         senha: formData.senha,
         cpf: formData.cpf,
         escola: formData.escola,
         telefone: formData.telefone,
-        documento: documento.name,
-        documentoImagem,
-        tipo: 'professor',
-        dataEnvio: new Date().toISOString()
+        tipo: 'PROFESSOR'
       })
       
       alert('Cadastro enviado com sucesso! Aguarde a verificação dos documentos pelo administrador.')

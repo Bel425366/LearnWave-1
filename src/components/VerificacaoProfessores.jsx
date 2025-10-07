@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { localDB } from '../services/localDatabase'
+import { api } from '../services/api-learnwave'
 
 function VerificacaoProfessores() {
   const [professoresPendentes, setProfessoresPendentes] = useState([])
@@ -9,23 +9,35 @@ function VerificacaoProfessores() {
     carregarProfessoresPendentes()
   }, [])
 
-  const carregarProfessoresPendentes = () => {
-    const pendentes = localDB.getPendingTeachers()
-    console.log('Professores pendentes:', pendentes)
-    setProfessoresPendentes(pendentes)
-  }
-
-  const aprovarProfessor = (professorId) => {
-    if (localDB.approveTeacher(professorId)) {
-      alert('Professor aprovado com sucesso!')
-      carregarProfessoresPendentes()
+  const carregarProfessoresPendentes = async () => {
+    try {
+      const pendentes = await api.getPendingTeachers()
+      console.log('Professores pendentes:', pendentes)
+      setProfessoresPendentes(pendentes)
+    } catch (error) {
+      console.error('Erro ao carregar professores pendentes:', error)
     }
   }
 
-  const rejeitarProfessor = (professorId) => {
-    if (localDB.rejectTeacher(professorId)) {
+  const aprovarProfessor = async (professorId) => {
+    try {
+      await api.approveTeacher(professorId)
+      alert('Professor aprovado com sucesso!')
+      carregarProfessoresPendentes()
+    } catch (error) {
+      console.error('Erro ao aprovar professor:', error)
+      alert('Erro ao aprovar professor')
+    }
+  }
+
+  const rejeitarProfessor = async (professorId) => {
+    try {
+      await api.rejectTeacher(professorId)
       alert('Professor rejeitado!')
       carregarProfessoresPendentes()
+    } catch (error) {
+      console.error('Erro ao rejeitar professor:', error)
+      alert('Erro ao rejeitar professor')
     }
   }
 
