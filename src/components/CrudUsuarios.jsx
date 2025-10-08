@@ -4,16 +4,7 @@ import UsuarioAPI from '../services/api-learnwave'
 function CrudUsuarios() {
   const [usuarios, setUsuarios] = useState([])
   const [loading, setLoading] = useState(true)
-  const [editando, setEditando] = useState(null)
-  const [showForm, setShowForm] = useState(false)
-  const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    tipoUsuario: 'ALUNO',
-    areaEnsino: '',
-    formacao: '',
-    experiencia: ''
-  })
+
 
   useEffect(() => {
     carregarUsuarios()
@@ -30,49 +21,7 @@ function CrudUsuarios() {
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      if (editando) {
-        await UsuarioAPI.atualizar(editando, formData)
-        alert('Usuário atualizado!')
-      } else {
-        await UsuarioAPI.cadastrar(formData)
-        alert('Usuário criado!')
-      }
-      
-      resetForm()
-      carregarUsuarios()
-    } catch (error) {
-      alert('Erro: ' + error.message)
-    }
-  }
 
-  const resetForm = () => {
-    setFormData({
-      nome: '',
-      email: '',
-      tipoUsuario: 'ALUNO',
-      areaEnsino: '',
-      formacao: '',
-      experiencia: ''
-    })
-    setEditando(null)
-    setShowForm(false)
-  }
-
-  const handleEdit = (usuario) => {
-    setFormData({
-      nome: usuario.nome,
-      email: usuario.email,
-      tipoUsuario: usuario.tipoUsuario,
-      areaEnsino: usuario.areaEnsino || '',
-      formacao: usuario.formacao || '',
-      experiencia: usuario.experiencia || ''
-    })
-    setEditando(usuario.id)
-    setShowForm(true)
-  }
 
   const handleDelete = async (id) => {
     if (confirm('Deletar usuário?')) {
@@ -101,107 +50,28 @@ function CrudUsuarios() {
     <div className="usuarios-section">
       <div className="section-header">
         <h2>Gerenciar Usuários</h2>
-        <button 
-          className="refresh-btn" 
-          onClick={() => setShowForm(!showForm)}
-        >
-          {showForm ? 'Cancelar' : 'Novo Usuário'}
-        </button>
+
       </div>
 
-      {showForm && (
-        <div className="config-card">
-          <h3>{editando ? 'Editar Usuário' : 'Novo Usuário'}</h3>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <input
-                type="text"
-                placeholder="Nome"
-                value={formData.nome}
-                onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <select
-                value={formData.tipoUsuario}
-                onChange={(e) => setFormData({...formData, tipoUsuario: e.target.value})}
-              >
-                <option value="ALUNO">Aluno</option>
-                <option value="PROFESSOR">Professor</option>
-                <option value="ADMIN">Administrador</option>
-              </select>
-            </div>
-            
-            {formData.tipoUsuario === 'PROFESSOR' && (
-              <>
-                <div className="form-group">
-                  <input
-                    type="text"
-                    placeholder="Área de Ensino"
-                    value={formData.areaEnsino}
-                    onChange={(e) => setFormData({...formData, areaEnsino: e.target.value})}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <input
-                    type="text"
-                    placeholder="Formação"
-                    value={formData.formacao}
-                    onChange={(e) => setFormData({...formData, formacao: e.target.value})}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <input
-                    type="text"
-                    placeholder="Experiência"
-                    value={formData.experiencia}
-                    onChange={(e) => setFormData({...formData, experiencia: e.target.value})}
-                  />
-                </div>
-              </>
-            )}
-            
-            <div className="form-actions">
-              <button type="submit" className="save-btn">
-                {editando ? 'Atualizar' : 'Criar'}
-              </button>
-              <button type="button" onClick={resetForm}>
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+
       
       <div className="usuarios-grid">
         {usuarios.map(usuario => (
           <div key={usuario.id} className="usuario-card">
-            <div className="usuario-avatar">
-              {getTipoIcon(usuario.tipoUsuario)}
+            <div className="usuario-header">
+              <div className="usuario-avatar">
+                {getTipoIcon(usuario.tipoUsuario)}
+              </div>
+              <div className="usuario-info">
+                <h3>{usuario.nome}</h3>
+                <p className="email">{usuario.email}</p>
+              </div>
             </div>
-            <div className="usuario-info">
-              <h3>{usuario.nome}</h3>
-              <p className="email">{usuario.email}</p>
+            <div className="usuario-footer">
               <span className={`tipo-badge tipo-${usuario.tipoUsuario?.toLowerCase()}`}>
-                {usuario.tipoUsuario}
+                {usuario.tipoUsuario === 'ALUNO' ? 'Aluno' : 
+                 usuario.tipoUsuario === 'PROFESSOR' ? 'Professor' : 'Admin'}
               </span>
-            </div>
-            <div className="usuario-actions">
-              <button onClick={() => handleEdit(usuario)}>Editar</button>
               {usuario.tipoUsuario !== 'ADMIN' && (
                 <button className="delete-btn" onClick={() => handleDelete(usuario.id)}>
                   Deletar
@@ -211,6 +81,106 @@ function CrudUsuarios() {
           </div>
         ))}
       </div>
+      
+      <style jsx>{`
+        .usuarios-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
+          margin-top: 20px;
+        }
+        
+        .usuario-card {
+          background: rgba(255, 255, 255, 0.06);
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          border: 1px solid #e0e0e0;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .usuario-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        
+        .usuario-header {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 15px;
+        }
+        
+        .usuario-avatar {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          font-weight: bold;
+          color: white;
+        }
+        
+        .usuario-info h3 {
+          margin: 0 0 5px 0;
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 600;
+        }
+        
+        .usuario-info .email {
+          margin: 0;
+          color: #b0b0b0;
+          font-size: 14px;
+        }
+        
+        .usuario-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .tipo-badge {
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 500;
+          text-transform: uppercase;
+        }
+        
+        .tipo-aluno {
+          background: #e3f2fd;
+          color: #1976d2;
+        }
+        
+        .tipo-professor {
+          background: #f3e5f5;
+          color: #7b1fa2;
+        }
+        
+        .tipo-admin {
+          background: #fff3e0;
+          color: #f57c00;
+        }
+        
+        .delete-btn {
+          background: #ffebee;
+          color: #d32f2f;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        
+        .delete-btn:hover {
+          background: #ffcdd2;
+        }
+      `}</style>
     </div>
   )
 }

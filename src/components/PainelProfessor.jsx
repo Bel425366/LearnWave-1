@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { database } from '../utils/database'
 import Modal from './Modal'
 
@@ -465,9 +465,22 @@ function AcompanharProgresso() {
   const [submissoes, setSubmissoes] = useState(() => {
     return JSON.parse(localStorage.getItem('submissoes')) || []
   })
-  const [usuarios] = useState(() => {
-    return database.listarUsuarios().filter(u => u.tipo === 'aluno')
-  })
+  const [usuarios, setUsuarios] = useState([])
+
+  useEffect(() => {
+    const buscarAlunos = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/usuarios/tipo/ALUNO')
+        if (response.ok) {
+          const alunosData = await response.json()
+          setUsuarios(alunosData)
+        }
+      } catch (error) {
+        console.error('Erro ao buscar alunos:', error)
+      }
+    }
+    buscarAlunos()
+  }, [])
 
   const darNota = (submissaoId, nota) => {
     const notaNum = parseFloat(nota)
@@ -743,14 +756,25 @@ function PerfilProfessor({ user }) {
   )
 }
 function VisualizarAlunos() {
-  const [alunos] = useState(() => {
-    try {
-      const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
-      return usuarios.filter(u => u.tipo === 'aluno')
-    } catch {
-      return []
+  const [alunos, setAlunos] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const buscarAlunos = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/usuarios/tipo/ALUNO')
+        if (response.ok) {
+          const alunosData = await response.json()
+          setAlunos(alunosData)
+        }
+      } catch (error) {
+        console.error('Erro ao buscar alunos:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  })
+    buscarAlunos()
+  }, [])
 
   const obterPerfilAluno = (email) => {
     try {
@@ -759,6 +783,15 @@ function VisualizarAlunos() {
     } catch {
       return { apelido: '', bio: '', fotoPerfil: null }
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="visualizar-alunos">
+        <h3>Perfis dos Alunos</h3>
+        <p>Carregando alunos...</p>
+      </div>
+    )
   }
 
   return (

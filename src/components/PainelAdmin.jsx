@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { localDB } from '../services/localDatabase'
 import VerificacaoProfessores from './VerificacaoProfessores'
 import CrudUsuarios from './CrudUsuarios'
@@ -112,11 +112,39 @@ function ConfiguracoesSite() {
 }
 
 function RelatoriosGerais() {
-  const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
+  const [usuarios, setUsuarios] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/usuarios')
+        if (response.ok) {
+          const data = await response.json()
+          setUsuarios(data)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar usuários:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    carregarDados()
+  }, [])
+
+  if (loading) {
+    return <div>Carregando relatórios...</div>
+  }
+
+  console.log('Todos os usuários:', usuarios)
+  console.log('Tipos encontrados:', usuarios.map(u => u.tipo))
+  
   const totalUsuarios = usuarios.length
-  const alunos = usuarios.filter(u => u.tipo === 'aluno').length
-  const professores = usuarios.filter(u => u.tipo === 'professor').length
-  const admins = usuarios.filter(u => u.tipo === 'administrador').length
+  const alunos = usuarios.filter(u => u.tipo === 'ALUNO' || u.tipoUsuario === 'ALUNO').length
+  const professores = usuarios.filter(u => u.tipo === 'PROFESSOR' || u.tipoUsuario === 'PROFESSOR').length
+  const admins = usuarios.filter(u => u.tipo === 'ADMIN' || u.tipoUsuario === 'ADMIN').length
+  
+  console.log('Contadores:', { totalUsuarios, alunos, professores, admins })
 
   return (
     <div className="relatorios-section">
@@ -151,7 +179,7 @@ function RelatoriosGerais() {
           <div className="stat-icon">ADM</div>
           <div className="stat-info">
             <h3>{admins}</h3>
-            <p>Administradores</p>
+            <p>Admins</p>
           </div>
         </div>
       </div>

@@ -85,7 +85,7 @@ function CadastroProfessor({ onNavigate }) {
     try {
       const documentoImagem = await processFile()
       
-      await UsuarioAPI.cadastrar({
+      const usuario = await UsuarioAPI.cadastrar({
         nome: formData.nome,
         email: formData.email,
         senha: formData.senha,
@@ -93,6 +93,21 @@ function CadastroProfessor({ onNavigate }) {
         escola: formData.escola,
         telefone: formData.telefone,
         tipo: 'PROFESSOR'
+      })
+      
+      // Enviar documento comprobatório
+      await fetch('http://localhost:8080/api/documentos-verificacao', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          usuarioId: usuario.id,
+          nomeArquivo: documento.name,
+          tipoArquivo: documento.type,
+          conteudoBase64: documentoImagem,
+          statusVerificacao: 'PENDENTE'
+        })
       })
       
       alert('Cadastro enviado com sucesso! Aguarde a verificação dos documentos pelo administrador.')

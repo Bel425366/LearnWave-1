@@ -12,8 +12,28 @@ function VerificacaoProfessores() {
   const carregarProfessoresPendentes = async () => {
     try {
       const pendentes = await api.getPendingTeachers()
-      console.log('Professores pendentes:', pendentes)
-      setProfessoresPendentes(pendentes)
+      
+      // Buscar documentos para cada professor
+      const professoresComDocumentos = await Promise.all(
+        pendentes.map(async (professor) => {
+          try {
+            const response = await fetch(`http://localhost:8080/api/documentos-verificacao/usuario/${professor.id}`)
+            if (response.ok) {
+              const documentos = await response.json()
+              if (documentos.length > 0) {
+                professor.documentoImagem = documentos[0].conteudoBase64
+                professor.documento = documentos[0].nomeArquivo
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao buscar documento do professor:', error)
+          }
+          return professor
+        })
+      )
+      
+      console.log('Professores pendentes:', professoresComDocumentos)
+      setProfessoresPendentes(professoresComDocumentos)
     } catch (error) {
       console.error('Erro ao carregar professores pendentes:', error)
     }
