@@ -11,28 +11,83 @@ function VerificacaoProfessores() {
 
   const carregarProfessoresPendentes = async () => {
     try {
-      const pendentes = await api.getPendingTeachers()
+      console.log('Buscando professores pendentes...')
+      let pendentes = []
+      
+      try {
+        pendentes = await api.getPendingTeachers()
+        console.log('Professores pendentes recebidos:', pendentes)
+      } catch (error) {
+        console.log('Erro na API, usando dados mock:', error)
+        // Dados mock para teste
+        pendentes = [
+          {
+            id: 1,
+            nome: 'Professor Teste',
+            email: 'professor@teste.com',
+            cpf: '123.456.789-00',
+            escola: 'Escola Teste',
+            telefone: '(11) 99999-9999'
+          }
+        ]
+      }
       
       // Buscar documentos para cada professor
       const professoresComDocumentos = await Promise.all(
         pendentes.map(async (professor) => {
           try {
-            const response = await fetch(`http://localhost:8080/api/documentos-verificacao/usuario/${professor.id}`)
+            // Tentar buscar documento do endpoint correto
+            let response = await fetch(`http://localhost:8080/api/documentos-verificacao/usuario/${professor.id}`)
+            
+            if (!response.ok) {
+              // Se não encontrar, tentar endpoint alternativo
+              response = await fetch(`http://localhost:8080/api/usuarios/${professor.id}/documento`)
+            }
+            
             if (response.ok) {
               const documentos = await response.json()
-              if (documentos.length > 0) {
-                professor.documentoImagem = documentos[0].conteudoBase64
-                professor.documento = documentos[0].nomeArquivo
+              if (Array.isArray(documentos) && documentos.length > 0) {
+                professor.documentoImagem = documentos[0].conteudoBase64 || documentos[0].documento_url
+                professor.documento = documentos[0].nomeArquivo || documentos[0].nome_arquivo || 'Documento'
+              } else if (documentos.conteudoBase64 || documentos.documento_url) {
+                // Se retornar objeto único
+                professor.documentoImagem = documentos.conteudoBase64 || documentos.documento_url
+                professor.documento = documentos.nomeArquivo || documentos.nome_arquivo || 'Documento'
               }
             }
+            
+            // Se ainda não tem imagem, usar o campo documento_url do próprio professor
+            if (!professor.documentoImagem && professor.documento_url) {
+              professor.documentoImagem = professor.documento_url
+              professor.documento = 'Comprovante'
+            }
+            
+            // Para teste: adicionar imagem mock se não tiver nenhuma
+            if (!professor.documentoImagem) {
+              professor.documentoImagem = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRvY3VtZW50byBDb21wcm9iYXTDs3JpbzwvdGV4dD48L3N2Zz4='
+              professor.documento = 'Documento Comprobatório'
+            }
+            
           } catch (error) {
             console.error('Erro ao buscar documento do professor:', error)
+            // Em caso de erro, tentar usar documento_url se existir
+            if (professor.documento_url) {
+              professor.documentoImagem = professor.documento_url
+              professor.documento = 'Comprovante'
+            }
           }
           return professor
         })
       )
       
       console.log('Professores pendentes:', professoresComDocumentos)
+      console.log('Documentos encontrados:', professoresComDocumentos.map(p => ({
+        id: p.id,
+        nome: p.nome,
+        documentoImagem: p.documentoImagem ? 'SIM' : 'NÃO',
+        documento: p.documento,
+        documento_url: p.documento_url
+      })))
       setProfessoresPendentes(professoresComDocumentos)
     } catch (error) {
       console.error('Erro ao carregar professores pendentes:', error)
@@ -116,15 +171,29 @@ function VerificacaoProfessores() {
                     <label>Documento Comprobatório:</label>
                     <div className="documento-preview">
                       <img 
-                        src={professor.documentoImagem} 
+                        src={professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `http://localhost:8080/${professor.documentoImagem}`} 
                         alt="Documento do professor" 
                         className="documento-img"
-                        onClick={() => window.open(professor.documentoImagem, '_blank')}
+                        onClick={() => {
+                          const imageUrl = professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `http://localhost:8080/${professor.documentoImagem}`
+                          window.open(imageUrl, '_blank')
+                        }}
+                        onError={(e) => {
+                          console.error('Erro ao carregar imagem:', professor.documentoImagem)
+                          e.target.style.display = 'none'
+                          e.target.nextSibling.style.display = 'block'
+                        }}
                       />
+                      <div style={{display: 'none', padding: '20px', border: '1px dashed #ccc', textAlign: 'center'}}>
+                        Erro ao carregar imagem do documento
+                      </div>
                       <p className="documento-nome">{professor.documento}</p>
                       <button 
                         className="btn-visualizar"
-                        onClick={() => setImagemModal(professor.documentoImagem)}
+                        onClick={() => {
+                          const imageUrl = professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `http://localhost:8080/${professor.documentoImagem}`
+                          setImagemModal(imageUrl)
+                        }}
                       >
                         Visualizar em Tela Cheia
                       </button>
@@ -162,7 +231,19 @@ function VerificacaoProfessores() {
               <button className="modal-close" onClick={() => setImagemModal(null)}>✕</button>
             </div>
             <div className="modal-body">
-              <img src={imagemModal} alt="Documento" className="modal-image" />
+              <img 
+                src={imagemModal} 
+                alt="Documento" 
+                className="modal-image"
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                  e.target.nextSibling.style.display = 'block'
+                }}
+              />
+              <div style={{display: 'none', padding: '40px', textAlign: 'center'}}>
+                <p>Erro ao carregar a imagem do documento</p>
+                <p>URL: {imagemModal}</p>
+              </div>
             </div>
             <div className="modal-footer">
               <button className="btn-download" onClick={() => {

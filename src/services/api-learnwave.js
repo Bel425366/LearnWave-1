@@ -114,10 +114,30 @@ const UsuarioAPI = {
     // Listar professores pendentes
     async getPendingTeachers() {
         try {
-            const response = await fetch(`${API_BASE}/usuarios/professores/pendentes`);
+            // Tentar diferentes endpoints
+            let response = await fetch(`${API_BASE}/usuarios/professores/pendentes`);
+            
+            if (!response.ok) {
+                // Tentar endpoint alternativo
+                response = await fetch(`${API_BASE}/professores-pendentes`);
+            }
+            
+            if (!response.ok) {
+                // Buscar todos os usuários e filtrar professores pendentes
+                response = await fetch(`${API_BASE}/usuarios`);
+                if (response.ok) {
+                    const usuarios = await response.json();
+                    return usuarios.filter(u => 
+                        (u.tipo === 'professor' || u.tipoUsuario === 'PROFESSOR' || u.tipo_usuario === 'professor') &&
+                        (u.status_verificacao === 'pendente' || u.statusVerificacao === 'PENDENTE')
+                    );
+                }
+            }
+            
             if (!response.ok) {
                 throw new Error(`Erro ${response.status}: ${response.statusText}`);
             }
+            
             return await response.json();
         } catch (error) {
             console.error('Erro ao buscar professores pendentes:', error);
@@ -128,9 +148,19 @@ const UsuarioAPI = {
     // Aprovar professor
     async approveTeacher(id) {
         try {
-            const response = await fetch(`${API_BASE}/usuarios/${id}/aprovar`, {
+            let response = await fetch(`${API_BASE}/usuarios/${id}/aprovar`, {
                 method: 'PATCH'
             });
+            
+            if (!response.ok) {
+                // Tentar endpoint alternativo
+                response = await fetch(`${API_BASE}/verificar-professor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ professorId: id, status: 'aprovado' })
+                });
+            }
+            
             if (!response.ok) {
                 throw new Error(`Erro ${response.status}: ${response.statusText}`);
             }
@@ -144,9 +174,19 @@ const UsuarioAPI = {
     // Rejeitar professor
     async rejectTeacher(id) {
         try {
-            const response = await fetch(`${API_BASE}/usuarios/${id}/rejeitar`, {
+            let response = await fetch(`${API_BASE}/usuarios/${id}/rejeitar`, {
                 method: 'PATCH'
             });
+            
+            if (!response.ok) {
+                // Tentar endpoint alternativo
+                response = await fetch(`${API_BASE}/verificar-professor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ professorId: id, status: 'rejeitado' })
+                });
+            }
+            
             if (!response.ok) {
                 throw new Error(`Erro ${response.status}: ${response.statusText}`);
             }

@@ -280,6 +280,21 @@ app.post('/api/usuarios/login', (req, res) => {
   });
 });
 
+// Endpoint para buscar documentos de verificação
+app.get('/api/documentos-verificacao/usuario/:userId', (req, res) => {
+  const { userId } = req.params;
+  
+  // Simular documento base64 para teste
+  const documentoMock = {
+    id: 1,
+    usuarioId: userId,
+    nomeArquivo: 'comprovante-professor.jpg',
+    conteudoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
+  };
+  
+  res.json([documentoMock]);
+});
+
 // Endpoint para cadastro de usuários
 app.post('/api/usuarios', (req, res) => {
   console.log('Cadastro request received:', req.body);
@@ -298,7 +313,7 @@ app.post('/api/usuarios', (req, res) => {
     }
     
     const hashedPassword = bcrypt.hashSync(senha, 10);
-    const status = (tipo === 'aluno' || tipo === 'administrador') ? 'aprovado' : 'pendente';
+    const status = (tipo === 'aluno' || tipo === 'ALUNO' || tipo === 'administrador' || tipo === 'ADMINISTRADOR') ? 'aprovado' : 'pendente';
     
     const newUser = {
       id: usuarios.length + 1,
@@ -309,7 +324,7 @@ app.post('/api/usuarios', (req, res) => {
       area_ensino: areaEnsino,
       formacao,
       experiencia,
-      status_verificacao: status
+      status_verificacao: (tipo === 'aluno' || tipo === 'ALUNO' || tipo === 'administrador' || tipo === 'ADMINISTRADOR') ? 'aprovado' : 'pendente'
     };
     
     usuarios.push(newUser);
@@ -326,6 +341,32 @@ app.post('/api/usuarios', (req, res) => {
     console.error('Cadastro error:', error);
     res.status(500).json({ error: 'Erro ao processar cadastro: ' + error.message });
   }
+});
+
+// Endpoints temporários para teste
+app.get('/api/usuarios/professores/pendentes', (req, res) => {
+  const professoresPendentes = [
+    {
+      id: 1,
+      nome: 'Professor Teste',
+      email: 'professor@teste.com',
+      cpf: '123.456.789-00',
+      escola: 'Escola Teste',
+      telefone: '(11) 99999-9999',
+      documento_url: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
+    }
+  ];
+  res.json(professoresPendentes);
+});
+
+app.get('/api/documentos-verificacao/usuario/:userId', (req, res) => {
+  const documento = {
+    id: 1,
+    usuarioId: req.params.userId,
+    nomeArquivo: 'comprovante.jpg',
+    conteudoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
+  };
+  res.json([documento]);
 });
 
 app.listen(PORT, () => {
