@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-// import { db, initDatabase } from './database.js';
+import { db, initDatabase } from './database.js';
 
 const app = express();
 const PORT = 8080;
@@ -47,13 +47,13 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 // Inicializar banco
-// try {
-//   initDatabase();
-//   console.log('Banco de dados inicializado com sucesso!');
-// } catch (error) {
-//   console.error('Erro ao inicializar banco:', error);
-//   process.exit(1);
-// }
+try {
+  initDatabase();
+  console.log('Banco de dados inicializado com sucesso!');
+} catch (error) {
+  console.error('Erro ao inicializar banco:', error);
+  process.exit(1);
+}
 
 // Dados temporários em memória
 let usuarios = [
@@ -225,59 +225,137 @@ app.post('/api/verificar-professor', (req, res) => {
   );
 });
 
-// Endpoint alternativo para compatibilidade
-app.post('/api/usuarios/login', (req, res) => {
-  console.log('Login request received:', req.body);
-  const { email, senha, tipo } = req.body;
+// Endpoint alternativo para compatibilidade (GET com query params)
+app.get('/api/usuarios/login', (req, res) => {
+  console.log('Login GET request received:', req.query);
+  const { email, senha, tipoUsuario } = req.query;
   
   if (!email || !senha) {
     console.log('Missing required fields:', { email: !!email, senha: !!senha });
     return res.status(400).json({ error: 'Email e senha são obrigatórios' });
   }
   
-  // Buscar usuário em memória
+  // Buscar usuário no banco de dados
   console.log('Searching for user by email:', email);
-  const user = usuarios.find(u => u.email === email);
   
-  console.log('User found:', !!user);
-  if (!user) {
-    return res.status(401).json({ error: 'Email ou senha incorretos!' });
-  }
-  
-  // Se tipo foi fornecido, verificar se bate
-  if (tipo && user.tipo !== tipo) {
-    console.log('Type mismatch:', { expected: tipo, actual: user.tipo });
-    return res.status(401).json({ error: 'Email ou senha incorretos!' });
-  }
-  
-  const passwordMatch = bcrypt.compareSync(senha, user.senha);
-  console.log('Password match:', passwordMatch);
-  
-  if (!passwordMatch) {
-    return res.status(401).json({ error: 'Email ou senha incorretos!' });
-  }
-  
-  if (user.tipo === 'professor' && user.status_verificacao !== 'aprovado') {
-    return res.status(403).json({ 
-      error: 'Conta pendente de verificação. Aguarde a aprovação dos documentos.' 
-    });
-  }
-  
-  const token = jwt.sign({ id: user.id, email: user.email, tipo: user.tipo }, JWT_SECRET);
-  
-  res.json({
-    token,
-    user: {
-      id: user.id,
-      nome: user.nome,
-      email: user.email,
-      tipo: user.tipo,
-      statusVerificacao: user.status_verificacao,
-      areaEnsino: user.area_ensino,
-      formacao: user.formacao,
-      experiencia: user.experiencia
+  db.get(
+    'SELECT * FROM usuarios WHERE email = ?',
+    [email],
+    (err, user) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+      
+      console.log('User found:', !!user);
+      if (!user) {
+        return res.status(401).json({ error: 'Email ou senha incorretos!' });
+      }
+      
+      // Se tipo foi fornecido, verificar se bate
+      if (tipoUsuario && user.tipo.toUpperCase() !== tipoUsuario.toUpperCase()) {
+        console.log('Type mismatch:', { expected: tipoUsuario, actual: user.tipo });
+        return res.status(401).json({ error: 'Email ou senha incorretos!' });
+      }
+      
+      const passwordMatch = bcrypt.compareSync(senha, user.senha);
+      console.log('Password match:', passwordMatch);
+      
+      if (!passwordMatch) {
+        return res.status(401).json({ error: 'Email ou senha incorretos!' });
+      }
+      
+      if (user.tipo === 'professor' && user.status_verificacao !== 'APROVADO') {
+        return res.status(403).json({ 
+          error: 'Conta pendente de verificação. Aguarde a aprovação dos documentos.' 
+        });
+      }
+      
+      const token = jwt.sign({ id: user.id, email: user.email, tipo: user.tipo }, JWT_SECRET);
+      
+      res.json({
+        token,
+        user: {
+          id: user.id,
+          nome: user.nome,
+          email: user.email,
+          tipo: user.tipo,
+          tipoUsuario: user.tipo.toUpperCase(),
+          statusVerificacao: user.status_verificacao,
+          areaEnsino: user.area_ensino,
+          formacao: user.formacao,
+          experiencia: user.experiencia
+        }
+      });
     }
-  });
+  );
+});
+
+// Endpoint POST para login
+app.post('/api/usuarios/login', (req, res) => {
+  console.log('Login POST request received:', req.body);
+  const { email, senha, tipoUsuario } = req.body;
+  
+  if (!email || !senha) {
+    console.log('Missing required fields:', { email: !!email, senha: !!senha });
+    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+  }
+  
+  // Buscar usuário no banco de dados
+  console.log('Searching for user by email:', email);
+  
+  db.get(
+    'SELECT * FROM usuarios WHERE email = ?',
+    [email],
+    (err, user) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+      
+      console.log('User found:', !!user);
+      if (!user) {
+        return res.status(401).json({ error: 'Email ou senha incorretos!' });
+      }
+      
+      // Se tipo foi fornecido, verificar se bate
+      if (tipoUsuario && user.tipo.toUpperCase() !== tipoUsuario.toUpperCase()) {
+        console.log('Type mismatch:', { expected: tipoUsuario, actual: user.tipo });
+        return res.status(401).json({ error: 'Email ou senha incorretos!' });
+      }
+      
+      const passwordMatch = bcrypt.compareSync(senha, user.senha);
+      console.log('Password match:', passwordMatch);
+      
+      if (!passwordMatch) {
+        return res.status(401).json({ error: 'Email ou senha incorretos!' });
+      }
+      
+      if (user.tipo === 'professor' && user.status_verificacao !== 'APROVADO') {
+        return res.status(403).json({ 
+          error: 'Conta pendente de verificação. Aguarde a aprovação dos documentos.' 
+        });
+      }
+      
+      const token = jwt.sign({ id: user.id, email: user.email, tipo: user.tipo }, JWT_SECRET);
+      
+      
+      res.json({
+        token,
+        user: {
+          id: user.id,
+          nome: user.nome,
+          email: user.email,
+          tipo: user.tipo,
+          tipoUsuario: user.tipo.toUpperCase(),
+          statusVerificacao: user.status_verificacao,
+          areaEnsino: user.area_ensino,
+          formacao: user.formacao,
+          experiencia: user.experiencia
+        }
+      });
+    }
+  );
 });
 
 // Endpoint para buscar documentos de verificação

@@ -92,7 +92,7 @@ const UsuarioAPI = {
             const params = new URLSearchParams({
                 email: email,
                 senha: senha,
-                tipoUsuario: tipoUsuario
+                tipoUsuario: tipoUsuario.toUpperCase()
             });
             
             const response = await fetch(`${API_BASE}/usuarios/login?${params}`, {
@@ -157,7 +157,7 @@ const UsuarioAPI = {
                 response = await fetch(`${API_BASE}/verificar-professor`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ professorId: id, status: 'aprovado' })
+                    body: JSON.stringify({ professorId: id, status: 'APROVADO' })
                 });
             }
             
@@ -183,7 +183,7 @@ const UsuarioAPI = {
                 response = await fetch(`${API_BASE}/verificar-professor`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ professorId: id, status: 'rejeitado' })
+                    body: JSON.stringify({ professorId: id, status: 'REJEITADO' })
                 });
             }
             

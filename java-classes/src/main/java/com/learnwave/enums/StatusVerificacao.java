@@ -1,9 +1,12 @@
 package com.learnwave.enums;
 
 public enum StatusVerificacao {
-    PENDENTE("pendente"),
-    APROVADO("aprovado"),
-    REJEITADO("rejeitado");
+    PENDENTE("PENDENTE"),
+    APROVADO("APROVADO"),
+    REJEITADO("REJEITADO"),
+    pendente("pendente"),
+    aprovado("aprovado"),
+    rejeitado("rejeitado");
     
     private final String valor;
     

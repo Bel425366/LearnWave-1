@@ -116,11 +116,34 @@ function AreaAluno({ user, onNavigate }) {
     alert('Material baixado!')
   }
 
-  const salvarPerfil = (novosDados) => {
-    setPerfilData(novosDados)
-    alert('Perfil atualizado com sucesso!')
-    // Força re-render do componente pai sem recarregar a página
-    window.dispatchEvent(new Event('storage'))
+  const salvarPerfil = async (novosDados) => {
+    try {
+      // Salvar no banco de dados
+      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...user,
+          nome: novosDados.apelido,
+          bio: novosDados.bio,
+          fotoPerfil: novosDados.fotoPerfil
+        })
+      })
+      
+      if (response.ok) {
+        setPerfilData(novosDados)
+        alert('Perfil atualizado com sucesso!')
+        window.dispatchEvent(new Event('storage'))
+      } else {
+        throw new Error('Erro ao salvar no servidor')
+      }
+    } catch (error) {
+      console.error('Erro ao salvar perfil:', error)
+      // Salvar apenas no localStorage como fallback
+      setPerfilData(novosDados)
+      alert('Perfil atualizado localmente. Erro ao sincronizar com servidor.')
+      window.dispatchEvent(new Event('storage'))
+    }
   }
 
   const renderContent = () => {
@@ -378,6 +401,7 @@ function PerfilAluno({ perfilData, onSalvar, user }) {
       </form>
       
       {user && <AlterarSenha userEmail={user.email} />}
+      {user && <DesativarConta user={user} onDesativar={() => window.location.reload()} />}
     </div>
   )
 }
@@ -525,6 +549,64 @@ function AlterarSenha({ userEmail }) {
           Alterar Senha
         </button>
       </form>
+    </div>
+  )
+}
+
+function DesativarConta({ user, onDesativar }) {
+  const handleDesativar = async () => {
+    const confirmacao = window.confirm(
+      'Tem certeza que deseja desativar sua conta?\n\n' +
+      'Após desativar:\n' +
+      '• Você será deslogado imediatamente\n' +
+      '• Não poderá mais fazer login nesta conta\n' +
+      '• Precisará se cadastrar novamente se quiser voltar\n\n' +
+      'Esta ação não pode ser desfeita!'
+    )
+    
+    if (confirmacao) {
+      try {
+        const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}/status?status=inativo`, {
+          method: 'PATCH'
+        })
+        
+        if (response.ok) {
+          alert('Conta desativada com sucesso!')
+          localStorage.clear()
+          onDesativar()
+        } else {
+          throw new Error('Erro ao desativar conta')
+        }
+      } catch (error) {
+        console.error('Erro:', error)
+        alert('Erro ao desativar conta. Tente novamente.')
+      }
+    }
+  }
+
+  return (
+    <div className="desativar-conta-section" style={{ marginTop: '30px', padding: '20px', borderTop: '1px solid #ddd' }}>
+      <h4 style={{ marginBottom: '10px' }}>Configurações da Conta</h4>
+      <p style={{ marginBottom: '15px' }}>Se você não deseja mais usar esta conta, pode desativá-la permanentemente.</p>
+      <button 
+        onClick={handleDesativar} 
+        className="btn-desativar-conta"
+        style={{
+          backgroundColor: '#6c757d',
+          color: 'white',
+          border: 'none',
+          padding: '12px 24px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '500',
+          transition: 'background-color 0.3s'
+        }}
+        onMouseOver={(e) => e.target.style.backgroundColor = '#5a6268'}
+        onMouseOut={(e) => e.target.style.backgroundColor = '#6c757d'}
+      >
+        Desativar Conta
+      </button>
     </div>
   )
 }
