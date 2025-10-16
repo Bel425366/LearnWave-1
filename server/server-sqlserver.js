@@ -27,17 +27,24 @@ app.post('/api/usuarios', async (req, res) => {
     const pool = getPool();
     const hashedPassword = bcrypt.hashSync(senha, 10);
     
+    // Definir status_verificacao baseado no tipo
+    let statusVerificacao = 'PENDENTE';
+    if (tipo === 'ADMIN' || tipo === 'ESTUDANTE') {
+      statusVerificacao = 'APROVADO';
+    }
+    
     const result = await pool.request()
       .input('nome', sql.NVarChar, nome)
       .input('email', sql.NVarChar, email)
       .input('senha', sql.NVarChar, hashedPassword)
       .input('tipo_usuario', sql.NVarChar, tipo)
+      .input('status_verificacao', sql.NVarChar, statusVerificacao)
       .input('area_ensino', sql.NVarChar, areaEnsino)
       .input('formacao', sql.NVarChar, formacao)
       .input('experiencia', sql.NVarChar, experiencia)
       .query(`
-        INSERT INTO usuarios (nome, email, senha, tipo_usuario, area_ensino, formacao, experiencia)
-        VALUES (@nome, @email, @senha, @tipo_usuario, @area_ensino, @formacao, @experiencia);
+        INSERT INTO usuarios (nome, email, senha, tipo_usuario, status_verificacao, area_ensino, formacao, experiencia)
+        VALUES (@nome, @email, @senha, @tipo_usuario, @status_verificacao, @area_ensino, @formacao, @experiencia);
         SELECT SCOPE_IDENTITY() AS id;
       `);
     
