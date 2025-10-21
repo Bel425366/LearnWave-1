@@ -174,18 +174,10 @@ const UsuarioAPI = {
     // Rejeitar professor
     async rejectTeacher(id) {
         try {
-            let response = await fetch(`${API_BASE}/usuarios/${id}/rejeitar`, {
-                method: 'PATCH'
+            console.log('Rejeitando professor ID:', id);
+            const response = await fetch(`${API_BASE}/usuarios/rejeitar-professor?id=${id}`, {
+                method: 'GET'
             });
-            
-            if (!response.ok) {
-                // Tentar endpoint alternativo
-                response = await fetch(`${API_BASE}/verificar-professor`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ professorId: id, status: 'REJEITADO' })
-                });
-            }
             
             if (!response.ok) {
                 throw new Error(`Erro ${response.status}: ${response.statusText}`);

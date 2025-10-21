@@ -7,9 +7,11 @@ function CadastroProfessor({ onNavigate }) {
     nome: '',
     email: '',
     cpf: '',
-
     escola: '',
     telefone: '',
+    areaEnsino: '',
+    formacao: '',
+    experiencia: '',
     senha: '',
     confirmarSenha: ''
   })
@@ -84,6 +86,8 @@ function CadastroProfessor({ onNavigate }) {
     
     try {
       const documentoImagem = await processFile()
+      console.log('Documento processado:', documentoImagem ? 'SIM' : 'NÃO')
+      console.log('Tamanho do documento:', documentoImagem ? documentoImagem.length : 0)
       
       const usuario = await UsuarioAPI.cadastrar({
         nome: formData.nome,
@@ -92,22 +96,11 @@ function CadastroProfessor({ onNavigate }) {
         cpf: formData.cpf,
         escola: formData.escola,
         telefone: formData.telefone,
+        areaEnsino: formData.areaEnsino,
+        formacao: formData.formacao,
+        experiencia: formData.experiencia,
+        documentoUrl: documentoImagem,
         tipo: 'PROFESSOR'
-      })
-      
-      // Enviar documento comprobatório
-      await fetch('http://localhost:8080/api/documentos-verificacao', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          usuarioId: usuario.id,
-          nomeArquivo: documento.name,
-          tipoArquivo: documento.type,
-          conteudoBase64: documentoImagem,
-          statusVerificacao: 'PENDENTE'
-        })
       })
       
       alert('Cadastro enviado com sucesso! Aguarde a verificação dos documentos pelo administrador.')
@@ -169,6 +162,45 @@ function CadastroProfessor({ onNavigate }) {
           placeholder="Telefone (opcional)"
           value={formData.telefone}
           onChange={handleChange}
+        />
+        
+        <select
+          name="areaEnsino"
+          value={formData.areaEnsino}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Selecione a área de ensino</option>
+          <option value="Gramática">Gramática</option>
+          <option value="Literatura">Literatura</option>
+          <option value="Redação">Redação</option>
+          <option value="Interpretação de Texto">Interpretação de Texto</option>
+          <option value="Ortografia">Ortografia</option>
+          <option value="Sintaxe">Sintaxe</option>
+          <option value="Morfologia">Morfologia</option>
+          <option value="Semântica">Semântica</option>
+          <option value="Fonética">Fonética</option>
+          <option value="Produção Textual">Produção Textual</option>
+          <option value="Análise Literária">Análise Literária</option>
+          <option value="Português Geral">Português Geral</option>
+        </select>
+        
+        <input
+          type="text"
+          name="formacao"
+          placeholder="Formação acadêmica"
+          value={formData.formacao}
+          onChange={handleChange}
+          required
+        />
+        
+        <textarea
+          name="experiencia"
+          placeholder="Experiência profissional"
+          value={formData.experiencia}
+          onChange={handleChange}
+          rows="3"
+          required
         />
         
         <input

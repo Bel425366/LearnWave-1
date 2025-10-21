@@ -685,12 +685,33 @@ function PerfilProfessor({ user }) {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setPerfilData(formData)
-    localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
-    alert('Perfil atualizado com sucesso!')
-    window.dispatchEvent(new Event('storage'))
+    
+    try {
+      // Atualizar no backend
+      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...user,
+          bio: formData.bio,
+          documentoUrl: formData.fotoPerfil // Salvando foto no documentoUrl
+        })
+      })
+      
+      if (response.ok) {
+        setPerfilData(formData)
+        localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
+        alert('Perfil atualizado com sucesso!')
+        window.dispatchEvent(new Event('storage'))
+      } else {
+        throw new Error('Erro ao salvar no servidor')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error)
+      alert('Erro ao salvar perfil: ' + error.message)
+    }
   }
 
   return (

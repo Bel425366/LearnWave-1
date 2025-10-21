@@ -56,16 +56,32 @@ function VerificacaoProfessores() {
               }
             }
             
-            // Se ainda não tem imagem, usar o campo documento_url do próprio professor
+            // Se ainda não tem imagem, buscar documento_url do usuário
+            if (!professor.documentoImagem) {
+              try {
+                const docResponse = await fetch(`http://localhost:8080/api/usuarios/${professor.id}/documento`)
+                if (docResponse.ok) {
+                  const documentoUrl = await docResponse.text()
+                  if (documentoUrl) {
+                    professor.documentoImagem = documentoUrl
+                    professor.documento = 'Documento Comprobatório'
+                  }
+                }
+              } catch (error) {
+                console.error('Erro ao buscar documento do usuário:', error)
+              }
+            }
+            
+            // Usar documento_url se existir
             if (!professor.documentoImagem && professor.documento_url) {
               professor.documentoImagem = professor.documento_url
               professor.documento = 'Comprovante'
             }
             
-            // Para teste: adicionar imagem mock se não tiver nenhuma
-            if (!professor.documentoImagem) {
-              professor.documentoImagem = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRvY3VtZW50byBDb21wcm9iYXTDs3JpbzwvdGV4dD48L3N2Zz4='
-              professor.documento = 'Documento Comprobatório'
+            // Se tem documento_url, mostrar imagem padrão
+            if (!professor.documentoImagem && professor.documento_url) {
+              professor.documentoImagem = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNGY4NWY0Ii8+PHRleHQgeD0iNTAlIiB5PSI0MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRvY3VtZW50bzwvdGV4dD48dGV4dCB4PSI1MCUiIHk9IjYwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+RW52aWFkbzwvdGV4dD48L3N2Zz4='
+              professor.documento = 'Documento Enviado'
             }
             
           } catch (error) {
@@ -106,6 +122,11 @@ function VerificacaoProfessores() {
   }
 
   const rejeitarProfessor = async (professorId) => {
+    console.log('ID do professor para rejeitar:', professorId)
+    if (!confirm('Tem certeza que deseja rejeitar este professor? Esta ação não pode ser desfeita.')) {
+      return
+    }
+    
     try {
       await api.rejectTeacher(professorId)
       alert('Professor rejeitado!')

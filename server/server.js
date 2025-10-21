@@ -69,7 +69,7 @@ let usuarios = [
 
 // Cadastro de professor com verificação
 app.post('/api/cadastro-professor', upload.single('documento'), (req, res) => {
-  const { nome, email, senha, cpf, escola, telefone } = req.body;
+  const { nome, email, senha, cpf, escola, telefone, areaEnsino, formacao, experiencia } = req.body;
   
   if (!req.file) {
     return res.status(400).json({ error: 'Documento comprobatório é obrigatório' });
@@ -78,9 +78,9 @@ app.post('/api/cadastro-professor', upload.single('documento'), (req, res) => {
   const hashedPassword = bcrypt.hashSync(senha, 10);
   
   db.run(
-    `INSERT INTO usuarios (nome, email, senha, tipo, cpf, escola, telefone, documento_url, status_verificacao) 
-     VALUES (?, ?, ?, 'professor', ?, ?, ?, ?, 'pendente')`,
-    [nome, email, hashedPassword, cpf, escola, telefone, req.file.path],
+    `INSERT INTO usuarios (nome, email, senha, tipo, cpf, escola, telefone, area_ensino, formacao, experiencia, documento_url, status_verificacao) 
+     VALUES (?, ?, ?, 'professor', ?, ?, ?, ?, ?, ?, ?, 'pendente')`,
+    [nome, email, hashedPassword, cpf, escola, telefone, areaEnsino, formacao, experiencia, req.file.path],
     function(err) {
       if (err) {
         // Remover arquivo se erro no banco
@@ -362,15 +362,29 @@ app.post('/api/usuarios/login', (req, res) => {
 app.get('/api/documentos-verificacao/usuario/:userId', (req, res) => {
   const { userId } = req.params;
   
-  // Simular documento base64 para teste
-  const documentoMock = {
-    id: 1,
-    usuarioId: userId,
-    nomeArquivo: 'comprovante-professor.jpg',
-    conteudoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
-  };
-  
-  res.json([documentoMock]);
+  db.get(
+    'SELECT * FROM usuarios WHERE id = ?',
+    [userId],
+    (err, user) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+      
+      if (!user || !user.documento_url) {
+        return res.json([]);
+      }
+      
+      const documento = {
+        id: 1,
+        usuarioId: userId,
+        nomeArquivo: path.basename(user.documento_url),
+        documento_url: user.documento_url,
+        conteudoBase64: null // Será carregado via URL
+      };
+      
+      res.json([documento]);
+    }
+  );
 });
 
 // Endpoint para cadastro de usuários
@@ -437,15 +451,7 @@ app.get('/api/usuarios/professores/pendentes', (req, res) => {
   res.json(professoresPendentes);
 });
 
-app.get('/api/documentos-verificacao/usuario/:userId', (req, res) => {
-  const documento = {
-    id: 1,
-    usuarioId: req.params.userId,
-    nomeArquivo: 'comprovante.jpg',
-    conteudoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
-  };
-  res.json([documento]);
-});
+
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

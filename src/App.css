@@ -19,7 +19,7 @@
 }
 
 .light-theme {
-  background: linear-gradient(135deg, #f8fafc 0%, #e8e5ff 50%, #ddd6fe 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #1e293b;
 }
 
@@ -376,6 +376,12 @@
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-family: inherit;
   letter-spacing: 0.01em;
+  resize: vertical;
+}
+
+.auth-form textarea {
+  min-height: 80px;
+  line-height: 1.4;
 }
 
 .auth-form select option {
@@ -1094,8 +1100,9 @@
 }
 
 .light-theme .welcome-section {
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
 }
 
 .light-theme .brand-text h1 {
@@ -1127,13 +1134,13 @@
 
 .light-theme .user-type-option {
   color: #2d3748 !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 .light-theme .user-type-option:hover {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(102, 126, 234, 0.4) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .light-theme .auth-form h2 {
@@ -1891,18 +1898,13 @@ html {
 }
 
 .light-theme .auth-form {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 8px 30px rgba(79, 70, 229, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 8px 30px rgba(0,0,0,0.04);
 }
 
-.light-theme .user-type-selection {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 8px 30px rgba(79, 70, 229, 0.05);
-}
+
 
 .light-theme .auth-form input, 
 .light-theme .auth-form textarea, 
