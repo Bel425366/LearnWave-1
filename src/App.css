@@ -380,8 +380,22 @@
 }
 
 .auth-form textarea {
-  min-height: 80px;
+  min-height: 120px !important;
+  height: auto !important;
   line-height: 1.4;
+  resize: vertical !important;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-y: auto !important;
+}
+
+textarea[name="formacao"],
+textarea[name="experiencia"] {
+  min-height: 100px !important;
+  height: 100px !important;
+  resize: vertical !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
 }
 
 .auth-form select option {

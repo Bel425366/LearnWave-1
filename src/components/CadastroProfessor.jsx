@@ -185,12 +185,12 @@ function CadastroProfessor({ onNavigate }) {
           <option value="Português Geral">Português Geral</option>
         </select>
         
-        <input
-          type="text"
+        <textarea
           name="formacao"
-          placeholder="Formação acadêmica"
+          placeholder="Formação acadêmica (ex: Licenciatura em Letras - USP, Mestrado em Literatura - UNICAMP)"
           value={formData.formacao}
           onChange={handleChange}
+          rows="3"
           required
         />
         
