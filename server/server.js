@@ -55,17 +55,7 @@ try {
   process.exit(1);
 }
 
-// Dados temporários em memória
-let usuarios = [
-  {
-    id: 1,
-    nome: 'Yasmin Teste',
-    email: 'yasmincunegundes25@gmail.com',
-    senha: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-    tipo: 'aluno',
-    status_verificacao: 'aprovado'
-  }
-];
+// Dados temporários em memória (removido - usando apenas banco de dados)
 
 // Cadastro de professor com verificação
 app.post('/api/cadastro-professor', upload.single('documento'), (req, res) => {
@@ -390,49 +380,43 @@ app.get('/api/documentos-verificacao/usuario/:userId', (req, res) => {
 // Endpoint para cadastro de usuários
 app.post('/api/usuarios', (req, res) => {
   console.log('Cadastro request received:', req.body);
-  const { nome, email, senha, tipo, areaEnsino, formacao, experiencia } = req.body;
+  const { nome, email, senha, tipo, tipoUsuario, areaEnsino, formacao, experiencia } = req.body;
   
-  if (!nome || !email || !senha || !tipo) {
-    console.log('Missing required fields:', { nome: !!nome, email: !!email, senha: !!senha, tipo: !!tipo });
+  // Usar tipoUsuario se tipo não estiver definido
+  const userType = tipo || tipoUsuario;
+  
+  if (!nome || !email || !senha || !userType) {
+    console.log('Missing required fields:', { nome: !!nome, email: !!email, senha: !!senha, tipo: !!userType });
     return res.status(400).json({ error: 'Nome, email, senha e tipo são obrigatórios' });
   }
   
-  try {
-    // Verificar se email já existe
-    const existingUser = usuarios.find(u => u.email === email);
-    if (existingUser) {
-      return res.status(400).json({ error: 'Este email já está cadastrado!' });
+  const hashedPassword = bcrypt.hashSync(senha, 10);
+  const normalizedType = userType.toLowerCase();
+  const status = (normalizedType === 'aluno' || normalizedType === 'administrador') ? 'aprovado' : 'pendente';
+  
+  db.run(
+    `INSERT INTO usuarios (nome, email, senha, tipo, area_ensino, formacao, experiencia, status_verificacao) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nome, email, hashedPassword, normalizedType, areaEnsino, formacao, experiencia, status],
+    function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+          return res.status(400).json({ error: 'Este email já está cadastrado!' });
+        }
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+      
+      console.log('User created successfully:', { id: this.lastID, nome, email, tipo: normalizedType, status });
+      res.json({ 
+        id: this.lastID,
+        nome,
+        email,
+        tipo: normalizedType,
+        message: 'Usuário cadastrado com sucesso!'
+      });
     }
-    
-    const hashedPassword = bcrypt.hashSync(senha, 10);
-    const status = (tipo === 'aluno' || tipo === 'ALUNO' || tipo === 'administrador' || tipo === 'ADMINISTRADOR') ? 'aprovado' : 'pendente';
-    
-    const newUser = {
-      id: usuarios.length + 1,
-      nome,
-      email,
-      senha: hashedPassword,
-      tipo,
-      area_ensino: areaEnsino,
-      formacao,
-      experiencia,
-      status_verificacao: (tipo === 'aluno' || tipo === 'ALUNO' || tipo === 'administrador' || tipo === 'ADMINISTRADOR') ? 'aprovado' : 'pendente'
-    };
-    
-    usuarios.push(newUser);
-    
-    console.log('User created successfully:', { id: newUser.id, nome, email, tipo });
-    res.json({ 
-      id: newUser.id,
-      nome,
-      email,
-      tipo,
-      message: 'Usuário cadastrado com sucesso!'
-    });
-  } catch (error) {
-    console.error('Cadastro error:', error);
-    res.status(500).json({ error: 'Erro ao processar cadastro: ' + error.message });
-  }
+  );
 });
 
 // Endpoints temporários para teste
