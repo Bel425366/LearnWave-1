@@ -1,5 +1,8 @@
 // API LearnWave - Funções para conectar com o backend
+import { localDB } from './localDatabase';
+
 const API_BASE = 'http://localhost:8080/api';
+const USE_LOCAL_FALLBACK = false; // Desativar fallback local
 
 // USUÁRIOS
 const UsuarioAPI = {
@@ -19,7 +22,23 @@ const UsuarioAPI = {
             
             return await response.json();
         } catch (error) {
-            console.error('Erro ao cadastrar:', error);
+            console.error('Erro ao cadastrar no backend:', error);
+            
+            // Fallback para banco local
+            if (USE_LOCAL_FALLBACK) {
+                console.log('Usando banco de dados local...');
+                const userData = {
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    senha: usuario.senha,
+                    tipo: usuario.tipoUsuario?.toLowerCase() || usuario.tipo?.toLowerCase(),
+                    areaEnsino: usuario.areaEnsino,
+                    formacao: usuario.formacao,
+                    experiencia: usuario.experiencia
+                };
+                return localDB.register(userData);
+            }
+            
             throw error;
         }
     },
@@ -106,7 +125,14 @@ const UsuarioAPI = {
             
             return await response.json();
         } catch (error) {
-            console.error('Erro ao fazer login:', error);
+            console.error('Erro ao fazer login no backend:', error);
+            
+            // Fallback para banco local
+            if (USE_LOCAL_FALLBACK) {
+                console.log('Usando banco de dados local para login...');
+                return localDB.login(email, senha, tipoUsuario.toLowerCase());
+            }
+            
             throw error;
         }
     },
