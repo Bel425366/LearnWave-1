@@ -1,8 +1,9 @@
 // API LearnWave - Funções para conectar com o backend
 import { localDB } from './localDatabase';
+import mockData from '../data/mock-data.json';
 
 const API_BASE = 'http://localhost:8080/api';
-const USE_LOCAL_FALLBACK = false; // Desativar fallback local
+const USE_MOCK_DATA = true; // Ativar dados mockados quando backend não estiver disponível
 
 // USUÁRIOS
 const UsuarioAPI = {
@@ -16,27 +17,38 @@ const UsuarioAPI = {
             });
             
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || `Erro ${response.status}`);
+                throw new Error('Backend indisponível');
             }
             
             return await response.json();
         } catch (error) {
             console.error('Erro ao cadastrar no backend:', error);
             
-            // Fallback para banco local
-            if (USE_LOCAL_FALLBACK) {
-                console.log('Usando banco de dados local...');
-                const userData = {
+            // Usar dados mockados
+            if (USE_MOCK_DATA) {
+                console.log('Usando dados mockados para cadastro...');
+                const novoUsuario = {
+                    id: mockData.usuarios.length + 1,
                     nome: usuario.nome,
                     email: usuario.email,
                     senha: usuario.senha,
                     tipo: usuario.tipoUsuario?.toLowerCase() || usuario.tipo?.toLowerCase(),
-                    areaEnsino: usuario.areaEnsino,
+                    status_verificacao: 'aprovado',
+                    area_ensino: usuario.areaEnsino,
                     formacao: usuario.formacao,
-                    experiencia: usuario.experiencia
+                    experiencia: usuario.experiencia,
+                    data_criacao: new Date().toISOString()
                 };
-                return localDB.register(userData);
+                
+                mockData.usuarios.push(novoUsuario);
+                
+                return {
+                    id: novoUsuario.id,
+                    nome: novoUsuario.nome,
+                    email: novoUsuario.email,
+                    tipo: novoUsuario.tipo,
+                    message: 'Usuário cadastrado com sucesso!'
+                };
             }
             
             throw error;
@@ -119,18 +131,40 @@ const UsuarioAPI = {
             });
             
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || `Erro ${response.status}`);
+                throw new Error('Backend indisponível');
             }
             
             return await response.json();
         } catch (error) {
             console.error('Erro ao fazer login no backend:', error);
             
-            // Fallback para banco local
-            if (USE_LOCAL_FALLBACK) {
-                console.log('Usando banco de dados local para login...');
-                return localDB.login(email, senha, tipoUsuario.toLowerCase());
+            // Usar dados mockados
+            if (USE_MOCK_DATA) {
+                console.log('Usando dados mockados para login...');
+                const usuario = mockData.usuarios.find(u => 
+                    u.email === email && 
+                    u.senha === senha && 
+                    u.tipo === tipoUsuario.toLowerCase()
+                );
+                
+                if (!usuario) {
+                    throw new Error('Email ou senha incorretos!');
+                }
+                
+                return {
+                    token: 'mock-token-' + usuario.id,
+                    user: {
+                        id: usuario.id,
+                        nome: usuario.nome,
+                        email: usuario.email,
+                        tipo: usuario.tipo,
+                        tipoUsuario: usuario.tipo.toUpperCase(),
+                        statusVerificacao: usuario.status_verificacao,
+                        areaEnsino: usuario.area_ensino,
+                        formacao: usuario.formacao,
+                        experiencia: usuario.experiencia
+                    }
+                };
             }
             
             throw error;
