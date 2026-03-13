@@ -1,0 +1,123 @@
+import { useState, useEffect } from 'react'
+import './Mascot.css'
+
+function Mascot({ mood = 'happy', message = '', position = 'left' }) {
+  const [isBlinking, setIsBlinking] = useState(false)
+  const [currentMessage, setCurrentMessage] = useState(message)
+  const [showMessage, setShowMessage] = useState(false)
+
+  // Piscar aleatoriamente
+  useEffect(() => {
+    const blinkInterval = setInterval(() => {
+      setIsBlinking(true)
+      setTimeout(() => setIsBlinking(false), 200)
+    }, Math.random() * 4000 + 2000)
+
+    return () => clearInterval(blinkInterval)
+  }, [])
+
+  // Atualizar mensagem
+  useEffect(() => {
+    if (message) {
+      setCurrentMessage(message)
+      setShowMessage(true)
+      const timer = setTimeout(() => setShowMessage(false), 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [message])
+
+  return (
+    <div className={`mascot-container ${position}`}>
+      {showMessage && currentMessage && (
+        <div className="mascot-bubble">
+          <p>{currentMessage}</p>
+          <div className="bubble-tail"></div>
+        </div>
+      )}
+      
+      <div className={`mascot mascot-${mood}`}>
+        {/* Corpo do mascote */}
+        <div className="mascot-body">
+          {/* Cabeça */}
+          <div className="mascot-head">
+            {/* Olhos */}
+            <div className="mascot-eyes">
+              <div className={`eye eye-left ${isBlinking ? 'blink' : ''}`}>
+                <div className="pupil"></div>
+                <div className="shine"></div>
+              </div>
+              <div className={`eye eye-right ${isBlinking ? 'blink' : ''}`}>
+                <div className="pupil"></div>
+                <div className="shine"></div>
+              </div>
+            </div>
+
+            {/* Boca */}
+            <div className={`mascot-mouth mouth-${mood}`}>
+              <svg viewBox="0 0 100 50" className="mouth-svg">
+                {mood === 'happy' && (
+                  <path d="M 20 20 Q 50 40 80 20" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                )}
+                {mood === 'excited' && (
+                  <>
+                    <path d="M 20 15 Q 50 45 80 15" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                    <circle cx="50" cy="35" r="8" fill="currentColor" opacity="0.8"/>
+                  </>
+                )}
+                {mood === 'thinking' && (
+                  <ellipse cx="50" cy="25" rx="15" ry="10" fill="currentColor" opacity="0.8"/>
+                )}
+                {mood === 'waving' && (
+                  <path d="M 25 25 Q 50 30 75 25" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                )}
+              </svg>
+            </div>
+
+            {/* Antena/Detalhe no topo */}
+            <div className="mascot-antenna">
+              <div className="antenna-stick"></div>
+              <div className="antenna-ball"></div>
+            </div>
+          </div>
+
+          {/* Corpo */}
+          <div className="mascot-torso">
+            {/* Braços */}
+            <div className={`mascot-arm arm-left ${mood === 'waving' ? 'waving' : ''}`}>
+              <div className="arm-upper"></div>
+              <div className="arm-lower"></div>
+              <div className="hand"></div>
+            </div>
+            <div className="mascot-arm arm-right">
+              <div className="arm-upper"></div>
+              <div className="arm-lower"></div>
+              <div className="hand"></div>
+            </div>
+
+            {/* Símbolo no peito */}
+            <div className="mascot-emblem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+            </div>
+          </div>
+
+          {/* Base/Pernas */}
+          <div className="mascot-base">
+            <div className="base-shadow"></div>
+          </div>
+        </div>
+
+        {/* Partículas decorativas */}
+        <div className="mascot-particles">
+          <span className="particle particle-1">✨</span>
+          <span className="particle particle-2">⭐</span>
+          <span className="particle particle-3">💫</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Mascot

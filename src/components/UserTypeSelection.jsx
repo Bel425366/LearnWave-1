@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './UserTypeSelection.css'
+import Mascot from './Mascot'
 
 const USER_TYPES = [
   { 
@@ -42,62 +43,104 @@ const USER_TYPES = [
 
 function UserTypeSelection({ onSelectUserType }) {
   const [selectedType, setSelectedType] = useState('')
+  const [mascotMood, setMascotMood] = useState('happy')
+  const [mascotMessage, setMascotMessage] = useState('Olá! Bem-vindo ao LearnWave! 👋')
+
+  const handleCardHover = (type) => {
+    if (type.id === 'aluno') {
+      setMascotMood('excited')
+      setMascotMessage('Ótima escolha! Vamos aprender juntos! 📚')
+    } else if (type.id === 'professor') {
+      setMascotMood('happy')
+      setMascotMessage('Que legal! Você vai inspirar muitos alunos! 🎓')
+    } else if (type.id === 'administrador') {
+      setMascotMood('thinking')
+      setMascotMessage('Administrador! Você terá controle total! 🛡️')
+    }
+  }
+
+  const handleCardLeave = () => {
+    if (!selectedType) {
+      setMascotMood('happy')
+      setMascotMessage('Escolha uma opção para começar! 😊')
+    }
+  }
+
+  const handleCardClick = (typeId) => {
+    setSelectedType(typeId)
+    setMascotMood('excited')
+    setMascotMessage('Perfeito! Agora clique em "Começar"! 🚀')
+  }
 
   const handleContinue = () => {
     if (selectedType) {
-      onSelectUserType(selectedType)
+      setMascotMood('waving')
+      setMascotMessage('Vamos lá! Boa sorte! 🎉')
+      setTimeout(() => {
+        onSelectUserType(selectedType)
+      }, 500)
     }
   }
 
   return (
     <div className="auth-container">
-      <div className="selection-wrapper">
-        <div className="selection-brand">
-          <div className="brand-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
+      <div className="selection-wrapper-split">
+        <div className="selection-left">
+          <div className="selection-brand">
+            <div className="brand-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+            </div>
+            <h1 className="brand-name">LearnWave</h1>
+            <p className="brand-tagline">Sua jornada de aprendizado começa aqui</p>
           </div>
-          <h1 className="brand-name">LearnWave</h1>
-          <p className="brand-tagline">Sua jornada de aprendizado começa aqui</p>
+
+          <div className="selection-content">
+            <h2 className="selection-question">Como você deseja continuar?</h2>
+            
+            <div className="type-cards">
+              {USER_TYPES.map(type => (
+                <div
+                  key={type.id}
+                  className={`type-card ${selectedType === type.id ? 'active' : ''}`}
+                  onClick={() => handleCardClick(type.id)}
+                  onMouseEnter={() => handleCardHover(type)}
+                  onMouseLeave={handleCardLeave}
+                  style={{'--accent-color': type.color}}
+                >
+                  <div className="card-glow"></div>
+                  <div className="card-icon">{type.icon}</div>
+                  <div className="card-content">
+                    <h3 className="card-label">{type.label}</h3>
+                    <p className="card-desc">{type.description}</p>
+                  </div>
+                  <div className="card-indicator">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button 
+              className="btn-start" 
+              onClick={handleContinue}
+              disabled={!selectedType}
+            >
+              <span>Começar</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div className="selection-content">
-          <h2 className="selection-question">Como você deseja continuar?</h2>
-          
-          <div className="type-cards">
-            {USER_TYPES.map(type => (
-              <div
-                key={type.id}
-                className={`type-card ${selectedType === type.id ? 'active' : ''}`}
-                onClick={() => setSelectedType(type.id)}
-                style={{'--accent-color': type.color}}
-              >
-                <div className="card-glow"></div>
-                <div className="card-icon">{type.icon}</div>
-                <h3 className="card-label">{type.label}</h3>
-                <p className="card-desc">{type.description}</p>
-                <div className="card-indicator">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button 
-            className="btn-start" 
-            onClick={handleContinue}
-            disabled={!selectedType}
-          >
-            <span>Começar</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </button>
+        <div className="selection-right">
+          <Mascot mood={mascotMood} message={mascotMessage} position="right" />
         </div>
       </div>
     </div>
