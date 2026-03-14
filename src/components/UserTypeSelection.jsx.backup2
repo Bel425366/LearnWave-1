@@ -52,10 +52,7 @@ function UserTypeSelection({ onSelectUserType }) {
   const [hoverMessage, setHoverMessage] = useState('Olá! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')
 
   const handleContinue = () => {
-    if (selectedType) {
-      setHoverMessage('Ótimo! Vamos lá!')
-      setTimeout(() => onSelectUserType(selectedType), 400)
-    }
+    if (selectedType) onSelectUserType(selectedType)
   }
 
   return (
@@ -81,9 +78,9 @@ function UserTypeSelection({ onSelectUserType }) {
                 <div
                   key={type.id}
                   className={`type-card ${selectedType === type.id ? 'active' : ''}`}
-                  onClick={() => { setSelectedType(type.id); setHoverMessage(HOVER_MESSAGES[type.id]) }}
+                  onClick={() => setSelectedType(type.id)}
                   onMouseEnter={() => setHoverMessage(HOVER_MESSAGES[type.id])}
-                  onMouseLeave={() => !selectedType && setHoverMessage('Olá! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')}
+                  onMouseLeave={() => setHoverMessage('Olá! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')}
                   style={{ '--accent-color': type.accentColor }}
                 >
                   <div className="card-glow" />
@@ -101,8 +98,7 @@ function UserTypeSelection({ onSelectUserType }) {
               ))}
             </div>
 
-            <button className="btn-start" onClick={handleContinue} disabled={!selectedType}
-              onMouseEnter={() => selectedType && setHoverMessage('Ótimo! Clica para continuar!')}>
+            <button className="btn-start" onClick={handleContinue} disabled={!selectedType}>
               Continuar
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"/>

@@ -72,16 +72,6 @@
   animation: mascotFloat 4s ease-in-out infinite;
 }
 
-.mascot.jumping {
-  animation: mascotJump 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) !important;
-}
-
-@keyframes mascotJump {
-  0%, 100% { transform: translateY(0px); }
-  30%       { transform: translateY(-30px) scale(1.05); }
-  60%       { transform: translateY(-10px) scale(0.98); }
-}
-
 @keyframes mascotFloat {
   0%, 100% {
     transform: translateY(0px);

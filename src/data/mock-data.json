@@ -2,7 +2,7 @@
   "usuarios": [
     {
       "id": 1,
-      "nome": "João Silva",
+      "nome": "Ana Silva",
       "email": "aluno@teste.com",
       "senha": "123456",
       "tipo": "aluno",
@@ -29,8 +29,8 @@
     },
     {
       "id": 3,
-      "nome": "Admin Sistema",
-      "email": "admin@teste.com",
+      "nome": "Isabelly Pereira",
+      "email": "pereiraisabelly585@gmail.com",
       "senha": "admin123",
       "tipo": "administrador",
       "status_verificacao": "aprovado",
