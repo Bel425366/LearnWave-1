@@ -582,37 +582,27 @@ textarea[name="experiencia"] {
 
 /* Formulários */
 .form-atividade {
-  background: rgba(255, 255, 255, 0.06);
-  padding: 1.8rem;
-  border-radius: 20px;
-  margin-bottom: 1.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  animation: fadeInUp 0.3s ease-out;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 2rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .form-atividade input, .form-atividade textarea, .form-atividade select {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem;
   margin-bottom: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  font-size: 0.9rem;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-
-.form-atividade input:focus, .form-atividade textarea:focus, .form-atividade select:focus {
-  outline: none;
-  border-color: rgba(240,147,251,0.5);
-  background: rgba(255,255,255,0.1);
 }
 
 .form-atividade select option {
   background: #2d3748;
   color: #ffffff;
+  padding: 0.5rem;
 }
 
 .form-atividade textarea {
@@ -622,38 +612,26 @@ textarea[name="experiencia"] {
 
 .form-actions {
   display: flex;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .form-actions button {
-  padding: 0.65rem 1.4rem;
+  padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.3s;
 }
 
 .form-actions button[type="submit"] {
-  background: linear-gradient(135deg, #f093fb 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(240,147,251,0.3);
-}
-
-.form-actions button[type="submit"]:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(240,147,251,0.45);
 }
 
 .form-actions button[type="button"] {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.form-actions button[type="button"]:hover {
-  background: rgba(255,255,255,0.13);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Gerenciamento */
@@ -661,40 +639,25 @@ textarea[name="experiencia"] {
   color: #ffffff;
 }
 
-.gerenciar-atividades > .header-actions,
-.gerenciar-videoaulas > .header-actions,
-.gerenciar-materiais > .header-actions {
+.header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.8rem;
-}
-
-.gerenciar-atividades > .header-actions h3,
-.gerenciar-videoaulas > .header-actions h3,
-.gerenciar-materiais > .header-actions h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
+  margin-bottom: 2rem;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #f093fb 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 0.65rem 1.3rem;
-  border-radius: 12px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(240,147,251,0.3);
+  transition: transform 0.2s;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(240,147,251,0.45);
 }
 
 .atividades-lista {
@@ -705,70 +668,53 @@ textarea[name="experiencia"] {
 
 .atividade-item {
   background: rgba(255, 255, 255, 0.06);
-  padding: 1.4rem 1.6rem;
+  padding: 1.8rem;
   border-radius: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   backdrop-filter: blur(10px);
 }
 
 .atividade-item:hover {
   background: rgba(255, 255, 255, 0.09);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: rgba(240,147,251,0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .atividade-item h4 {
   color: #ffffff;
-  margin: 0 0 0.4rem;
-  font-size: 0.95rem;
-  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .atividade-item p {
-  color: rgba(255,255,255,0.5);
-  margin: 0 0 0.2rem;
-  font-size: 0.82rem;
+  color: #b0b0b0;
+  margin-bottom: 0.3rem;
 }
 
 .actions {
   display: flex;
   gap: 0.5rem;
-  flex-shrink: 0;
 }
 
 .actions button {
-  padding: 0.45rem 1rem;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.3s;
 }
 
 .actions button:first-child {
-  background: rgba(102,126,234,0.2);
-  color: #a5b4fc;
-  border: 1px solid rgba(102,126,234,0.3);
-}
-
-.actions button:first-child:hover {
-  background: rgba(102,126,234,0.35);
+  background: #28a745;
+  color: white;
 }
 
 .actions button:last-child {
-  background: rgba(239,68,68,0.15);
-  color: #fca5a5;
-  border: 1px solid rgba(239,68,68,0.25);
-}
-
-.actions button:last-child:hover {
-  background: rgba(239,68,68,0.28);
+  background: #dc3545;
+  color: white;
 }
 
 /* Área do aluno */
@@ -911,16 +857,15 @@ textarea[name="experiencia"] {
 }
 
 .progresso-item {
-  background: rgba(255, 255, 255, 0.06);
-  padding: 1.4rem 1.6rem;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .progresso-item h4 {
   color: #ffffff;
-  margin-bottom: 0.8rem;
-  font-size: 0.95rem;
+  margin-bottom: 1rem;
 }
 
 .progresso-stats {
@@ -930,8 +875,7 @@ textarea[name="experiencia"] {
 }
 
 .progresso-stats span {
-  color: rgba(255,255,255,0.5);
-  font-size: 0.85rem;
+  color: #b0b0b0;
 }
 
 /* Lixeira */
@@ -941,32 +885,28 @@ textarea[name="experiencia"] {
 
 .lixeira-tabs {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.8rem;
+  gap: 1rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
 .lixeira-tabs button {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255,255,255,0.6);
-  padding: 0.6rem 1.1rem;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s;
 }
 
 .lixeira-tabs button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .lixeira-tabs button.active {
-  background: rgba(239,68,68,0.15);
-  border-color: rgba(239,68,68,0.35);
-  color: #fca5a5;
+  background: rgba(220, 53, 69, 0.2);
+  border-color: #dc3545;
 }
 
 .lixeira-content {
@@ -976,19 +916,12 @@ textarea[name="experiencia"] {
 }
 
 .lixeira-content .atividade-item button {
-  background: rgba(34,197,94,0.15);
-  color: #86efac;
-  border: 1px solid rgba(34,197,94,0.25);
-  padding: 0.45rem 1rem;
-  border-radius: 10px;
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.lixeira-content .atividade-item button:hover {
-  background: rgba(34,197,94,0.28);
 }
 
 /* Correção de atividades */
@@ -1000,45 +933,34 @@ textarea[name="experiencia"] {
   color: #ffffff;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.95rem;
-  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .submissao-item {
-  background: rgba(255, 255, 255, 0.06);
-  padding: 1.4rem 1.6rem;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1.5rem;
+  border-radius: 10px;
   margin-bottom: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  transition: all 0.2s ease;
-}
-
-.submissao-item:hover {
-  background: rgba(255,255,255,0.09);
-  border-color: rgba(240,147,251,0.2);
 }
 
 .submissao-item.corrigida {
-  background: rgba(34,197,94,0.08);
-  border-color: rgba(34,197,94,0.2);
+  background: rgba(40, 167, 69, 0.1);
+  border-color: rgba(40, 167, 69, 0.3);
 }
 
 .submissao-info h5 {
   color: #ffffff;
-  margin-bottom: 0.4rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .submissao-info p {
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 0.25rem;
-  font-size: 0.83rem;
+  color: #b0b0b0;
+  margin-bottom: 0.3rem;
 }
 
 .correcao-actions {
@@ -1049,31 +971,26 @@ textarea[name="experiencia"] {
 }
 
 .correcao-actions input {
-  width: 90px;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.07);
+  width: 100px;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  font-size: 0.88rem;
 }
 
 .correcao-actions button {
-  background: linear-gradient(135deg, #f093fb 0%, #764ba2 100%);
+  background: #007bff;
   color: white;
   border: none;
-  padding: 0.55rem 1.1rem;
-  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(240,147,251,0.25);
+  transition: background 0.3s;
 }
 
 .correcao-actions button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(240,147,251,0.4);
+  background: #0056b3;
 }
 
 .status.pendente {

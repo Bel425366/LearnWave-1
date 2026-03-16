@@ -40,62 +40,77 @@ function PainelProfessor({ user, onNavigate }) {
     }
   }
 
-  const primeiroNome = user.nome.split(' ')[0]
-  const iniciais = user.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-
-  const tabs = [
-    { id: 'atividades', label: 'Atividades',       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> },
-    { id: 'videoaulas', label: 'Videoaulas',       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> },
-    { id: 'materiais',  label: 'Materiais',        icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-    { id: 'progresso',  label: 'Progresso',        icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
-    { id: 'alunos',     label: 'Alunos',           icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> },
-    { id: 'lixeira',    label: 'Lixeira',          icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> },
-    { id: 'perfil',     label: 'Meu Perfil',       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
-  ]
-
   return (
-    <div className="painel-novo">
-      {/* Hero */}
-      <div className="painel-hero painel-hero--prof">
-        <div className="painel-hero-avatar painel-hero--prof">
-          {iniciais}
-        </div>
-        <div className="painel-hero-info">
-          <h2>Olá, {primeiroNome}</h2>
-          <p>{user.email}</p>
-        </div>
-        <div className="painel-hero-stats">
-          <div className="painel-stat">
-            <span className="painel-stat-val">{atividades.filter(a => !a.excluido).length}</span>
-            <span className="painel-stat-lbl">Atividades</span>
-          </div>
-          <div className="painel-stat">
-            <span className="painel-stat-val">{videoaulas.filter(v => !v.excluido).length}</span>
-            <span className="painel-stat-lbl">Videoaulas</span>
-          </div>
-          <div className="painel-stat">
-            <span className="painel-stat-val">{materiais.filter(m => !m.excluido).length}</span>
-            <span className="painel-stat-lbl">Materiais</span>
-          </div>
-        </div>
+    <div className="painel-professor">
+      <h2>Painel do Professor - {user.nome}</h2>
+      
+      <div className="tabs" role="tablist" aria-label="Navegação do painel">
+        <button 
+          className={activeTab === 'atividades' ? 'active' : ''}
+          onClick={() => setActiveTab('atividades')}
+          role="tab"
+          aria-selected={activeTab === 'atividades'}
+          aria-controls="tab-content"
+        >
+          Atividades
+        </button>
+        <button 
+          className={activeTab === 'videoaulas' ? 'active' : ''}
+          onClick={() => setActiveTab('videoaulas')}
+          role="tab"
+          aria-selected={activeTab === 'videoaulas'}
+          aria-controls="tab-content"
+        >
+          Videoaulas
+        </button>
+        <button 
+          className={activeTab === 'materiais' ? 'active' : ''}
+          onClick={() => setActiveTab('materiais')}
+          role="tab"
+          aria-selected={activeTab === 'materiais'}
+          aria-controls="tab-content"
+        >
+          Materiais
+        </button>
+        <button 
+          className={activeTab === 'progresso' ? 'active' : ''}
+          onClick={() => setActiveTab('progresso')}
+          role="tab"
+          aria-selected={activeTab === 'progresso'}
+          aria-controls="tab-content"
+        >
+          Progresso dos Alunos
+        </button>
+        <button 
+          className={activeTab === 'lixeira' ? 'active' : ''}
+          onClick={() => setActiveTab('lixeira')}
+          role="tab"
+          aria-selected={activeTab === 'lixeira'}
+          aria-controls="tab-content"
+        >
+          Lixeira
+        </button>
+        <button 
+          className={activeTab === 'alunos' ? 'active' : ''}
+          onClick={() => setActiveTab('alunos')}
+          role="tab"
+          aria-selected={activeTab === 'alunos'}
+          aria-controls="tab-content"
+        >
+          Perfis dos Alunos
+        </button>
+        <button 
+          className={activeTab === 'perfil' ? 'active' : ''}
+          onClick={() => setActiveTab('perfil')}
+          role="tab"
+          aria-selected={activeTab === 'perfil'}
+          aria-controls="tab-content"
+        >
+          Meu Perfil
+        </button>
       </div>
 
-      {/* Tabs */}
-      <div className="painel-tabs">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`painel-tab${activeTab === tab.id ? ' active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Conteúdo */}
-      <div className="painel-content">
+      <div className="tab-content" role="tabpanel" id="tab-content" aria-labelledby={`tab-${activeTab}`}>
         {renderContent()}
       </div>
     </div>

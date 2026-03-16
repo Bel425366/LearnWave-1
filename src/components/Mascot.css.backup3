@@ -663,11 +663,3 @@
 .mascot-mini .base-shadow {
   display: none;
 }
-
-.mascot-mini .antenna-ball {
-  box-shadow: none;
-}
-
-.mascot-mini .hand {
-  box-shadow: none;
-}
