@@ -52,9 +52,9 @@ class LocalDatabase {
     const users = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
     
     // Admin especial
-    if (email === 'pereiraisabelly585@gmail.com' && tipo === 'administrador') {
+    if (email === 'pereiraisabelly585@gmail.com' && senha === 'adm123' && tipo === 'administrador') {
       return {
-        id: 1,
+        id: 0,
         nome: 'Isabelly Pereira',
         email: 'pereiraisabelly585@gmail.com',
         tipo: 'administrador',

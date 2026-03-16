@@ -37,20 +37,9 @@ function CadastroProfessor({ onNavigate }) {
     setDocumento(e.target.files[0])
   }
 
-  const institutionalDomains = ['.edu.br', '.gov.br', '.escola.', '.colegio.']
-  
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email) && institutionalDomains.some(domain => email.includes(domain))
-  }
-
   const validateForm = () => {
     if (formData.senha !== formData.confirmarSenha) {
       alert('Senhas não coincidem!')
-      return false
-    }
-    if (!validateEmail(formData.email)) {
-      alert('Use um e-mail institucional (.edu.br, .gov.br, etc.)')
       return false
     }
     if (formData.senha.length < 6) {

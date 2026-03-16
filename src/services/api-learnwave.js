@@ -22,36 +22,37 @@ const UsuarioAPI = {
             
             return await response.json();
         } catch (error) {
-            console.error('Erro ao cadastrar no backend:', error);
-            
-            // Usar dados mockados
-            if (USE_MOCK_DATA) {
-                console.log('Usando dados mockados para cadastro...');
-                const novoUsuario = {
-                    id: mockData.usuarios.length + 1,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    senha: usuario.senha,
-                    tipo: usuario.tipoUsuario?.toLowerCase() || usuario.tipo?.toLowerCase(),
-                    status_verificacao: 'aprovado',
-                    area_ensino: usuario.areaEnsino,
-                    formacao: usuario.formacao,
-                    experiencia: usuario.experiencia,
-                    data_criacao: new Date().toISOString()
-                };
-                
-                mockData.usuarios.push(novoUsuario);
-                
-                return {
-                    id: novoUsuario.id,
-                    nome: novoUsuario.nome,
-                    email: novoUsuario.email,
-                    tipo: novoUsuario.tipo,
-                    message: 'Usuário cadastrado com sucesso!'
-                };
+            if (!USE_MOCK_DATA) throw error;
+
+            const tipo = (usuario.tipoUsuario || usuario.tipo || '').toLowerCase();
+            const todos = JSON.parse(localStorage.getItem('mock_usuarios') || '[]');
+
+            if (todos.find(u => u.email === usuario.email)) {
+                throw new Error('Este e-mail já está cadastrado.');
             }
-            
-            throw error;
+
+            const novoUsuario = {
+                id: Date.now(),
+                nome: usuario.nome,
+                email: usuario.email,
+                senha: usuario.senha,
+                cpf: usuario.cpf,
+                escola: usuario.escola,
+                telefone: usuario.telefone,
+                tipo,
+                status_verificacao: tipo === 'professor' ? 'pendente' : 'aprovado',
+                area_ensino: usuario.areaEnsino,
+                formacao: usuario.formacao,
+                experiencia: usuario.experiencia,
+                documentoImagem: usuario.documentoUrl || null,
+                documento: 'Documento Comprobatório',
+                data_criacao: new Date().toISOString()
+            };
+
+            todos.push(novoUsuario);
+            localStorage.setItem('mock_usuarios', JSON.stringify(todos));
+
+            return { id: novoUsuario.id, nome: novoUsuario.nome, email: novoUsuario.email, tipo };
         }
     },
 
@@ -59,13 +60,15 @@ const UsuarioAPI = {
     async listar() {
         try {
             const response = await fetch(`${API_BASE}/usuarios`);
-            if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error('Backend indisponível');
             return await response.json();
         } catch (error) {
-            console.error('Erro ao listar:', error);
-            throw error;
+            if (!USE_MOCK_DATA) throw error;
+            const locais = JSON.parse(localStorage.getItem('mock_usuarios') || '[]');
+            return [
+                ...mockData.usuarios.map(u => ({ ...u, tipoUsuario: u.tipo.toUpperCase() })),
+                ...locais.map(u => ({ ...u, tipoUsuario: u.tipo.toUpperCase() }))
+            ];
         }
     },
 
@@ -107,145 +110,105 @@ const UsuarioAPI = {
     // Deletar
     async deletar(id) {
         try {
-            const response = await fetch(`${API_BASE}/usuarios/${id}`, {
-                method: 'DELETE'
-            });
-            return response.ok;
+            const response = await fetch(`${API_BASE}/usuarios/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Backend indisponível');
+            return true;
         } catch (error) {
-            console.error('Erro ao deletar:', error);
-            throw error;
+            if (!USE_MOCK_DATA) throw error;
+            const locais = JSON.parse(localStorage.getItem('mock_usuarios') || '[]');
+            const filtrado = locais.filter(u => u.id !== id);
+            localStorage.setItem('mock_usuarios', JSON.stringify(filtrado));
+            return true;
         }
     },
 
     // Login
     async login(email, senha, tipoUsuario) {
         try {
-            const params = new URLSearchParams({
-                email: email,
-                senha: senha,
-                tipoUsuario: tipoUsuario.toUpperCase()
-            });
-            
-            const response = await fetch(`${API_BASE}/usuarios/login?${params}`, {
-                method: 'POST'
-            });
-            
-            if (!response.ok) {
-                throw new Error('Backend indisponível');
-            }
-            
+            const params = new URLSearchParams({ email, senha, tipoUsuario: tipoUsuario.toUpperCase() });
+            const response = await fetch(`${API_BASE}/usuarios/login?${params}`, { method: 'POST' });
+            if (!response.ok) throw new Error('Backend indisponível');
             return await response.json();
         } catch (error) {
-            console.error('Erro ao fazer login no backend:', error);
-            
-            // Usar dados mockados
-            if (USE_MOCK_DATA) {
-                console.log('Usando dados mockados para login...');
-                const usuario = mockData.usuarios.find(u => 
-                    u.email === email && 
-                    u.senha === senha && 
-                    u.tipo === tipoUsuario.toLowerCase()
-                );
-                
-                if (!usuario) {
-                    throw new Error('Email ou senha incorretos!');
-                }
-                
-                return {
-                    token: 'mock-token-' + usuario.id,
-                    user: {
-                        id: usuario.id,
-                        nome: usuario.nome,
-                        email: usuario.email,
-                        tipo: usuario.tipo,
-                        tipoUsuario: usuario.tipo.toUpperCase(),
-                        statusVerificacao: usuario.status_verificacao,
-                        areaEnsino: usuario.area_ensino,
-                        formacao: usuario.formacao,
-                        experiencia: usuario.experiencia
-                    }
-                };
+            if (!USE_MOCK_DATA) throw error;
+
+            const tipo = tipoUsuario.toLowerCase();
+
+            // Buscar primeiro no localStorage, depois no mock-data.json
+            const locais = JSON.parse(localStorage.getItem('mock_usuarios') || '[]');
+            let usuario = locais.find(u => u.email === email && u.senha === senha && u.tipo === tipo)
+                       || mockData.usuarios.find(u => u.email === email && u.senha === senha && u.tipo === tipo);
+
+            if (!usuario) throw new Error('Email ou senha incorretos!');
+
+            if (usuario.status_verificacao === 'pendente') {
+                throw new Error('Seu cadastro ainda está aguardando aprovação do administrador.');
             }
-            
-            throw error;
+
+            if (usuario.status_verificacao === 'rejeitado') {
+                throw new Error('Seu cadastro foi rejeitado. Entre em contato com o administrador.');
+            }
+
+            return {
+                id: usuario.id,
+                nome: usuario.nome,
+                email: usuario.email,
+                tipo: usuario.tipo,
+                tipoUsuario: usuario.tipo.toUpperCase(),
+                statusVerificacao: usuario.status_verificacao,
+                areaEnsino: usuario.area_ensino,
+                formacao: usuario.formacao,
+                experiencia: usuario.experiencia
+            };
         }
     },
 
     // Listar professores pendentes
     async getPendingTeachers() {
         try {
-            // Tentar diferentes endpoints
-            let response = await fetch(`${API_BASE}/usuarios/professores/pendentes`);
-            
-            if (!response.ok) {
-                // Tentar endpoint alternativo
-                response = await fetch(`${API_BASE}/professores-pendentes`);
-            }
-            
-            if (!response.ok) {
-                // Buscar todos os usuários e filtrar professores pendentes
-                response = await fetch(`${API_BASE}/usuarios`);
-                if (response.ok) {
-                    const usuarios = await response.json();
-                    return usuarios.filter(u => 
-                        (u.tipo === 'professor' || u.tipoUsuario === 'PROFESSOR' || u.tipo_usuario === 'professor') &&
-                        (u.status_verificacao === 'pendente' || u.statusVerificacao === 'PENDENTE')
-                    );
-                }
-            }
-            
-            if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
-            }
-            
-            return await response.json();
+            const response = await fetch(`${API_BASE}/usuarios/professores/pendentes`);
+            if (response.ok) return await response.json();
+            throw new Error('Backend indisponível');
         } catch (error) {
-            console.error('Erro ao buscar professores pendentes:', error);
-            throw error;
+            if (!USE_MOCK_DATA) throw error;
+            const todos = JSON.parse(localStorage.getItem('mock_usuarios') || '[]');
+            return todos.filter(u => u.tipo === 'professor' && u.status_verificacao === 'pendente');
         }
     },
 
     // Aprovar professor
     async approveTeacher(id) {
         try {
-            let response = await fetch(`${API_BASE}/usuarios/${id}/aprovar`, {
-                method: 'PATCH'
-            });
-            
-            if (!response.ok) {
-                // Tentar endpoint alternativo
-                response = await fetch(`${API_BASE}/verificar-professor`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ professorId: id, status: 'APROVADO' })
-                });
-            }
-            
-            if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            const response = await fetch(`${API_BASE}/usuarios/${id}/aprovar`, { method: 'PATCH' });
+            if (response.ok) return true;
+            throw new Error('Backend indisponível');
+        } catch (error) {
+            if (!USE_MOCK_DATA) throw error;
+            const todos = JSON.parse(localStorage.getItem('mock_usuarios') || '[]');
+            const idx = todos.findIndex(u => u.id === id);
+            if (idx !== -1) {
+                todos[idx].status_verificacao = 'aprovado';
+                localStorage.setItem('mock_usuarios', JSON.stringify(todos));
             }
             return true;
-        } catch (error) {
-            console.error('Erro ao aprovar professor:', error);
-            throw error;
         }
     },
 
     // Rejeitar professor
     async rejectTeacher(id) {
         try {
-            console.log('Rejeitando professor ID:', id);
-            const response = await fetch(`${API_BASE}/usuarios/rejeitar-professor?id=${id}`, {
-                method: 'GET'
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            const response = await fetch(`${API_BASE}/usuarios/rejeitar-professor?id=${id}`, { method: 'GET' });
+            if (response.ok) return true;
+            throw new Error('Backend indisponível');
+        } catch (error) {
+            if (!USE_MOCK_DATA) throw error;
+            const todos = JSON.parse(localStorage.getItem('mock_usuarios') || '[]');
+            const idx = todos.findIndex(u => u.id === id);
+            if (idx !== -1) {
+                todos[idx].status_verificacao = 'rejeitado';
+                localStorage.setItem('mock_usuarios', JSON.stringify(todos));
             }
             return true;
-        } catch (error) {
-            console.error('Erro ao rejeitar professor:', error);
-            throw error;
         }
     }
 };

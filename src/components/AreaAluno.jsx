@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Mascot from './Mascot'
 
 function AreaAluno({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
@@ -6,58 +7,33 @@ function AreaAluno({ user, onNavigate }) {
   const [perfilData, setPerfilData] = useState(() => {
     try {
       const saved = localStorage.getItem(`perfil_${user.email}`)
-      return saved ? JSON.parse(saved) : {
-        apelido: user.nome,
-        bio: '',
-        fotoPerfil: null
-      }
+      return saved ? JSON.parse(saved) : { apelido: user.nome, bio: '', fotoPerfil: null }
     } catch {
-      return {
-        apelido: user.nome,
-        bio: '',
-        fotoPerfil: null
-      }
+      return { apelido: user.nome, bio: '', fotoPerfil: null }
     }
   })
   const [progressoAluno, setProgressoAluno] = useState(() => {
     try {
       const saved = localStorage.getItem(`progresso_${user.email}`)
       return saved ? JSON.parse(saved) : {
-        atividadesConcluidas: [],
-        videoaulasAssistidas: [],
-        materiaisBaixados: [],
-        notas: {}
+        atividadesConcluidas: [], videoaulasAssistidas: [], materiaisBaixados: [], notas: {}
       }
     } catch {
-      return {
-        atividadesConcluidas: [],
-        videoaulasAssistidas: [],
-        materiaisBaixados: [],
-        notas: {}
-      }
+      return { atividadesConcluidas: [], videoaulasAssistidas: [], materiaisBaixados: [], notas: {} }
     }
   })
-  
+
   const todasAtividades = (() => {
-    try {
-      return (JSON.parse(localStorage.getItem('atividades')) || []).filter(a => !a.excluido)
-    } catch {
-      return []
-    }
+    try { return (JSON.parse(localStorage.getItem('atividades')) || []).filter(a => !a.excluido) }
+    catch { return [] }
   })()
   const todasVideoaulas = (() => {
-    try {
-      return (JSON.parse(localStorage.getItem('videoaulas')) || []).filter(v => !v.excluido)
-    } catch {
-      return []
-    }
+    try { return (JSON.parse(localStorage.getItem('videoaulas')) || []).filter(v => !v.excluido) }
+    catch { return [] }
   })()
   const todosMateriais = (() => {
-    try {
-      return (JSON.parse(localStorage.getItem('materiais')) || []).filter(m => !m.excluido)
-    } catch {
-      return []
-    }
+    try { return (JSON.parse(localStorage.getItem('materiais')) || []).filter(m => !m.excluido) }
+    catch { return [] }
   })()
 
   useEffect(() => {
@@ -68,14 +44,10 @@ function AreaAluno({ user, onNavigate }) {
     localStorage.setItem(`perfil_${user.email}`, JSON.stringify(perfilData))
   }, [perfilData, user.email])
 
-  const abrirAtividade = (atividade) => {
-    setAtividadeAtual(atividade)
-  }
-
   const enviarAtividade = (resposta) => {
     try {
       const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
-      const novaSubmissao = {
+      submissoes.push({
         id: Date.now(),
         atividadeId: atividadeAtual.id,
         alunoEmail: user.email,
@@ -84,14 +56,12 @@ function AreaAluno({ user, onNavigate }) {
         data: new Date().toLocaleString(),
         status: 'pendente',
         nota: null
-      }
-      submissoes.push(novaSubmissao)
+      })
       localStorage.setItem('submissoes', JSON.stringify(submissoes))
-    } catch (error) {
+    } catch {
       alert('Erro ao enviar atividade. Tente novamente.')
       return
     }
-    
     setProgressoAluno(prev => ({
       ...prev,
       atividadesConcluidas: [...prev.atividadesConcluidas, atividadeAtual.id]
@@ -105,7 +75,6 @@ function AreaAluno({ user, onNavigate }) {
       ...prev,
       videoaulasAssistidas: [...prev.videoaulasAssistidas, videoId]
     }))
-    alert('Videoaula marcada como assistida!')
   }
 
   const baixarMaterial = (materialId) => {
@@ -113,205 +82,294 @@ function AreaAluno({ user, onNavigate }) {
       ...prev,
       materiaisBaixados: [...prev.materiaisBaixados, materialId]
     }))
-    alert('Material baixado!')
   }
 
   const salvarPerfil = async (novosDados) => {
     try {
-      // Salvar no banco de dados
       const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...user,
-          nome: novosDados.apelido,
-          bio: novosDados.bio,
-          fotoPerfil: novosDados.fotoPerfil
-        })
+        body: JSON.stringify({ ...user, nome: novosDados.apelido, bio: novosDados.bio, fotoPerfil: novosDados.fotoPerfil })
       })
-      
-      if (response.ok) {
-        setPerfilData(novosDados)
-        alert('Perfil atualizado com sucesso!')
-        window.dispatchEvent(new Event('storage'))
-      } else {
-        throw new Error('Erro ao salvar no servidor')
-      }
-    } catch (error) {
-      console.error('Erro ao salvar perfil:', error)
-      // Salvar apenas no localStorage como fallback
+      if (!response.ok) throw new Error()
       setPerfilData(novosDados)
-      alert('Perfil atualizado localmente. Erro ao sincronizar com servidor.')
+      alert('Perfil atualizado com sucesso!')
+      window.dispatchEvent(new Event('storage'))
+    } catch {
+      setPerfilData(novosDados)
+      alert('Perfil atualizado localmente.')
       window.dispatchEvent(new Event('storage'))
     }
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'atividades':
-        return (
-          <div className="atividades-disponiveis">
-            <h3>Todas as Atividades Disponíveis</h3>
-            {todasAtividades.filter(a => a.status === 'Publicada').map(atividade => {
-              const concluida = progressoAluno.atividadesConcluidas.includes(atividade.id)
-              const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
-              const minhaSubmissao = submissoes.find(s => s.atividadeId === atividade.id && s.alunoEmail === user.email)
-              
-              return (
-                <div key={atividade.id} className="atividade-card">
-                  <h4>{atividade.titulo}</h4>
-                  <p>Área: {atividade.area}</p>
-                  <p>{atividade.descricao}</p>
-                  {minhaSubmissao ? (
-                    <div>
-                      <span className={`status ${minhaSubmissao.status}`}>
-                        {minhaSubmissao.status === 'pendente' ? 'Aguardando Correção' : 'Corrigida'}
-                      </span>
-                      {minhaSubmissao.nota && <span className="nota">Nota: {minhaSubmissao.nota}</span>}
-                    </div>
-                  ) : (
-                    <button onClick={() => abrirAtividade(atividade)}>Fazer Atividade</button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )
-      case 'videoaulas':
-        return (
-          <div className="videoaulas-disponiveis">
-            <h3>Todas as Videoaulas Disponíveis</h3>
-            {todasVideoaulas.map(video => {
-              const assistida = progressoAluno.videoaulasAssistidas.includes(video.id)
-              return (
-                <div key={video.id} className="video-card">
-                  <h4>{video.titulo}</h4>
-                  <p>Área: {video.area}</p>
-                  <p>Duração: {video.duracao}</p>
-                  <p>URL: <a href={video.url} target="_blank" rel="noopener noreferrer">{video.url}</a></p>
-                  {assistida ? (
-                    <span className="status assistida">Assistida</span>
-                  ) : (
-                    <button onClick={() => marcarVideoaulaAssistida(video.id)}>Assistir</button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )
-      case 'materiais':
-        return (
-          <div className="materiais-disponiveis">
-            <h3>Todos os Materiais Disponíveis</h3>
-            {todosMateriais.map(material => {
-              const baixado = progressoAluno.materiaisBaixados.includes(material.id)
-              return (
-                <div key={material.id} className="material-card">
-                  <h4>{material.titulo}</h4>
-                  <p>Área: {material.area}</p>
-                  <p>Tipo: {material.tipo} | Arquivo: {material.arquivo}</p>
-                  {baixado ? (
-                    <span className="status baixado">Baixado</span>
-                  ) : (
-                    <button onClick={() => baixarMaterial(material.id)}>Baixar</button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )
-      case 'progresso':
-        const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
-        const minhasSubmissoes = submissoes.filter(s => s.alunoEmail === user.email && s.nota !== null)
-        const notaMedia = minhasSubmissoes.length > 0 
-          ? (minhasSubmissoes.reduce((acc, s) => acc + s.nota, 0) / minhasSubmissoes.length).toFixed(1)
-          : 0
-        return (
-          <div className="meu-progresso">
-            <h3>Meu Progresso</h3>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <h4>Atividades Concluídas</h4>
-                <p>{progressoAluno.atividadesConcluidas.length}</p>
-              </div>
-              <div className="stat-card">
-                <h4>Videoaulas Assistidas</h4>
-                <p>{progressoAluno.videoaulasAssistidas.length}</p>
-              </div>
-              <div className="stat-card">
-                <h4>Materiais Baixados</h4>
-                <p>{progressoAluno.materiaisBaixados.length}</p>
-              </div>
-              <div className="stat-card">
-                <h4>Nota Média</h4>
-                <p>{notaMedia}</p>
-              </div>
-            </div>
-            <div className="detalhes-progresso">
-              <h4>Atividades Realizadas:</h4>
-              {minhasSubmissoes.map(submissao => {
-                const atividade = todasAtividades.find(a => a.id === submissao.atividadeId)
-                return atividade ? (
-                  <div key={submissao.id} className="atividade-concluida">
-                    <span>{atividade.titulo}</span>
-                    <span>Nota: {submissao.nota || 'Pendente'}</span>
-                  </div>
-                ) : null
-              })}
-            </div>
-          </div>
-        )
-      case 'perfil':
-        return <PerfilAluno perfilData={perfilData} onSalvar={salvarPerfil} user={user} />
-      default:
-        return null
-    }
+  const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
+  const minhasSubmissoes = submissoes.filter(s => s.alunoEmail === user.email && s.nota !== null)
+  const notaMedia = minhasSubmissoes.length > 0
+    ? (minhasSubmissoes.reduce((acc, s) => acc + s.nota, 0) / minhasSubmissoes.length).toFixed(1)
+    : '—'
+
+  const mensagensPorAba = {
+    atividades: 'Vamos lá! Você consegue fazer todas as atividades!',
+    videoaulas: 'Hora de aprender algo novo. Bora assistir!',
+    materiais: 'Baixe os materiais e estude no seu ritmo!',
+    progresso: `Olha quanto você já evoluiu! Continue assim!`,
+    perfil: 'Personalize seu perfil e mostre quem você é!',
   }
+
+  const tabs = [
+    { id: 'atividades', label: 'Atividades', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> },
+    { id: 'videoaulas', label: 'Videoaulas', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> },
+    { id: 'materiais', label: 'Materiais', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
+    { id: 'progresso', label: 'Progresso', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+    { id: 'perfil', label: 'Perfil', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+  ]
 
   if (atividadeAtual) {
     return <FazerAtividade atividade={atividadeAtual} onEnviar={enviarAtividade} onVoltar={() => setAtividadeAtual(null)} />
   }
 
+  const primeiroNome = (perfilData.apelido || user.nome).split(' ')[0]
+  const iniciais = (perfilData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+
   return (
-    <div className="area-aluno">
-      <h2>Área do Aluno - {user.nome}</h2>
-      
-      <div className="tabs">
-        <button 
-          className={activeTab === 'atividades' ? 'active' : ''}
-          onClick={() => setActiveTab('atividades')}
-        >
-          Atividades
-        </button>
-        <button 
-          className={activeTab === 'videoaulas' ? 'active' : ''}
-          onClick={() => setActiveTab('videoaulas')}
-        >
-          Videoaulas
-        </button>
-        <button 
-          className={activeTab === 'materiais' ? 'active' : ''}
-          onClick={() => setActiveTab('materiais')}
-        >
-          Materiais
-        </button>
-        <button 
-          className={activeTab === 'progresso' ? 'active' : ''}
-          onClick={() => setActiveTab('progresso')}
-        >
-          Meu Progresso
-        </button>
-        <button 
-          className={activeTab === 'perfil' ? 'active' : ''}
-          onClick={() => setActiveTab('perfil')}
-        >
-          Meu Perfil
-        </button>
+    <div className="painel-novo" style={{ position: 'relative' }}>
+      {/* Hero */}
+      <div className="painel-hero painel-hero--aluno">
+        <div className="painel-hero-avatar">
+          {perfilData.fotoPerfil
+            ? <img src={perfilData.fotoPerfil} alt="foto" />
+            : iniciais}
+        </div>
+        <div className="painel-hero-info">
+          <h2>Olá, {primeiroNome}</h2>
+          <p>{user.email}</p>
+        </div>
+        <div className="painel-hero-stats">
+          <div className="painel-stat">
+            <span className="painel-stat-val">{progressoAluno.atividadesConcluidas.length}</span>
+            <span className="painel-stat-lbl">Atividades</span>
+          </div>
+          <div className="painel-stat">
+            <span className="painel-stat-val">{progressoAluno.videoaulasAssistidas.length}</span>
+            <span className="painel-stat-lbl">Videoaulas</span>
+          </div>
+          <div className="painel-stat">
+            <span className="painel-stat-val">{notaMedia}</span>
+            <span className="painel-stat-lbl">Média</span>
+          </div>
+        </div>
       </div>
 
-      <div className="tab-content">
-        {renderContent()}
+      {/* Tabs */}
+      <div className="painel-tabs">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`painel-tab${activeTab === tab.id ? ' active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.icon}
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </div>
+
+      {/* Mascote flutuante */}
+      <div className="mascot-flutuante">
+        <Mascot message={mensagensPorAba[activeTab]} position="right" />
+      </div>
+
+      {/* Conteúdo */}
+      <div className="painel-content">
+        {activeTab === 'atividades' && (
+          <TabAtividades
+            atividades={todasAtividades}
+            progressoAluno={progressoAluno}
+            userEmail={user.email}
+            onAbrirAtividade={setAtividadeAtual}
+          />
+        )}
+        {activeTab === 'videoaulas' && (
+          <TabVideoaulas
+            videoaulas={todasVideoaulas}
+            progressoAluno={progressoAluno}
+            onMarcar={marcarVideoaulaAssistida}
+          />
+        )}
+        {activeTab === 'materiais' && (
+          <TabMateriais
+            materiais={todosMateriais}
+            progressoAluno={progressoAluno}
+            onBaixar={baixarMaterial}
+          />
+        )}
+        {activeTab === 'progresso' && (
+          <TabProgresso
+            progressoAluno={progressoAluno}
+            todasAtividades={todasAtividades}
+            minhasSubmissoes={minhasSubmissoes}
+            notaMedia={notaMedia}
+          />
+        )}
+        {activeTab === 'perfil' && (
+          <PerfilAluno perfilData={perfilData} onSalvar={salvarPerfil} user={user} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+function TabAtividades({ atividades, progressoAluno, userEmail, onAbrirAtividade }) {
+  const publicadas = atividades.filter(a => a.status === 'Publicada')
+  const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
+
+  if (publicadas.length === 0) {
+    return <EstadoVazio mensagem="Nenhuma atividade disponível no momento." />
+  }
+
+  return (
+    <div className="aluno-grid">
+      {publicadas.map(atividade => {
+        const concluida = progressoAluno.atividadesConcluidas.includes(atividade.id)
+        const minhaSubmissao = submissoes.find(s => s.atividadeId === atividade.id && s.alunoEmail === userEmail)
+        return (
+          <div key={atividade.id} className="aluno-card">
+            <div className="aluno-card-header">
+              <span className="aluno-card-tag">{atividade.area}</span>
+              {minhaSubmissao && (
+                <span className={`aluno-badge ${minhaSubmissao.status === 'pendente' ? 'badge-pendente' : 'badge-ok'}`}>
+                  {minhaSubmissao.status === 'pendente' ? 'Aguardando correção' : 'Corrigida'}
+                </span>
+              )}
+            </div>
+            <h3 className="aluno-card-title">{atividade.titulo}</h3>
+            <p className="aluno-card-desc">{atividade.descricao}</p>
+            {minhaSubmissao ? (
+              minhaSubmissao.nota && (
+                <div className="aluno-nota">Nota: <strong>{minhaSubmissao.nota}</strong></div>
+              )
+            ) : (
+              <button className="aluno-btn" onClick={() => onAbrirAtividade(atividade)}>
+                Fazer atividade
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function TabVideoaulas({ videoaulas, progressoAluno, onMarcar }) {
+  if (videoaulas.length === 0) {
+    return <EstadoVazio mensagem="Nenhuma videoaula disponível no momento." />
+  }
+
+  return (
+    <div className="aluno-grid">
+      {videoaulas.map(video => {
+        const assistida = progressoAluno.videoaulasAssistidas.includes(video.id)
+        return (
+          <div key={video.id} className="aluno-card">
+            <div className="aluno-card-header">
+              <span className="aluno-card-tag">{video.area}</span>
+              {assistida && <span className="aluno-badge badge-ok">Assistida</span>}
+            </div>
+            <h3 className="aluno-card-title">{video.titulo}</h3>
+            {video.duracao && <p className="aluno-card-meta">Duração: {video.duracao}</p>}
+            <div className="aluno-card-actions">
+              <a href={video.url} target="_blank" rel="noopener noreferrer" className="aluno-btn aluno-btn-outline">
+                Assistir
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+              {!assistida && (
+                <button className="aluno-btn" onClick={() => onMarcar(video.id)}>
+                  Marcar como assistida
+                </button>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function TabMateriais({ materiais, progressoAluno, onBaixar }) {
+  if (materiais.length === 0) {
+    return <EstadoVazio mensagem="Nenhum material disponível no momento." />
+  }
+
+  return (
+    <div className="aluno-grid">
+      {materiais.map(material => {
+        const baixado = progressoAluno.materiaisBaixados.includes(material.id)
+        return (
+          <div key={material.id} className="aluno-card">
+            <div className="aluno-card-header">
+              <span className="aluno-card-tag">{material.area}</span>
+              {baixado && <span className="aluno-badge badge-ok">Baixado</span>}
+            </div>
+            <h3 className="aluno-card-title">{material.titulo}</h3>
+            <p className="aluno-card-meta">{material.tipo} · {material.arquivo}</p>
+            {!baixado && (
+              <button className="aluno-btn" onClick={() => onBaixar(material.id)}>
+                Baixar
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaMedia }) {
+  const stats = [
+    { val: progressoAluno.atividadesConcluidas.length, lbl: 'Atividades concluídas' },
+    { val: progressoAluno.videoaulasAssistidas.length, lbl: 'Videoaulas assistidas' },
+    { val: progressoAluno.materiaisBaixados.length, lbl: 'Materiais baixados' },
+    { val: notaMedia, lbl: 'Nota média' },
+  ]
+
+  return (
+    <div>
+      <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+        {stats.map((s, i) => (
+          <div key={i} className="stat-card">
+            <h4>{s.lbl}</h4>
+            <p>{s.val}</p>
+          </div>
+        ))}
+      </div>
+
+      {minhasSubmissoes.length > 0 && (
+        <div className="detalhes-progresso">
+          <h4>Atividades corrigidas</h4>
+          {minhasSubmissoes.map(submissao => {
+            const atividade = todasAtividades.find(a => a.id === submissao.atividadeId)
+            return atividade ? (
+              <div key={submissao.id} className="atividade-concluida">
+                <span>{atividade.titulo}</span>
+                <span>Nota: {submissao.nota}</span>
+              </div>
+            ) : null
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function EstadoVazio({ mensagem }) {
+  return (
+    <div className="no-activities">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.4, marginBottom: '1rem' }}>
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p style={{ margin: 0 }}>{mensagem}</p>
     </div>
   )
 }
@@ -320,62 +378,41 @@ function PerfilAluno({ perfilData, onSalvar, user }) {
   const [formData, setFormData] = useState(perfilData || { apelido: '', bio: '', fotoPerfil: null })
   const [previewFoto, setPreviewFoto] = useState(perfilData?.fotoPerfil || null)
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
   const handleFotoChange = (e) => {
     const file = e.target.files[0]
     if (file) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        const fotoBase64 = e.target.result
-        setPreviewFoto(fotoBase64)
-        setFormData({ ...formData, fotoPerfil: fotoBase64 })
+        setPreviewFoto(e.target.result)
+        setFormData(prev => ({ ...prev, fotoPerfil: e.target.result }))
       }
       reader.readAsDataURL(file)
     }
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSalvar(formData)
-  }
+  const iniciais = (formData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
   return (
     <div className="perfil-aluno">
-      <h3>Meu Perfil</h3>
-      <form onSubmit={handleSubmit} className="form-perfil">
+      <form onSubmit={(e) => { e.preventDefault(); onSalvar(formData) }} className="form-perfil">
         <div className="foto-perfil-section">
-          <div className="foto-preview">
-            {previewFoto ? (
-              <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
-            ) : (
-              <div className="foto-placeholder">
-                <span>📷</span>
-                <p>Adicionar foto</p>
-              </div>
-            )}
+          <div className="foto-preview" style={{ width: 100, height: 100, fontSize: '1.8rem', fontWeight: 700, color: 'white', background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
+            {previewFoto
+              ? <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
+              : iniciais}
           </div>
-          <input
-            type="file"
-            id="fotoPerfil"
-            accept="image/*"
-            onChange={handleFotoChange}
-            className="foto-input"
-          />
+          <input type="file" id="fotoPerfil" accept="image/*" onChange={handleFotoChange} className="foto-input" />
           <label htmlFor="fotoPerfil" className="btn-foto">
-            {previewFoto ? 'Alterar Foto' : 'Adicionar Foto'}
+            {previewFoto ? 'Alterar foto' : 'Adicionar foto'}
           </label>
         </div>
 
         <div className="campo-perfil">
-          <label>Apelido:</label>
+          <label>Apelido</label>
           <input
             type="text"
-            name="apelido"
             value={formData.apelido}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, apelido: e.target.value })}
             placeholder="Como você gostaria de ser chamado?"
             maxLength="30"
             required
@@ -383,11 +420,10 @@ function PerfilAluno({ perfilData, onSalvar, user }) {
         </div>
 
         <div className="campo-perfil">
-          <label>Bio:</label>
+          <label>Bio</label>
           <textarea
-            name="bio"
             value={formData.bio}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             placeholder="Conte um pouco sobre você..."
             maxLength="200"
             rows="4"
@@ -395,11 +431,9 @@ function PerfilAluno({ perfilData, onSalvar, user }) {
           <small>{formData.bio?.length || 0}/200 caracteres</small>
         </div>
 
-        <button type="submit" className="btn-salvar-perfil">
-          Salvar Perfil
-        </button>
+        <button type="submit" className="btn-salvar-perfil">Salvar perfil</button>
       </form>
-      
+
       {user && <AlterarSenha userEmail={user.email} />}
       {user && <DesativarConta user={user} onDesativar={() => window.location.reload()} />}
     </div>
@@ -425,10 +459,8 @@ function FazerAtividade({ atividade, onEnviar, onVoltar }) {
       <div className="atividade-container">
         <h2>{atividade.titulo}</h2>
         <p><strong>Área:</strong> {atividade.area}</p>
-        <div className="descricao-atividade">
-          <p>{atividade.descricao}</p>
-        </div>
-        
+        <div className="descricao-atividade"><p>{atividade.descricao}</p></div>
+
         {atividade.tipo === 'multipla_escolha' ? (
           <div className="opcoes-resposta">
             <h4>Escolha a alternativa correta:</h4>
@@ -456,98 +488,48 @@ function FazerAtividade({ atividade, onEnviar, onVoltar }) {
             />
           </div>
         )}
-        
-        <button onClick={handleEnviar} className="btn-enviar">Enviar Atividade</button>
+
+        <button onClick={handleEnviar} className="btn-enviar">Enviar atividade</button>
       </div>
     </div>
   )
 }
 
 function AlterarSenha({ userEmail }) {
-  const [senhaData, setSenhaData] = useState({
-    senhaAtual: '',
-    novaSenha: '',
-    confirmarSenha: ''
-  })
-
-  const handleChange = (e) => {
-    setSenhaData({ ...senhaData, [e.target.name]: e.target.value })
-  }
+  const [senhaData, setSenhaData] = useState({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    
-    if (senhaData.novaSenha !== senhaData.confirmarSenha) {
-      alert('Nova senha e confirmação não coincidem!')
-      return
-    }
-
-    if (senhaData.novaSenha.length < 6) {
-      alert('Nova senha deve ter pelo menos 6 caracteres!')
-      return
-    }
-
+    if (senhaData.novaSenha !== senhaData.confirmarSenha) { alert('Senhas não coincidem!'); return }
+    if (senhaData.novaSenha.length < 6) { alert('Nova senha deve ter pelo menos 6 caracteres!'); return }
     try {
       const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
-      const usuarioIndex = usuarios.findIndex(u => u.email === userEmail)
-      
-      if (usuarioIndex === -1) {
-        alert('Usuário não encontrado!')
-        return
-      }
-
-      if (usuarios[usuarioIndex].senha !== senhaData.senhaAtual) {
-        alert('Senha atual incorreta!')
-        return
-      }
-
-      usuarios[usuarioIndex].senha = senhaData.novaSenha
+      const idx = usuarios.findIndex(u => u.email === userEmail)
+      if (idx === -1) { alert('Usuário não encontrado!'); return }
+      if (usuarios[idx].senha !== senhaData.senhaAtual) { alert('Senha atual incorreta!'); return }
+      usuarios[idx].senha = senhaData.novaSenha
       localStorage.setItem('learnwave_users', JSON.stringify(usuarios))
-      
       setSenhaData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
       alert('Senha alterada com sucesso!')
-    } catch (error) {
+    } catch {
       alert('Erro ao alterar senha. Tente novamente.')
     }
   }
 
   return (
     <div className="alterar-senha-section">
-      <h4>🔒 Alterar Senha</h4>
+      <h4>Alterar senha</h4>
       <form onSubmit={handleSubmit} className="form-senha">
         <div className="campo-perfil">
-          <input
-            type="password"
-            name="senhaAtual"
-            value={senhaData.senhaAtual}
-            onChange={handleChange}
-            placeholder="Senha atual"
-            required
-          />
+          <input type="password" value={senhaData.senhaAtual} onChange={(e) => setSenhaData({ ...senhaData, senhaAtual: e.target.value })} placeholder="Senha atual" required />
         </div>
         <div className="campo-perfil">
-          <input
-            type="password"
-            name="novaSenha"
-            value={senhaData.novaSenha}
-            onChange={handleChange}
-            placeholder="Nova senha (mín. 6 caracteres)"
-            required
-          />
+          <input type="password" value={senhaData.novaSenha} onChange={(e) => setSenhaData({ ...senhaData, novaSenha: e.target.value })} placeholder="Nova senha (mín. 6 caracteres)" required />
         </div>
         <div className="campo-perfil">
-          <input
-            type="password"
-            name="confirmarSenha"
-            value={senhaData.confirmarSenha}
-            onChange={handleChange}
-            placeholder="Confirmar nova senha"
-            required
-          />
+          <input type="password" value={senhaData.confirmarSenha} onChange={(e) => setSenhaData({ ...senhaData, confirmarSenha: e.target.value })} placeholder="Confirmar nova senha" required />
         </div>
-        <button type="submit" className="btn-alterar-senha">
-          Alterar Senha
-        </button>
+        <button type="submit" className="btn-alterar-senha">Alterar senha</button>
       </form>
     </div>
   )
@@ -556,57 +538,27 @@ function AlterarSenha({ userEmail }) {
 function DesativarConta({ user, onDesativar }) {
   const handleDesativar = async () => {
     const confirmacao = window.confirm(
-      'Tem certeza que deseja desativar sua conta?\n\n' +
-      'Após desativar:\n' +
-      '• Você será deslogado imediatamente\n' +
-      '• Não poderá mais fazer login nesta conta\n' +
-      '• Precisará se cadastrar novamente se quiser voltar\n\n' +
-      'Esta ação não pode ser desfeita!'
+      'Tem certeza que deseja desativar sua conta?\n\nEsta ação não pode ser desfeita!'
     )
-    
     if (confirmacao) {
       try {
-        const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}/status?status=inativo`, {
-          method: 'PATCH'
-        })
-        
+        const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
         if (response.ok) {
           alert('Conta desativada com sucesso!')
           localStorage.clear()
           onDesativar()
-        } else {
-          throw new Error('Erro ao desativar conta')
-        }
-      } catch (error) {
-        console.error('Erro:', error)
+        } else throw new Error()
+      } catch {
         alert('Erro ao desativar conta. Tente novamente.')
       }
     }
   }
 
   return (
-    <div className="desativar-conta-section" style={{ marginTop: '30px', padding: '20px', borderTop: '1px solid #ddd' }}>
-      <h4 style={{ marginBottom: '10px' }}>Configurações da Conta</h4>
-      <p style={{ marginBottom: '15px' }}>Se você não deseja mais usar esta conta, pode desativá-la permanentemente.</p>
-      <button 
-        onClick={handleDesativar} 
-        className="btn-desativar-conta"
-        style={{
-          backgroundColor: '#6c757d',
-          color: 'white',
-          border: 'none',
-          padding: '12px 24px',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: '500',
-          transition: 'background-color 0.3s'
-        }}
-        onMouseOver={(e) => e.target.style.backgroundColor = '#5a6268'}
-        onMouseOut={(e) => e.target.style.backgroundColor = '#6c757d'}
-      >
-        Desativar Conta
-      </button>
+    <div className="desativar-conta-section" style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+      <h4 style={{ marginBottom: '0.5rem' }}>Configurações da conta</h4>
+      <p style={{ marginBottom: '1rem', fontSize: '0.9rem' }}>Se não deseja mais usar esta conta, pode desativá-la permanentemente.</p>
+      <button onClick={handleDesativar} className="btn-desativar-conta">Desativar conta</button>
     </div>
   )
 }

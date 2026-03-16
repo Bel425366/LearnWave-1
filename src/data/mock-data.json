@@ -1,15 +1,24 @@
 {
   "usuarios": [
     {
+      "id": 0,
+      "nome": "Isabelly Pereira",
+      "email": "pereiraisabelly585@gmail.com",
+      "senha": "adm123",
+      "tipo": "administrador",
+      "status_verificacao": "aprovado",
+      "data_criacao": "2024-01-01T00:00:00Z"
+    },
+    {
       "id": 1,
       "nome": "Ana Silva",
       "email": "aluno@teste.com",
       "senha": "123456",
       "tipo": "aluno",
       "status_verificacao": "aprovado",
-      "area_ensino": null,
-      "formacao": null,
-      "experiencia": null,
+      "area_ensino": "",
+      "formacao": "",
+      "experiencia": "",
       "data_criacao": "2024-01-15T10:00:00Z"
     },
     {
@@ -23,21 +32,12 @@
       "telefone": "(11) 98765-4321",
       "status_verificacao": "aprovado",
       "area_ensino": "Gramática",
-      "formacao": "Letras - USP",
+      "formacao": "Letras",
       "experiencia": "5 anos",
-      "data_criacao": "2024-01-10T10:00:00Z"
-    },
-    {
-      "id": 3,
-      "nome": "Isabelly Pereira",
-      "email": "pereiraisabelly585@gmail.com",
-      "senha": "admin123",
-      "tipo": "administrador",
-      "status_verificacao": "aprovado",
-      "area_ensino": null,
-      "formacao": null,
-      "experiencia": null,
-      "data_criacao": "2024-01-01T10:00:00Z"
+      "data_criacao": "2023-11-20T14:30:00Z"
     }
-  ]
+  ],
+  "materiais": [],
+  "atividades": [],
+  "videoaulas": []
 }
