@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react'
-import { database } from '../utils/database'
 import Modal from './Modal'
 
 const AREAS = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Texto', 'Ortografia', 'Fonética', 'Semântica', 'Estilística', 'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação']

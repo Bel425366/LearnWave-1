@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { localDB } from '../services/localDatabase'
 import UsuarioAPI from '../services/api-learnwave'
 import VerificacaoProfessores from './VerificacaoProfessores'
 import CrudUsuarios from './CrudUsuarios'

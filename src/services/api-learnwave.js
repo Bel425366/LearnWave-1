@@ -1,5 +1,4 @@
 // API LearnWave - Funções para conectar com o backend
-import { localDB } from './localDatabase';
 import mockData from '../data/mock-data.json';
 
 const API_BASE = 'http://localhost:8080/api';
