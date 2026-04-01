@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { userService } from '../services/userService'
+import UsuarioAPI from '../services/api-learnwave'
 import './GerenciarUsuarios.css'
 
 function GerenciarUsuarios() {
@@ -13,7 +13,7 @@ function GerenciarUsuarios() {
 
   const carregarUsuarios = async () => {
     try {
-      const data = await userService.listarUsuarios()
+      const data = await UsuarioAPI.listar()
       setUsuarios(data)
     } catch (error) {
       alert('Erro ao carregar usuários: ' + error.message)
@@ -27,7 +27,7 @@ function GerenciarUsuarios() {
   const handleDelete = async (id) => {
     if (confirm('Tem certeza que deseja deletar este usuário?')) {
       try {
-        await userService.deletar(id)
+        await UsuarioAPI.deletar(id)
         alert('Usuário deletado com sucesso!')
         carregarUsuarios()
       } catch (error) {
@@ -64,7 +64,7 @@ function GerenciarUsuarios() {
                 <td>{usuario.id}</td>
                 <td>{usuario.nome}</td>
                 <td>{usuario.email}</td>
-                <td>{usuario.tipoUsuario}</td>
+                <td>{usuario.tipoUsuario || usuario.tipo}</td>
                 <td>
                   <button onClick={() => handleDelete(usuario.id)}>
                     Deletar

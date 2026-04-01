@@ -17,13 +17,22 @@ function Login({ userType, onLogin, onNavigate }) {
         const usuario = await UsuarioAPI.login(email.trim(), senha.trim(), tipoUsuario)
         setMascotMessage(`Que bom te ver, ${usuario.nome.split(' ')[0]}!`)
         onLogin(usuario)
-        const tipo = usuario.tipoUsuario?.toLowerCase() || userType
+        const tipo = (usuario.tipoUsuario || usuario.tipo || userType).toLowerCase()
         if (tipo === 'aluno') onNavigate('area-aluno')
         else if (tipo === 'professor') onNavigate('painel-professor')
         else if (tipo === 'administrador') onNavigate('painel-admin')
       } catch (error) {
-        setMascotMessage('Hmm, algo deu errado. Confere seus dados!')
-        alert(error.message)
+        const msg = error.message || ''
+        if (msg.includes('aguardando aprova')) {
+          setMascotMessage('Seu cadastro ainda está sendo analisado!')
+          alert('Seu cadastro ainda está aguardando aprovação do administrador.')
+        } else if (msg.includes('reprovado') || msg.includes('rejeitado')) {
+          setMascotMessage('Infelizmente seu cadastro foi reprovado.')
+          alert('Seu cadastro foi reprovado pelo administrador. Entre em contato para mais informações.')
+        } else {
+          setMascotMessage('Hmm, algo deu errado. Confere seus dados!')
+          alert(msg || 'Email ou senha incorretos!')
+        }
       }
     }
   }

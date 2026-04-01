@@ -2,21 +2,32 @@
 import mockData from '../data/mock-data.json';
 
 const API_BASE = 'http://localhost:8080/api';
-const USE_MOCK_DATA = true; // Ativar dados mockados quando backend não estiver disponível
+const USE_MOCK_DATA = false; // Ativar dados mockados quando backend não estiver disponível
 
 // USUÁRIOS
 const UsuarioAPI = {
     // Cadastrar
     async cadastrar(usuario) {
         try {
+            const payload = {
+                nome: usuario.nome,
+                email: usuario.email,
+                senha: usuario.senha,
+                tipoUsuario: (usuario.tipoUsuario || usuario.tipo || '').toUpperCase(),
+                areaEnsino: usuario.areaEnsino || null,
+                formacao: usuario.formacao || null,
+                experiencia: usuario.experiencia || null,
+                documentoUrl: usuario.documentoUrl || null
+            };
             const response = await fetch(`${API_BASE}/usuarios`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(usuario)
+                body: JSON.stringify(payload)
             });
             
             if (!response.ok) {
-                throw new Error('Backend indisponível');
+                const msg = await response.text();
+                throw new Error(msg || `Erro ${response.status}`);
             }
             
             return await response.json();
@@ -124,9 +135,15 @@ const UsuarioAPI = {
     // Login
     async login(email, senha, tipoUsuario) {
         try {
-            const params = new URLSearchParams({ email, senha, tipoUsuario: tipoUsuario.toUpperCase() });
-            const response = await fetch(`${API_BASE}/usuarios/login?${params}`, { method: 'POST' });
-            if (!response.ok) throw new Error('Backend indisponível');
+            const response = await fetch(`${API_BASE}/usuarios/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha, tipoUsuario: tipoUsuario.toUpperCase() })
+            });
+            if (!response.ok) {
+                const msg = await response.text();
+                throw new Error(msg || `Erro ${response.status}`);
+            }
             return await response.json();
         } catch (error) {
             if (!USE_MOCK_DATA) throw error;

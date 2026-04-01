@@ -40,15 +40,20 @@ function Cadastro({ userType, onNavigate }) {
       }
       const userData = {
         nome: formData.nome, email: formData.email, senha: formData.senha,
-        tipoUsuario: tipoUsuarioEnum, tipo: tipoUsuarioEnum,
+        tipoUsuario: tipoUsuarioEnum,
         areaEnsino: formData.areaEnsino || null,
         formacao: formData.formacao || null,
         experiencia: formData.experiencia || null,
         documentoUrl
       }
       await UsuarioAPI.cadastrar(userData)
-      setMascotMessage(`Bem-vindo, ${formData.nome.split(' ')[0]}! Agora faça login!`)
-      alert('Cadastro realizado com sucesso! Faça login para continuar.')
+      if (userType === 'professor') {
+        setMascotMessage('Cadastro enviado! Aguarde a aprovação do administrador.')
+        alert('Cadastro realizado! Seu cadastro está aguardando aprovação do administrador. Você receberá acesso assim que for aprovado.')
+      } else {
+        setMascotMessage(`Bem-vindo, ${formData.nome.split(' ')[0]}! Agora faça login!`)
+        alert('Cadastro realizado com sucesso! Faça login para continuar.')
+      }
       onNavigate('login')
     } catch (error) {
       setMascotMessage('Ops, algo deu errado. Tenta de novo!')
