@@ -18,9 +18,9 @@ function Login({ userType, onLogin, onNavigate }) {
         setMascotMessage(`Que bom te ver, ${usuario.nome.split(' ')[0]}!`)
         onLogin(usuario)
         const tipo = (usuario.tipoUsuario || usuario.tipo || userType).toLowerCase()
-        if (tipo === 'aluno') onNavigate('area-aluno')
+        if (tipo === 'aluno' || tipo === 'estudante') onNavigate('area-aluno')
         else if (tipo === 'professor') onNavigate('painel-professor')
-        else if (tipo === 'administrador') onNavigate('painel-admin')
+        else if (tipo === 'admin' || tipo === 'administrador') onNavigate('painel-admin')
       } catch (error) {
         const msg = error.message || ''
         if (msg.includes('aguardando aprova')) {

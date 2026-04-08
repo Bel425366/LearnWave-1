@@ -6,15 +6,27 @@ import Mascot from './Mascot'
 function Cadastro({ userType, onNavigate }) {
   const [formData, setFormData] = useState({
     nome: '', email: '', senha: '', confirmarSenha: '',
+    cpf: '', telefone: '', escola: '',
     areaEnsino: '', formacao: '', experiencia: ''
   })
   const [documento, setDocumento] = useState(null)
+  const [emailProfInvalido, setEmailProfInvalido] = useState(false)
   const [mascotMessage, setMascotMessage] = useState('Crie sua conta e comece sua jornada de aprendizado!')
+
+  const validarEmailProfessor = (email) => {
+    if (!email) return true
+    return /\.(edu\.br|edu|gov\.br|org\.br)$|\.(edu\.br|edu|gov\.br)\b|(professor|escola|colegio|instituto|faculdade|universidade|ifsp|senai|sesi)/i.test(email)
+  }
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (userType === 'professor' && !validarEmailProfessor(formData.email)) {
+      setMascotMessage('Use um email institucional da sua escola!')
+      alert('Use um email institucional (ex: nome@escola.edu.br)')
+      return
+    }
     if (formData.senha !== formData.confirmarSenha) {
       setMascotMessage('As senhas não coincidem, confere aí!')
       alert('Senhas não coincidem!')
@@ -41,6 +53,9 @@ function Cadastro({ userType, onNavigate }) {
       const userData = {
         nome: formData.nome, email: formData.email, senha: formData.senha,
         tipoUsuario: tipoUsuarioEnum,
+        cpf: formData.cpf || null,
+        telefone: formData.telefone || null,
+        escola: formData.escola || null,
         areaEnsino: formData.areaEnsino || null,
         formacao: formData.formacao || null,
         experiencia: formData.experiencia || null,
@@ -97,11 +112,37 @@ function Cadastro({ userType, onNavigate }) {
                   required />
               </div>
               <div className="auth-field">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="seu@email.com" value={formData.email}
-                  onChange={handleChange}
-                  onFocus={() => setMascotMessage('Usa um email que você acessa sempre!')}
+                <label>{userType === 'professor' ? 'Email institucional' : 'Email'}</label>
+                <input type="email" name="email"
+                  placeholder={userType === 'professor' ? 'nome@escola.edu.br' : 'seu@email.com'}
+                  value={formData.email}
+                  onChange={(e) => {
+                    handleChange(e)
+                    if (userType === 'professor') setEmailProfInvalido(e.target.value && !validarEmailProfessor(e.target.value))
+                  }}
+                  onFocus={() => setMascotMessage(userType === 'professor' ? 'Use seu email institucional da escola!' : 'Usa um email que você acessa sempre!')}
                   required />
+                {userType === 'professor' && emailProfInvalido && (
+                  <small style={{ color: '#ff6b6b', fontSize: '0.78rem' }}>
+                    Use um email institucional (ex: nome@escola.edu.br)
+                  </small>
+                )}
+              </div>
+              <div className="auth-field">
+                <label>CPF</label>
+                <input type="text" name="cpf" placeholder="Apenas números" value={formData.cpf}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, '')
+                    if (v.length <= 11) setFormData({ ...formData, cpf: v })
+                  }}
+                  onFocus={() => setMascotMessage('Digite seu CPF só com números!')}
+                  maxLength={11} required />
+              </div>
+              <div className="auth-field">
+                <label>Telefone</label>
+                <input type="tel" name="telefone" placeholder="(opcional)" value={formData.telefone}
+                  onChange={handleChange}
+                  onFocus={() => setMascotMessage('Telefone para contato (opcional)!')} />
               </div>
               <div className="auth-field">
                 <label>Senha</label>
@@ -121,6 +162,13 @@ function Cadastro({ userType, onNavigate }) {
 
               {userType === 'professor' && (
                 <>
+                  <div className="auth-field">
+                    <label>Escola ou instituição</label>
+                    <input type="text" name="escola" placeholder="Nome da escola" value={formData.escola}
+                      onChange={handleChange}
+                      onFocus={() => setMascotMessage('Em qual escola você leciona?')}
+                      required />
+                  </div>
                   <div className="auth-field">
                     <label>Área de Ensino</label>
                     <select name="areaEnsino" value={formData.areaEnsino}

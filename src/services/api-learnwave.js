@@ -14,6 +14,9 @@ const UsuarioAPI = {
                 email: usuario.email,
                 senha: usuario.senha,
                 tipoUsuario: (usuario.tipoUsuario || usuario.tipo || '').toUpperCase(),
+                cpf: usuario.cpf || null,
+                telefone: usuario.telefone || null,
+                escola: usuario.escola || null,
                 areaEnsino: usuario.areaEnsino || null,
                 formacao: usuario.formacao || null,
                 experiencia: usuario.experiencia || null,
@@ -135,10 +138,9 @@ const UsuarioAPI = {
     // Login
     async login(email, senha, tipoUsuario) {
         try {
-            const response = await fetch(`${API_BASE}/usuarios/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, senha, tipoUsuario: tipoUsuario.toUpperCase() })
+            const params = new URLSearchParams({ email, senha, tipoUsuario: tipoUsuario.toUpperCase() });
+            const response = await fetch(`${API_BASE}/usuarios/login?${params}`, {
+                method: 'POST'
             });
             if (!response.ok) {
                 const msg = await response.text();

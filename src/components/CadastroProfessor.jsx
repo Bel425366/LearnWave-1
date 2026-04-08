@@ -34,7 +34,13 @@ function CadastroProfessor({ onNavigate }) {
   }
 
   const handleFileChange = (e) => {
-    setDocumento(e.target.files[0])
+    const file = e.target.files[0]
+    if (file && file.size > 2 * 1024 * 1024) {
+      alert('Arquivo muito grande! Máximo permitido: 2MB')
+      e.target.value = ''
+      return
+    }
+    setDocumento(file)
   }
 
   const validateForm = () => {
