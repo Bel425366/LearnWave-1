@@ -21,7 +21,7 @@ function PainelProfessor({ user, onNavigate }) {
   const renderContent = () => {
     switch (activeTab) {
       case 'atividades':
-        return <GerenciarAtividades atividades={atividades} setAtividades={setAtividades} />
+        return <GerenciarAtividades atividades={atividades} setAtividades={setAtividades} professorId={user.id} />
       case 'videoaulas':
         return <GerenciarVideoaulas videoaulas={videoaulas} setVideoaulas={setVideoaulas} />
       case 'materiais':
@@ -101,18 +101,18 @@ function PainelProfessor({ user, onNavigate }) {
   )
 }
 
-function GerenciarAtividades({ atividades, setAtividades }) {
+function GerenciarAtividades({ atividades, setAtividades, professorId }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa', questoes: [] })
+  const [areasAbertas, setAreasAbertas] = useState({})
+  const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
 
-  const handleSubmit = useCallback((e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault()
-    
-    // Validação para múltipla escolha
+
     if (formData.tipo === 'multipla_escolha') {
       if (formData.questoes && formData.questoes.length > 0) {
-        // Validar múltiplas questões
         for (let i = 0; i < formData.questoes.length; i++) {
           const q = formData.questoes[i]
           if (!q.pergunta || !q.opcaoA || !q.opcaoB || !q.opcaoC || !q.opcaoD || !q.respostaCorreta) {
@@ -121,31 +121,58 @@ function GerenciarAtividades({ atividades, setAtividades }) {
           }
         }
       } else {
-        // Validar questão única
         if (!formData.opcaoA || !formData.opcaoB || !formData.opcaoC || !formData.opcaoD || !formData.respostaCorreta) {
           alert('Para atividades de múltipla escolha, todas as opções e a resposta correta devem ser preenchidas.')
           return
         }
       }
     }
-    
-    let newAtividades
-    if (editingId) {
-      newAtividades = atividades.map(a => a.id === editingId ? { ...a, ...formData } : a)
-    } else {
-      const novaAtividade = { 
-        id: crypto.randomUUID ? crypto.randomUUID() : Date.now(), 
-        ...formData, 
-        excluido: false
-      }
-      newAtividades = [...atividades, novaAtividade]
+
+    const payload = {
+      titulo: formData.titulo,
+      descricao: formData.descricao,
+      area: formData.area,
+      professorId: professorId,
+      conteudo: JSON.stringify({ tipo: formData.tipo, questoes: formData.questoes, opcaoA: formData.opcaoA, opcaoB: formData.opcaoB, opcaoC: formData.opcaoC, opcaoD: formData.opcaoD, respostaCorreta: formData.respostaCorreta }),
+      status: formData.status === 'Publicada' ? 'PUBLICADO' : 'RASCUNHO'
     }
-    setAtividades(newAtividades)
-    localStorage.setItem('atividades', JSON.stringify(newAtividades))
+
+    try {
+      let atividadeSalva
+      if (editingId) {
+        const res = await fetch(`http://localhost:8080/api/atividades/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error(await res.text())
+        atividadeSalva = await res.json()
+        const newAtividades = atividades.map(a => a.id === editingId ? { ...a, ...formData, id: atividadeSalva.id } : a)
+        setAtividades(newAtividades)
+        localStorage.setItem('atividades', JSON.stringify(newAtividades))
+      } else {
+        const res = await fetch('http://localhost:8080/api/atividades', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error(await res.text())
+        atividadeSalva = await res.json()
+        const novaAtividade = { ...formData, id: atividadeSalva.id, excluido: false }
+        const newAtividades = [...atividades, novaAtividade]
+        setAtividades(newAtividades)
+        localStorage.setItem('atividades', JSON.stringify(newAtividades))
+      }
+    } catch (err) {
+      console.error('Erro ao salvar atividade:', err)
+      alert('Erro ao salvar no servidor: ' + err.message)
+      return
+    }
+
     setFormData({ titulo: '', area: '', descricao: '', status: 'Rascunho', tipo: 'dissertativa', questoes: [] })
     setShowForm(false)
     setEditingId(null)
-  }, [editingId, atividades, formData, setAtividades])
+  }, [editingId, atividades, formData, setAtividades, professorId])
 
   const handleEdit = (atividade) => {
     setFormData(atividade)
@@ -159,8 +186,14 @@ function GerenciarAtividades({ atividades, setAtividades }) {
     setDeleteModal({ isOpen: true, id })
   }
 
-  const confirmDelete = () => {
-    const newAtividades = atividades.map(a => a.id === deleteModal.id ? { ...a, excluido: true } : a)
+  const confirmDelete = async () => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/atividades/${deleteModal.id}/lixeira`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+    } catch (err) {
+      console.error('Erro ao mover para lixeira:', err)
+    }
+    const newAtividades = atividades.map(a => a.id === deleteModal.id ? { ...a, situacao: 'lixeira', excluido: true } : a)
     setAtividades(newAtividades)
     localStorage.setItem('atividades', JSON.stringify(newAtividades))
     setDeleteModal({ isOpen: false, id: null })
@@ -222,19 +255,43 @@ function GerenciarAtividades({ atividades, setAtividades }) {
       )}
       
       <div className="atividades-lista">
-        {atividades.filter(a => !a.excluido).map(atividade => (
-          <div key={atividade.id} className="atividade-item">
-            <div>
-              <h4>{atividade.titulo}</h4>
-              <p>Área: {atividade.area} | Status: {atividade.status}</p>
-              <p>{atividade.descricao}</p>
+        {Object.entries(
+          atividades.filter(a => !a.excluido && a.situacao !== 'lixeira').reduce((acc, a) => {
+            acc[a.area] = acc[a.area] || []
+            acc[a.area].push(a)
+            return acc
+          }, {})
+        ).map(([area, atividadesArea]) => {
+          const aberta = areasAbertas[area] === true
+          return (
+            <div key={area} style={{ marginBottom: '0.5rem' }}>
+              <button
+                onClick={() => toggleArea(area)}
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: aberta ? '8px 8px 0 0' : '8px', cursor: 'pointer', color: 'inherit', fontSize: '1rem', fontWeight: 600 }}
+              >
+                <span>{area} <span style={{ fontWeight: 400, opacity: 0.6, fontSize: '0.85rem' }}>({atividadesArea.length})</span></span>
+                <span>{aberta ? '▲' : '▼'}</span>
+              </button>
+              {aberta && (
+                <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '0.5rem' }}>
+                  {atividadesArea.map(atividade => (
+                    <div key={atividade.id} className="atividade-item">
+                      <div>
+                        <h4>{atividade.titulo}</h4>
+                        <p>Status: {atividade.status}</p>
+                        <p>{atividade.descricao}</p>
+                      </div>
+                      <div className="actions">
+                        <button onClick={() => handleEdit(atividade)}>Editar</button>
+                        <button onClick={() => handleDelete(atividade.id)}>Excluir</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="actions">
-              <button onClick={() => handleEdit(atividade)}>Editar</button>
-              <button onClick={() => handleDelete(atividade.id)}>Excluir</button>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
       <Modal
         isOpen={deleteModal.isOpen}
@@ -450,21 +507,34 @@ function AcompanharProgresso() {
     return JSON.parse(localStorage.getItem('submissoes')) || []
   })
   const [usuarios, setUsuarios] = useState([])
+  const [atividades, setAtividades] = useState([])
 
   useEffect(() => {
     const buscarAlunos = async () => {
       try {
         const response = await fetch('http://localhost:8080/api/usuarios/tipo/ALUNO')
-        if (response.ok) {
-          const alunosData = await response.json()
-          setUsuarios(alunosData)
-        }
+        if (response.ok) setUsuarios(await response.json())
       } catch (error) {
         console.error('Erro ao buscar alunos:', error)
       }
     }
+    const buscarAtividades = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/atividades')
+        if (response.ok) setAtividades(await response.json())
+      } catch (error) {
+        console.error('Erro ao buscar atividades:', error)
+      }
+    }
     buscarAlunos()
+    buscarAtividades()
   }, [])
+
+  const atividadesAtivas = atividades.filter(a => a.situacao === 'ativo' || !a.situacao)
+
+  const submissoesValidas = submissoes.filter(s =>
+    atividadesAtivas.some(a => a.id === s.atividadeId)
+  )
 
   const darNota = (submissaoId, nota) => {
     const notaNum = parseFloat(nota)
@@ -473,7 +543,7 @@ function AcompanharProgresso() {
       return
     }
     try {
-      const novasSubmissoes = submissoes.map(s => 
+      const novasSubmissoes = submissoes.map(s =>
         s.id === submissaoId ? { ...s, nota: notaNum, status: 'corrigida' } : s
       )
       setSubmissoes(novasSubmissoes)
@@ -483,7 +553,11 @@ function AcompanharProgresso() {
     }
   }
 
-  const submissoesPendentes = submissoes.filter(s => s.status === 'pendente')
+  const submissoesPendentes = submissoesValidas.filter(s => {
+    if (s.status !== 'pendente') return false
+    const atividade = atividadesAtivas.find(a => a.id === s.atividadeId)
+    return !!atividade
+  })
 
   return (
     <div className="acompanhar-progresso">
@@ -492,9 +566,9 @@ function AcompanharProgresso() {
       <div className="secao-correcao">
         <h4>Alunos Cadastrados ({usuarios.length})</h4>
         {usuarios.map(aluno => {
-          const submissoesAluno = submissoes.filter(s => s.alunoEmail === aluno.email)
-          const notaMedia = submissoesAluno.length > 0 
-            ? (submissoesAluno.filter(s => s.nota).reduce((acc, s) => acc + s.nota, 0) / submissoesAluno.filter(s => s.nota).length).toFixed(1)
+          const submissoesAluno = submissoesValidas.filter(s => s.alunoEmail === aluno.email && s.nota !== null)
+          const notaMedia = submissoesAluno.length > 0
+            ? (submissoesAluno.reduce((acc, s) => acc + s.nota, 0) / submissoesAluno.length).toFixed(1)
             : 0
           
           return (
@@ -514,7 +588,7 @@ function AcompanharProgresso() {
             <div className="submissao-info">
               <h5>Atividade: {submissao.atividadeId}</h5>
               <p><strong>Aluno:</strong> {submissao.alunoNome}</p>
-              <p><strong>Resposta:</strong> {submissao.resposta}</p>
+              {submissao.resposta && <p><strong>Resposta:</strong> {submissao.resposta}</p>}
             </div>
             <div className="correcao-actions">
               <input 
@@ -546,8 +620,25 @@ function AcompanharProgresso() {
 function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materiais, setMateriais }) {
   const [activeType, setActiveType] = useState('atividades')
 
-  const restaurarAtividade = (id) => {
-    const newAtividades = atividades.map(a => a.id === id ? { ...a, excluido: false } : a)
+  const restaurarAtividade = async (id) => {
+    try {
+      await fetch(`http://localhost:8080/api/atividades/${id}/restaurar`, { method: 'PATCH' })
+    } catch (err) {
+      console.error('Erro ao restaurar:', err)
+    }
+    const newAtividades = atividades.map(a => a.id === id ? { ...a, situacao: 'ativo', excluido: false } : a)
+    setAtividades(newAtividades)
+    localStorage.setItem('atividades', JSON.stringify(newAtividades))
+  }
+
+  const excluirPermanente = async (id) => {
+    if (!window.confirm('Tem certeza que deseja excluir permanentemente? Esta ação não pode ser desfeita!')) return
+    try {
+      await fetch(`http://localhost:8080/api/atividades/${id}`, { method: 'DELETE' })
+    } catch (err) {
+      console.error('Erro ao excluir:', err)
+    }
+    const newAtividades = atividades.filter(a => a.id !== id)
     setAtividades(newAtividades)
     localStorage.setItem('atividades', JSON.stringify(newAtividades))
   }
@@ -567,13 +658,16 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
   const renderContent = () => {
     switch (activeType) {
       case 'atividades':
-        return atividades.filter(a => a.excluido).map(atividade => (
+        return atividades.filter(a => a.excluido || a.situacao === 'lixeira').map(atividade => (
           <div key={atividade.id} className="atividade-item">
             <div>
               <h4>{atividade.titulo}</h4>
               <p>Área: {atividade.area} | Status: {atividade.status}</p>
             </div>
-            <button onClick={() => restaurarAtividade(atividade.id)}>Restaurar</button>
+            <div className="actions">
+              <button onClick={() => restaurarAtividade(atividade.id)}>Restaurar</button>
+              <button onClick={() => excluirPermanente(atividade.id)}>Excluir permanentemente</button>
+            </div>
           </div>
         ))
       case 'videoaulas':
@@ -671,27 +765,15 @@ function PerfilProfessor({ user }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
     try {
-      // Atualizar no backend
-      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...user,
-          bio: formData.bio,
-          documentoUrl: formData.fotoPerfil // Salvando foto no documentoUrl
-        })
+      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(formData.apelido)}`, {
+        method: 'PATCH'
       })
-      
-      if (response.ok) {
-        setPerfilData(formData)
-        localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
-        alert('Perfil atualizado com sucesso!')
-        window.dispatchEvent(new Event('storage'))
-      } else {
-        throw new Error('Erro ao salvar no servidor')
-      }
+      if (!response.ok) throw new Error(await response.text())
+      setPerfilData(formData)
+      localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
+      alert('Perfil atualizado com sucesso!')
+      window.dispatchEvent(new Event('storage'))
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error)
       alert('Erro ao salvar perfil: ' + error.message)

@@ -23,10 +23,7 @@ function AreaAluno({ user, onNavigate }) {
     }
   })
 
-  const todasAtividades = (() => {
-    try { return (JSON.parse(localStorage.getItem('atividades')) || []).filter(a => !a.excluido) }
-    catch { return [] }
-  })()
+  const [todasAtividades, setTodasAtividades] = useState([])
   const todasVideoaulas = (() => {
     try { return (JSON.parse(localStorage.getItem('videoaulas')) || []).filter(v => !v.excluido) }
     catch { return [] }
@@ -37,6 +34,16 @@ function AreaAluno({ user, onNavigate }) {
   })()
 
   useEffect(() => {
+    fetch('http://localhost:8080/api/atividades')
+      .then(r => r.json())
+      .then(data => setTodasAtividades(data))
+      .catch(() => {
+        const local = JSON.parse(localStorage.getItem('atividades') || '[]').filter(a => !a.excluido)
+        setTodasAtividades(local)
+      })
+  }, [])
+
+  useEffect(() => {
     localStorage.setItem(`progresso_${user.email}`, JSON.stringify(progressoAluno))
   }, [progressoAluno, user.email])
 
@@ -45,17 +52,39 @@ function AreaAluno({ user, onNavigate }) {
   }, [perfilData, user.email])
 
   const enviarAtividade = (resposta) => {
+    let notaAutomatica = null
+    let statusAutomatico = 'pendente'
+
     try {
       const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
+
+      const conteudo = (() => {
+        try { return atividadeAtual.conteudo ? JSON.parse(atividadeAtual.conteudo) : {} }
+        catch { return {} }
+      })()
+      const tipo = conteudo.tipo || atividadeAtual.tipo || 'dissertativa'
+      const questoes = conteudo.questoes?.length > 0 ? conteudo.questoes : []
+
+      if (tipo === 'multipla_escolha') {
+        if (questoes.length > 0) {
+          const respostasAluno = JSON.parse(resposta)
+          const acertos = questoes.filter((q, i) => respostasAluno[i] === q.respostaCorreta).length
+          notaAutomatica = parseFloat(((acertos / questoes.length) * 10).toFixed(1))
+        } else {
+          notaAutomatica = resposta === conteudo.respostaCorreta ? 10 : 0
+        }
+        statusAutomatico = 'corrigida'
+      }
+
       submissoes.push({
         id: Date.now(),
         atividadeId: atividadeAtual.id,
         alunoEmail: user.email,
         alunoNome: user.nome,
-        resposta,
+        resposta: statusAutomatico === 'pendente' ? resposta : null,
         data: new Date().toLocaleString(),
-        status: 'pendente',
-        nota: null
+        status: statusAutomatico,
+        nota: notaAutomatica
       })
       localStorage.setItem('submissoes', JSON.stringify(submissoes))
     } catch {
@@ -67,7 +96,11 @@ function AreaAluno({ user, onNavigate }) {
       atividadesConcluidas: [...prev.atividadesConcluidas, atividadeAtual.id]
     }))
     setAtividadeAtual(null)
-    alert('Atividade enviada! Aguarde a correção do professor.')
+    if (notaAutomatica !== null) {
+      alert(`Atividade corrigida automaticamente! Sua nota: ${notaAutomatica}`)
+    } else {
+      alert('Atividade enviada! Aguarde a correção do professor.')
+    }
   }
 
   const marcarVideoaulaAssistida = (videoId) => {
@@ -86,24 +119,31 @@ function AreaAluno({ user, onNavigate }) {
 
   const salvarPerfil = async (novosDados) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...user, nome: novosDados.apelido, bio: novosDados.bio, fotoPerfil: novosDados.fotoPerfil })
+      console.log('user.id:', user.id, '| novo nome:', novosDados.apelido)
+      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(novosDados.apelido)}`, {
+        method: 'PATCH'
       })
-      if (!response.ok) throw new Error()
+      console.log('resposta status:', response.status)
+      if (!response.ok) throw new Error(await response.text())
       setPerfilData(novosDados)
       alert('Perfil atualizado com sucesso!')
       window.dispatchEvent(new Event('storage'))
-    } catch {
+    } catch (err) {
+      console.error('Erro ao salvar perfil:', err)
       setPerfilData(novosDados)
-      alert('Perfil atualizado localmente.')
+      alert('Erro ao salvar no servidor: ' + err.message)
       window.dispatchEvent(new Event('storage'))
     }
   }
 
+  const atividadesAtivas = todasAtividades.filter(a => a.situacao === 'ativo' || !a.situacao)
+
   const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
-  const minhasSubmissoes = submissoes.filter(s => s.alunoEmail === user.email && s.nota !== null)
+  const minhasSubmissoes = submissoes.filter(s =>
+    s.alunoEmail === user.email &&
+    s.nota !== null &&
+    atividadesAtivas.some(a => a.id === s.atividadeId)
+  )
   const notaMedia = minhasSubmissoes.length > 0
     ? (minhasSubmissoes.reduce((acc, s) => acc + s.nota, 0) / minhasSubmissoes.length).toFixed(1)
     : '—'
@@ -146,7 +186,7 @@ function AreaAluno({ user, onNavigate }) {
         </div>
         <div className="painel-hero-stats">
           <div className="painel-stat">
-            <span className="painel-stat-val">{progressoAluno.atividadesConcluidas.length}</span>
+            <span className="painel-stat-val">{progressoAluno.atividadesConcluidas.filter(id => atividadesAtivas.some(a => a.id === id)).length}</span>
             <span className="painel-stat-lbl">Atividades</span>
           </div>
           <div className="painel-stat">
@@ -178,7 +218,7 @@ function AreaAluno({ user, onNavigate }) {
       <div className="painel-content">
         {activeTab === 'atividades' && (
           <TabAtividades
-            atividades={todasAtividades}
+            atividades={atividadesAtivas}
             progressoAluno={progressoAluno}
             userEmail={user.email}
             onAbrirAtividade={setAtividadeAtual}
@@ -201,7 +241,7 @@ function AreaAluno({ user, onNavigate }) {
         {activeTab === 'progresso' && (
           <TabProgresso
             progressoAluno={progressoAluno}
-            todasAtividades={todasAtividades}
+            todasAtividades={atividadesAtivas}
             minhasSubmissoes={minhasSubmissoes}
             notaMedia={notaMedia}
           />
@@ -215,39 +255,65 @@ function AreaAluno({ user, onNavigate }) {
 }
 
 function TabAtividades({ atividades, progressoAluno, userEmail, onAbrirAtividade }) {
-  const publicadas = atividades.filter(a => a.status === 'Publicada')
+  const publicadas = atividades.filter(a => (a.status === 'Publicada' || a.status === 'PUBLICADO') && a.situacao !== 'lixeira' && a.situacao !== 'excluido')
   const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
+  const [areasAbertas, setAreasAbertas] = useState({})
 
   if (publicadas.length === 0) {
     return <EstadoVazio mensagem="Nenhuma atividade disponível no momento." />
   }
 
+  const porArea = publicadas.reduce((acc, a) => {
+    acc[a.area] = acc[a.area] || []
+    acc[a.area].push(a)
+    return acc
+  }, {})
+
+  const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
+
   return (
-    <div className="aluno-grid">
-      {publicadas.map(atividade => {
-        const concluida = progressoAluno.atividadesConcluidas.includes(atividade.id)
-        const minhaSubmissao = submissoes.find(s => s.atividadeId === atividade.id && s.alunoEmail === userEmail)
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      {Object.entries(porArea).map(([area, atividadesArea]) => {
+        const aberta = areasAbertas[area] === true
         return (
-          <div key={atividade.id} className="aluno-card">
-            <div className="aluno-card-header">
-              <span className="aluno-card-tag">{atividade.area}</span>
-              {minhaSubmissao && (
-                <span className={`aluno-badge ${minhaSubmissao.status === 'pendente' ? 'badge-pendente' : 'badge-ok'}`}>
-                  {minhaSubmissao.status === 'pendente' ? 'Aguardando correção' : 'Corrigida'}
-                </span>
-              )}
-            </div>
-            <h3 className="aluno-card-title">{atividade.titulo}</h3>
-            <p className="aluno-card-desc">{atividade.descricao}</p>
-            {minhaSubmissao ? (
-              minhaSubmissao.nota && (
-                <div className="aluno-nota">Nota: <strong>{minhaSubmissao.nota}</strong></div>
-              )
-            ) : (
-              <button className="aluno-btn" onClick={() => onAbrirAtividade(atividade)}>
-                Fazer atividade
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </button>
+          <div key={area} className="area-grupo">
+            <button
+              onClick={() => toggleArea(area)}
+              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: aberta ? '8px 8px 0 0' : '8px', cursor: 'pointer', color: 'inherit', fontSize: '1rem', fontWeight: 600 }}
+            >
+              <span>{area} <span style={{ fontWeight: 400, opacity: 0.6, fontSize: '0.85rem' }}>({atividadesArea.length})</span></span>
+              <span>{aberta ? '▲' : '▼'}</span>
+            </button>
+            {aberta && (
+              <div className="aluno-grid" style={{ border: '1px solid rgba(255,255,255,0.1)', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '1rem' }}>
+                {atividadesArea.map(atividade => {
+                  const minhaSubmissao = submissoes.find(s => s.atividadeId === atividade.id && s.alunoEmail === userEmail)
+                  return (
+                    <div key={atividade.id} className="aluno-card">
+                      <div className="aluno-card-header">
+                        <span className="aluno-card-tag">{atividade.area}</span>
+                        {minhaSubmissao && (
+                          <span className={`aluno-badge ${minhaSubmissao.status === 'pendente' ? 'badge-pendente' : 'badge-ok'}`}>
+                            {minhaSubmissao.status === 'pendente' ? 'Aguardando correção' : 'Corrigida'}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="aluno-card-title">{atividade.titulo}</h3>
+                      <p className="aluno-card-desc">{atividade.descricao}</p>
+                      {minhaSubmissao ? (
+                        minhaSubmissao.nota !== null && (
+                          <div className="aluno-nota">Nota: <strong>{minhaSubmissao.nota}</strong></div>
+                        )
+                      ) : (
+                        <button className="aluno-btn" onClick={() => onAbrirAtividade(atividade)}>
+                          Fazer atividade
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
         )
@@ -322,8 +388,12 @@ function TabMateriais({ materiais, progressoAluno, onBaixar }) {
 }
 
 function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaMedia }) {
+  const atividadesConcluidasAtivas = progressoAluno.atividadesConcluidas.filter(id =>
+    todasAtividades.some(a => a.id === id)
+  )
+
   const stats = [
-    { val: progressoAluno.atividadesConcluidas.length, lbl: 'Atividades concluídas' },
+    { val: atividadesConcluidasAtivas.length, lbl: 'Atividades concluídas' },
     { val: progressoAluno.videoaulasAssistidas.length, lbl: 'Videoaulas assistidas' },
     { val: progressoAluno.materiaisBaixados.length, lbl: 'Materiais baixados' },
     { val: notaMedia, lbl: 'Nota média' },
@@ -436,15 +506,35 @@ function PerfilAluno({ perfilData, onSalvar, user }) {
 }
 
 function FazerAtividade({ atividade, onEnviar, onVoltar }) {
+  const [respostas, setRespostas] = useState({})
   const [resposta, setResposta] = useState('')
-  const [opcaoSelecionada, setOpcaoSelecionada] = useState('')
+
+  // Parsear conteudo do banco (JSON string) ou usar campos diretos (localStorage)
+  const conteudo = (() => {
+    try { return atividade.conteudo ? JSON.parse(atividade.conteudo) : {} }
+    catch { return {} }
+  })()
+
+  const tipo = conteudo.tipo || atividade.tipo || 'dissertativa'
+  const questoes = conteudo.questoes?.length > 0 ? conteudo.questoes : atividade.questoes || []
+
+  // Se tem múltiplas questões
+  const temMultiplasQuestoes = questoes.length > 0
 
   const handleEnviar = () => {
-    const respostaFinal = atividade.tipo === 'multipla_escolha' ? opcaoSelecionada : resposta
-    if (respostaFinal.trim()) {
-      onEnviar(respostaFinal)
+    if (temMultiplasQuestoes) {
+      if (Object.keys(respostas).length < questoes.length) {
+        alert('Por favor, responda todas as questões.')
+        return
+      }
+      onEnviar(JSON.stringify(respostas))
+    } else if (tipo === 'multipla_escolha') {
+      const opcao = respostas[0]
+      if (!opcao) { alert('Por favor, selecione uma alternativa.'); return }
+      onEnviar(opcao)
     } else {
-      alert('Por favor, responda a atividade.')
+      if (!resposta.trim()) { alert('Por favor, responda a atividade.'); return }
+      onEnviar(resposta)
     }
   }
 
@@ -456,19 +546,37 @@ function FazerAtividade({ atividade, onEnviar, onVoltar }) {
         <p><strong>Área:</strong> {atividade.area}</p>
         <div className="descricao-atividade"><p>{atividade.descricao}</p></div>
 
-        {atividade.tipo === 'multipla_escolha' ? (
+        {temMultiplasQuestoes ? (
+          questoes.map((q, i) => (
+            <div key={i} className="questao-bloco" style={{ marginBottom: '1.5rem' }}>
+              <h4>Questão {i + 1}: {q.pergunta}</h4>
+              {['A', 'B', 'C', 'D'].map(letra => (
+                <label key={letra} className="opcao-label">
+                  <input
+                    type="radio"
+                    name={`questao_${i}`}
+                    value={letra}
+                    checked={respostas[i] === letra}
+                    onChange={() => setRespostas(prev => ({ ...prev, [i]: letra }))}
+                  />
+                  <span>{letra}) {q[`opcao${letra}`]}</span>
+                </label>
+              ))}
+            </div>
+          ))
+        ) : tipo === 'multipla_escolha' ? (
           <div className="opcoes-resposta">
-            <h4>Escolha a alternativa correta:</h4>
+            <h4>{conteudo.pergunta || 'Escolha a alternativa correta:'}</h4>
             {['A', 'B', 'C', 'D'].map(letra => (
               <label key={letra} className="opcao-label">
                 <input
                   type="radio"
                   name="opcao"
                   value={letra}
-                  checked={opcaoSelecionada === letra}
-                  onChange={(e) => setOpcaoSelecionada(e.target.value)}
+                  checked={respostas[0] === letra}
+                  onChange={() => setRespostas({ 0: letra })}
                 />
-                <span>{letra}) {atividade[`opcao${letra}`]}</span>
+                <span>{letra}) {conteudo[`opcao${letra}`] || atividade[`opcao${letra}`]}</span>
               </label>
             ))}
           </div>
