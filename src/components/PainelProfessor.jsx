@@ -1,5 +1,13 @@
 import { useState, useCallback, useEffect } from 'react'
 import Modal from './Modal'
+import PasswordValidator from './PasswordValidator'
+
+const SENHA_FORTE = (pwd) =>
+  pwd.length >= 8 &&
+  /[A-Z]/.test(pwd) &&
+  /[a-z]/.test(pwd) &&
+  /\d/.test(pwd) &&
+  /[!@#$%^&*(),.?":{}|<>]/.test(pwd)
 
 const AREAS = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Texto', 'Ortografia', 'Fonética', 'Semântica', 'Estilística', 'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação']
 
@@ -513,7 +521,7 @@ function AcompanharProgresso() {
     const buscarAlunos = async () => {
       try {
         const response = await fetch('http://localhost:8080/api/usuarios/tipo/ALUNO')
-        if (response.ok) setUsuarios(await response.json())
+        if (response.ok) setUsuarios((await response.json()).filter(a => a.status !== 'inativo'))
       } catch (error) {
         console.error('Erro ao buscar alunos:', error)
       }
@@ -838,7 +846,8 @@ function PerfilProfessor({ user }) {
         </button>
       </form>
       
-      <AlterarSenhaProfessor userEmail={user.email} />
+      <AlterarSenhaProfessor userId={user.id} />
+      <DesativarContaProfessor user={user} />
     </div>
   )
 }
@@ -852,7 +861,7 @@ function VisualizarAlunos() {
         const response = await fetch('http://localhost:8080/api/usuarios/tipo/ALUNO')
         if (response.ok) {
           const alunosData = await response.json()
-          setAlunos(alunosData)
+          setAlunos(alunosData.filter(a => a.status !== 'inativo'))
         }
       } catch (error) {
         console.error('Erro ao buscar alunos:', error)
@@ -921,91 +930,48 @@ function VisualizarAlunos() {
     </div>
   )
 }
-function AlterarSenhaProfessor({ userEmail }) {
-  const [senhaData, setSenhaData] = useState({
-    senhaAtual: '',
-    novaSenha: '',
-    confirmarSenha: ''
-  })
+function AlterarSenhaProfessor({ userId }) {
+  const [senhaData, setSenhaData] = useState({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
+  const [erro, setErro] = useState('')
+  const [sucesso, setSucesso] = useState(false)
 
-  const handleChange = (e) => {
-    setSenhaData({ ...senhaData, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    if (senhaData.novaSenha !== senhaData.confirmarSenha) {
-      alert('Nova senha e confirmação não coincidem!')
-      return
-    }
-
-    if (senhaData.novaSenha.length < 6) {
-      alert('Nova senha deve ter pelo menos 6 caracteres!')
-      return
-    }
-
+    setErro('')
+    setSucesso(false)
+    if (!SENHA_FORTE(senhaData.novaSenha)) { setErro('A nova senha não atende aos requisitos de segurança.'); return }
+    if (senhaData.novaSenha !== senhaData.confirmarSenha) { setErro('As senhas não coincidem.'); return }
     try {
-      const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
-      const usuarioIndex = usuarios.findIndex(u => u.email === userEmail)
-      
-      if (usuarioIndex === -1) {
-        alert('Usuário não encontrado!')
-        return
-      }
-
-      if (usuarios[usuarioIndex].senha !== senhaData.senhaAtual) {
-        alert('Senha atual incorreta!')
-        return
-      }
-
-      usuarios[usuarioIndex].senha = senhaData.novaSenha
-      localStorage.setItem('learnwave_users', JSON.stringify(usuarios))
-      
+      const params = new URLSearchParams({ senhaAtual: senhaData.senhaAtual, novaSenha: senhaData.novaSenha })
+      const res = await fetch(`http://localhost:8080/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
+      if (!res.ok) { setErro(await res.text()); return }
       setSenhaData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
-      alert('Senha alterada com sucesso!')
-    } catch (error) {
-      alert('Erro ao alterar senha. Tente novamente.')
+      setSucesso(true)
+    } catch {
+      setErro('Erro ao conectar com o servidor. Tente novamente.')
     }
   }
 
   return (
     <div className="alterar-senha-section">
-      <h4>🔒 Alterar Senha</h4>
+      <h4>Alterar senha</h4>
       <form onSubmit={handleSubmit} className="form-senha">
         <div className="campo-perfil">
-          <input
-            type="password"
-            name="senhaAtual"
-            value={senhaData.senhaAtual}
-            onChange={handleChange}
-            placeholder="Senha atual"
-            required
-          />
+          <label>Senha atual</label>
+          <input type="password" name="senhaAtual" value={senhaData.senhaAtual} onChange={(e) => setSenhaData({ ...senhaData, senhaAtual: e.target.value })} placeholder="Digite sua senha atual" required />
         </div>
         <div className="campo-perfil">
-          <input
-            type="password"
-            name="novaSenha"
-            value={senhaData.novaSenha}
-            onChange={handleChange}
-            placeholder="Nova senha (mín. 6 caracteres)"
-            required
-          />
+          <label>Nova senha</label>
+          <input type="password" name="novaSenha" value={senhaData.novaSenha} onChange={(e) => setSenhaData({ ...senhaData, novaSenha: e.target.value })} placeholder="Crie uma senha forte" required />
         </div>
+        {senhaData.novaSenha && <PasswordValidator password={senhaData.novaSenha} />}
         <div className="campo-perfil">
-          <input
-            type="password"
-            name="confirmarSenha"
-            value={senhaData.confirmarSenha}
-            onChange={handleChange}
-            placeholder="Confirmar nova senha"
-            required
-          />
+          <label>Confirmar nova senha</label>
+          <input type="password" name="confirmarSenha" value={senhaData.confirmarSenha} onChange={(e) => setSenhaData({ ...senhaData, confirmarSenha: e.target.value })} placeholder="Repita a nova senha" required />
         </div>
-        <button type="submit" className="btn-alterar-senha">
-          Alterar Senha
-        </button>
+        {erro && <p className="senha-erro">{erro}</p>}
+        {sucesso && <p className="senha-sucesso">Senha alterada com sucesso.</p>}
+        <button type="submit" className="btn-alterar-senha">Salvar nova senha</button>
       </form>
     </div>
   )
@@ -1152,6 +1118,65 @@ function FormularioQuestoes({ formData, setFormData }) {
         </div>
       )}
     </div>
+  )
+}
+
+function DesativarContaProfessor({ user }) {
+  const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [erro, setErro] = useState('')
+
+  const confirmarDesativacao = async () => {
+    setLoading(true)
+    setErro('')
+    try {
+      // Apagar atividades do professor no backend
+      const atividadesRes = await fetch(`http://localhost:8080/api/atividades/professor/${user.id}`)
+      if (atividadesRes.ok) {
+        const atividades = await atividadesRes.json()
+        await Promise.all(atividades.map(a =>
+          fetch(`http://localhost:8080/api/atividades/${a.id}`, { method: 'DELETE' })
+        ))
+      }
+      // Desativar conta
+      const res = await fetch(`http://localhost:8080/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      localStorage.clear()
+      window.location.href = '/'
+    } catch {
+      setErro('Erro ao desativar conta. Tente novamente.')
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <div className="desativar-conta-section">
+        <h4>Desativar conta</h4>
+        <p>Ao desativar sua conta, todas as suas atividades serão removidas e os alunos não terão mais acesso a elas.</p>
+        <button onClick={() => setShowModal(true)} className="btn-desativar-conta">Desativar minha conta</button>
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => !loading && setShowModal(false)}>
+          <div className="modal-desativar" onClick={e => e.stopPropagation()}>
+            <div className="modal-desativar-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <h3>Desativar conta?</h3>
+            <p>Tem certeza que deseja desativar sua conta? Você será desconectado imediatamente e <strong>todas as suas atividades serão apagadas</strong>.</p>
+            <p className="modal-desativar-aviso">Esta ação não pode ser desfeita sem contato com o administrador.</p>
+            {erro && <p className="senha-erro">{erro}</p>}
+            <div className="modal-desativar-actions">
+              <button onClick={() => setShowModal(false)} className="btn-cancelar-desativar" disabled={loading}>Cancelar</button>
+              <button onClick={confirmarDesativacao} className="btn-confirmar-desativar" disabled={loading}>
+                {loading ? 'Desativando...' : 'Sim, desativar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

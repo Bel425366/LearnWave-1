@@ -2539,36 +2539,198 @@ html {
   color: #ffffff;
   margin-bottom: 1rem;
   font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .form-senha {
-  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
   padding: 1.5rem;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.senha-erro {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #f87171;
+  padding: 0.5rem 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #ef4444;
+}
+
+.senha-sucesso {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #4ade80;
+  padding: 0.5rem 0.75rem;
+  background: rgba(74, 222, 128, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #4ade80;
+}
+
 .btn-alterar-senha {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 0.8rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  transition: opacity 0.2s, transform 0.2s;
   width: 100%;
+  margin-top: 0.25rem;
 }
 
 .btn-alterar-senha:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-/* Modo claro */
-.light-theme .alterar-senha-section {
+/* Desativar Conta */
+.desativar-conta-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.desativar-conta-section h4 {
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.desativar-conta-section p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.btn-desativar-conta {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.btn-desativar-conta:hover {
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Modal Desativar */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+}
+
+.modal-desativar {
+  background: #16162a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal-desativar-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.modal-desativar h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.modal-desativar p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.modal-desativar-aviso {
+  font-size: 0.8rem !important;
+  color: rgba(255, 255, 255, 0.35) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.modal-desativar-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-cancelar-desativar {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancelar-desativar:hover { background: rgba(255,255,255,0.09); }
+
+.btn-confirmar-desativar {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(239, 68, 68, 0.75);
+  color: white;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-confirmar-desativar:hover { background: rgba(239, 68, 68, 0.9); transform: translateY(-1px); }
+.btn-confirmar-desativar:disabled,
+.btn-cancelar-desativar:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.light-theme .desativar-conta-section { border-top-color: rgba(0,0,0,0.08); }
+.light-theme .desativar-conta-section h4 { color: #1e293b; }
+.light-theme .desativar-conta-section p { color: rgba(0,0,0,0.4); }
+.light-theme .btn-desativar-conta { color: rgba(0,0,0,0.4); border-color: rgba(0,0,0,0.1); }
+.light-theme .btn-desativar-conta:hover { color: #dc2626; border-color: rgba(239,68,68,0.3); }
+.light-theme .modal-desativar { background: #ffffff; border-color: rgba(0,0,0,0.08); }
+.light-theme .modal-desativar h3 { color: #1e293b; }
+.light-theme .modal-desativar p { color: rgba(0,0,0,0.5); }
+.light-theme .modal-desativar-icon { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.35); }
+.light-theme .btn-cancelar-desativar { border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.03); color: #1e293b; }
   border-top-color: rgba(0, 0, 0, 0.1);
 }
 
