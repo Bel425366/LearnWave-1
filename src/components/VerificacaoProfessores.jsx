@@ -37,11 +37,11 @@ function VerificacaoProfessores() {
         pendentes.map(async (professor) => {
           try {
             // Tentar buscar documento do endpoint correto
-            let response = await fetch(`http://localhost:8080/api/documentos-verificacao/usuario/${professor.id}`)
+            let response = await fetch(`https://learnwaveback-8.onrender.com/api/documentos-verificacao/usuario/${professor.id}`)
             
             if (!response.ok) {
               // Se não encontrar, tentar endpoint alternativo
-              response = await fetch(`http://localhost:8080/api/usuarios/${professor.id}/documento`)
+              response = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${professor.id}/documento`)
             }
             
             if (response.ok) {
@@ -59,7 +59,7 @@ function VerificacaoProfessores() {
             // Se ainda não tem imagem, buscar documento_url do usuário
             if (!professor.documentoImagem) {
               try {
-                const docResponse = await fetch(`http://localhost:8080/api/usuarios/${professor.id}/documento`)
+                const docResponse = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${professor.id}/documento`)
                 if (docResponse.ok) {
                   const documentoUrl = await docResponse.text()
                   if (documentoUrl) {
@@ -192,11 +192,11 @@ function VerificacaoProfessores() {
                     <label>Documento Comprobatório:</label>
                     <div className="documento-preview">
                       <img 
-                        src={professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `http://localhost:8080/${professor.documentoImagem}`} 
+                        src={professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `https://learnwaveback-8.onrender.com/${professor.documentoImagem}`} 
                         alt="Documento do professor" 
                         className="documento-img"
                         onClick={() => {
-                          const imageUrl = professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `http://localhost:8080/${professor.documentoImagem}`
+                          const imageUrl = professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `https://learnwaveback-8.onrender.com/${professor.documentoImagem}`
                           window.open(imageUrl, '_blank')
                         }}
                         onError={(e) => {
@@ -212,7 +212,7 @@ function VerificacaoProfessores() {
                       <button 
                         className="btn-visualizar"
                         onClick={() => {
-                          const imageUrl = professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `http://localhost:8080/${professor.documentoImagem}`
+                          const imageUrl = professor.documentoImagem.startsWith('data:') ? professor.documentoImagem : `https://learnwaveback-8.onrender.com/${professor.documentoImagem}`
                           setImagemModal(imageUrl)
                         }}
                       >

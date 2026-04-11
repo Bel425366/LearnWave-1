@@ -148,7 +148,7 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
     try {
       let atividadeSalva
       if (editingId) {
-        const res = await fetch(`http://localhost:8080/api/atividades/${editingId}`, {
+        const res = await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -159,7 +159,7 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
         setAtividades(newAtividades)
         localStorage.setItem('atividades', JSON.stringify(newAtividades))
       } else {
-        const res = await fetch('http://localhost:8080/api/atividades', {
+        const res = await fetch('https://learnwaveback-8.onrender.com/api/atividades', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -196,7 +196,7 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
 
   const confirmDelete = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/${deleteModal.id}/lixeira`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${deleteModal.id}/lixeira`, { method: 'PATCH' })
       if (!res.ok) throw new Error(await res.text())
     } catch (err) {
       console.error('Erro ao mover para lixeira:', err)
@@ -520,7 +520,7 @@ function AcompanharProgresso() {
   useEffect(() => {
     const buscarAlunos = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/usuarios/tipo/ALUNO')
+        const response = await fetch('https://learnwaveback-8.onrender.com/api/usuarios/tipo/ALUNO')
         if (response.ok) setUsuarios((await response.json()).filter(a => a.status !== 'inativo'))
       } catch (error) {
         console.error('Erro ao buscar alunos:', error)
@@ -528,7 +528,7 @@ function AcompanharProgresso() {
     }
     const buscarAtividades = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/atividades')
+        const response = await fetch('https://learnwaveback-8.onrender.com/api/atividades')
         if (response.ok) setAtividades(await response.json())
       } catch (error) {
         console.error('Erro ao buscar atividades:', error)
@@ -630,7 +630,7 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
 
   const restaurarAtividade = async (id) => {
     try {
-      await fetch(`http://localhost:8080/api/atividades/${id}/restaurar`, { method: 'PATCH' })
+      await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${id}/restaurar`, { method: 'PATCH' })
     } catch (err) {
       console.error('Erro ao restaurar:', err)
     }
@@ -642,7 +642,7 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
   const excluirPermanente = async (id) => {
     if (!window.confirm('Tem certeza que deseja excluir permanentemente? Esta ação não pode ser desfeita!')) return
     try {
-      await fetch(`http://localhost:8080/api/atividades/${id}`, { method: 'DELETE' })
+      await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${id}`, { method: 'DELETE' })
     } catch (err) {
       console.error('Erro ao excluir:', err)
     }
@@ -774,7 +774,7 @@ function PerfilProfessor({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(formData.apelido)}`, {
+      const response = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(formData.apelido)}`, {
         method: 'PATCH'
       })
       if (!response.ok) throw new Error(await response.text())
@@ -858,7 +858,7 @@ function VisualizarAlunos() {
   useEffect(() => {
     const buscarAlunos = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/usuarios/tipo/ALUNO')
+        const response = await fetch('https://learnwaveback-8.onrender.com/api/usuarios/tipo/ALUNO')
         if (response.ok) {
           const alunosData = await response.json()
           setAlunos(alunosData.filter(a => a.status !== 'inativo'))
@@ -943,7 +943,7 @@ function AlterarSenhaProfessor({ userId }) {
     if (senhaData.novaSenha !== senhaData.confirmarSenha) { setErro('As senhas não coincidem.'); return }
     try {
       const params = new URLSearchParams({ senhaAtual: senhaData.senhaAtual, novaSenha: senhaData.novaSenha })
-      const res = await fetch(`http://localhost:8080/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
       if (!res.ok) { setErro(await res.text()); return }
       setSenhaData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
       setSucesso(true)
@@ -1131,15 +1131,15 @@ function DesativarContaProfessor({ user }) {
     setErro('')
     try {
       // Apagar atividades do professor no backend
-      const atividadesRes = await fetch(`http://localhost:8080/api/atividades/professor/${user.id}`)
+      const atividadesRes = await fetch(`https://learnwaveback-8.onrender.com/api/atividades/professor/${user.id}`)
       if (atividadesRes.ok) {
         const atividades = await atividadesRes.json()
         await Promise.all(atividades.map(a =>
-          fetch(`http://localhost:8080/api/atividades/${a.id}`, { method: 'DELETE' })
+          fetch(`https://learnwaveback-8.onrender.com/api/atividades/${a.id}`, { method: 'DELETE' })
         ))
       }
       // Desativar conta
-      const res = await fetch(`http://localhost:8080/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
       if (!res.ok) throw new Error(await res.text())
       localStorage.clear()
       window.location.href = '/'

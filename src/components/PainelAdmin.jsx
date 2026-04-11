@@ -196,7 +196,7 @@ function PerfilAdmin({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}`, {
+      const response = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...user, nome: formData.apelido, bio: formData.bio, fotoPerfil: formData.fotoPerfil })

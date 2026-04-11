@@ -42,7 +42,7 @@ function AreaAluno({ user, onNavigate }) {
   })()
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/atividades')
+    fetch('https://learnwaveback-8.onrender.com/api/atividades')
       .then(r => r.json())
       .then(data => setTodasAtividades(data))
       .catch(() => {
@@ -128,7 +128,7 @@ function AreaAluno({ user, onNavigate }) {
   const salvarPerfil = async (novosDados) => {
     try {
       console.log('user.id:', user.id, '| novo nome:', novosDados.apelido)
-      const response = await fetch(`http://localhost:8080/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(novosDados.apelido)}`, {
+      const response = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(novosDados.apelido)}`, {
         method: 'PATCH'
       })
       console.log('resposta status:', response.status)
@@ -622,7 +622,7 @@ function AlterarSenha({ userEmail, userId }) {
     if (senhaData.novaSenha !== senhaData.confirmarSenha) { setErro('As senhas não coincidem.'); return }
     try {
       const params = new URLSearchParams({ senhaAtual: senhaData.senhaAtual, novaSenha: senhaData.novaSenha })
-      const res = await fetch(`http://localhost:8080/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
       if (!res.ok) { setErro(await res.text()); return }
       setSenhaData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
       setSucesso(true)
@@ -665,7 +665,7 @@ function DesativarConta({ user, onDesativar }) {
     setLoading(true)
     setErro('')
     try {
-      const res = await fetch(`http://localhost:8080/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
       if (!res.ok) throw new Error(await res.text())
       localStorage.clear()
       onDesativar()

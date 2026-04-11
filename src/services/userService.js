@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api'; // URL do seu backend Java Spring Boot
+const API_BASE_URL = 'https://learnwaveback-8.onrender.com/api'; // URL do seu backend Java Spring Boot
 
 class UserService {
   async cadastrar(userData) {
