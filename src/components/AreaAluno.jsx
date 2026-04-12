@@ -32,6 +32,7 @@ function AreaAluno({ user, onNavigate }) {
   })
 
   const [todasAtividades, setTodasAtividades] = useState([])
+  const [professores, setProfessores] = useState([])
   const todasVideoaulas = (() => {
     try { return (JSON.parse(localStorage.getItem('videoaulas')) || []).filter(v => !v.excluido) }
     catch { return [] }
@@ -49,6 +50,10 @@ function AreaAluno({ user, onNavigate }) {
         const local = JSON.parse(localStorage.getItem('atividades') || '[]').filter(a => !a.excluido)
         setTodasAtividades(local)
       })
+    fetch('https://learnwaveback-8.onrender.com/api/usuarios/professores/aprovados')
+      .then(r => r.json())
+      .then(data => setProfessores(data))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -156,6 +161,14 @@ function AreaAluno({ user, onNavigate }) {
     ? (minhasSubmissoes.reduce((acc, s) => acc + s.nota, 0) / minhasSubmissoes.length).toFixed(1)
     : '—'
 
+  const notaMediaPorProfessor = (professorId) => {
+    const atividadesProf = atividadesAtivas.filter(a => a.professorId === professorId)
+    const submissoesProf = minhasSubmissoes.filter(s => atividadesProf.some(a => a.id === s.atividadeId))
+    return submissoesProf.length > 0
+      ? (submissoesProf.reduce((acc, s) => acc + s.nota, 0) / submissoesProf.length).toFixed(1)
+      : '—'
+  }
+
   const mensagensPorAba = {
     atividades: 'Vamos lá! Você consegue fazer todas as atividades!',
     videoaulas: 'Hora de aprender algo novo. Bora assistir!',
@@ -227,6 +240,7 @@ function AreaAluno({ user, onNavigate }) {
         {activeTab === 'atividades' && (
           <TabAtividades
             atividades={atividadesAtivas}
+            professores={professores}
             progressoAluno={progressoAluno}
             userEmail={user.email}
             onAbrirAtividade={setAtividadeAtual}
@@ -252,6 +266,8 @@ function AreaAluno({ user, onNavigate }) {
             todasAtividades={atividadesAtivas}
             minhasSubmissoes={minhasSubmissoes}
             notaMedia={notaMedia}
+            professores={professores}
+            notaMediaPorProfessor={notaMediaPorProfessor}
           />
         )}
         {activeTab === 'perfil' && (
@@ -262,67 +278,79 @@ function AreaAluno({ user, onNavigate }) {
   )
 }
 
-function TabAtividades({ atividades, progressoAluno, userEmail, onAbrirAtividade }) {
+function TabAtividades({ atividades, professores, progressoAluno, userEmail, onAbrirAtividade }) {
   const publicadas = atividades.filter(a => (a.status === 'Publicada' || a.status === 'PUBLICADO') && a.situacao !== 'lixeira' && a.situacao !== 'excluido')
   const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
-  const [areasAbertas, setAreasAbertas] = useState({})
+  const [professorSelecionado, setProfessorSelecionado] = useState(null)
 
-  if (publicadas.length === 0) {
+  const professoresComAtividades = professores.filter(p =>
+    publicadas.some(a => a.professorId === p.id)
+  )
+
+  if (professorSelecionado) {
+    const atividadesDoProf = publicadas.filter(a => a.professorId === professorSelecionado.id)
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <button
+          onClick={() => setProfessorSelecionado(null)}
+          style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '0.4rem 0.9rem', cursor: 'pointer', color: 'inherit', marginBottom: '0.5rem' }}
+        >
+          ← Voltar aos professores
+        </button>
+        <h3 style={{ margin: '0 0 0.75rem', opacity: 0.9 }}>Atividades de {professorSelecionado.nome}</h3>
+        <div className="aluno-grid">
+          {atividadesDoProf.map(atividade => {
+            const minhaSubmissao = submissoes.find(s => s.atividadeId === atividade.id && s.alunoEmail === userEmail)
+            return (
+              <div key={atividade.id} className="aluno-card">
+                <div className="aluno-card-header">
+                  <span className="aluno-card-tag">{atividade.area}</span>
+                  {minhaSubmissao && (
+                    <span className={`aluno-badge ${minhaSubmissao.status === 'pendente' ? 'badge-pendente' : 'badge-ok'}`}>
+                      {minhaSubmissao.status === 'pendente' ? 'Aguardando correção' : 'Corrigida'}
+                    </span>
+                  )}
+                </div>
+                <h3 className="aluno-card-title">{atividade.titulo}</h3>
+                <p className="aluno-card-desc">{atividade.descricao}</p>
+                {minhaSubmissao ? (
+                  minhaSubmissao.nota !== null && (
+                    <div className="aluno-nota">Nota: <strong>{minhaSubmissao.nota}</strong></div>
+                  )
+                ) : (
+                  <button className="aluno-btn" onClick={() => onAbrirAtividade(atividade)}>
+                    Fazer atividade
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  if (professoresComAtividades.length === 0) {
     return <EstadoVazio mensagem="Nenhuma atividade disponível no momento." />
   }
 
-  const porArea = publicadas.reduce((acc, a) => {
-    acc[a.area] = acc[a.area] || []
-    acc[a.area].push(a)
-    return acc
-  }, {})
-
-  const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-      {Object.entries(porArea).map(([area, atividadesArea]) => {
-        const aberta = areasAbertas[area] === true
+    <div className="aluno-grid">
+      {professoresComAtividades.map(prof => {
+        const qtd = publicadas.filter(a => a.professorId === prof.id).length
         return (
-          <div key={area} className="area-grupo">
-            <button
-              onClick={() => toggleArea(area)}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: aberta ? '8px 8px 0 0' : '8px', cursor: 'pointer', color: 'inherit', fontSize: '1rem', fontWeight: 600 }}
-            >
-              <span>{area} <span style={{ fontWeight: 400, opacity: 0.6, fontSize: '0.85rem' }}>({atividadesArea.length})</span></span>
-              <span>{aberta ? '▲' : '▼'}</span>
-            </button>
-            {aberta && (
-              <div className="aluno-grid" style={{ border: '1px solid rgba(255,255,255,0.1)', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '1rem' }}>
-                {atividadesArea.map(atividade => {
-                  const minhaSubmissao = submissoes.find(s => s.atividadeId === atividade.id && s.alunoEmail === userEmail)
-                  return (
-                    <div key={atividade.id} className="aluno-card">
-                      <div className="aluno-card-header">
-                        <span className="aluno-card-tag">{atividade.area}</span>
-                        {minhaSubmissao && (
-                          <span className={`aluno-badge ${minhaSubmissao.status === 'pendente' ? 'badge-pendente' : 'badge-ok'}`}>
-                            {minhaSubmissao.status === 'pendente' ? 'Aguardando correção' : 'Corrigida'}
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="aluno-card-title">{atividade.titulo}</h3>
-                      <p className="aluno-card-desc">{atividade.descricao}</p>
-                      {minhaSubmissao ? (
-                        minhaSubmissao.nota !== null && (
-                          <div className="aluno-nota">Nota: <strong>{minhaSubmissao.nota}</strong></div>
-                        )
-                      ) : (
-                        <button className="aluno-btn" onClick={() => onAbrirAtividade(atividade)}>
-                          Fazer atividade
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                        </button>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+          <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer' }} onClick={() => setProfessorSelecionado(prof)}>
+            <div className="aluno-card-header">
+              <span className="aluno-card-tag">Professor</span>
+              <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{qtd} atividade{qtd !== 1 ? 's' : ''}</span>
+            </div>
+            <h3 className="aluno-card-title">{prof.nome}</h3>
+            {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
+            <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
+              Ver atividades
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
           </div>
         )
       })}
@@ -395,7 +423,7 @@ function TabMateriais({ materiais, progressoAluno, onBaixar }) {
   )
 }
 
-function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaMedia }) {
+function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaMedia, professores, notaMediaPorProfessor }) {
   const atividadesConcluidasAtivas = progressoAluno.atividadesConcluidas.filter(id =>
     todasAtividades.some(a => a.id === id)
   )
@@ -404,8 +432,10 @@ function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaM
     { val: atividadesConcluidasAtivas.length, lbl: 'Atividades concluídas' },
     { val: progressoAluno.videoaulasAssistidas.length, lbl: 'Videoaulas assistidas' },
     { val: progressoAluno.materiaisBaixados.length, lbl: 'Materiais baixados' },
-    { val: notaMedia, lbl: 'Nota média' },
+    { val: notaMedia, lbl: 'Média geral' },
   ]
+
+  const professoresComNota = professores.filter(p => notaMediaPorProfessor(p.id) !== '—')
 
   return (
     <div>
@@ -417,6 +447,18 @@ function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaM
           </div>
         ))}
       </div>
+
+      {professoresComNota.length > 0 && (
+        <div className="detalhes-progresso" style={{ marginBottom: '1.5rem' }}>
+          <h4>Média por professor</h4>
+          {professoresComNota.map(prof => (
+            <div key={prof.id} className="atividade-concluida">
+              <span>{prof.nome}</span>
+              <span>Média: {notaMediaPorProfessor(prof.id)}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {minhasSubmissoes.length > 0 && (
         <div className="detalhes-progresso">

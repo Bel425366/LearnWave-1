@@ -167,18 +167,28 @@ function VerificacaoProfessores() {
               
               <div className="card-body">
                 <div className="info-grid">
-                  <div className="info-item">
-                    <label>CPF:</label>
-                    <span>{professor.cpf}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Instituição:</label>
-                    <span>{professor.escola}</span>
-                  </div>
-                  {professor.telefone && (
+                  {professor.areaEnsino && (
                     <div className="info-item">
-                      <label>Telefone:</label>
-                      <span>{professor.telefone}</span>
+                      <label>Área de Ensino:</label>
+                      <span>{professor.areaEnsino}</span>
+                    </div>
+                  )}
+                  {professor.formacao && (
+                    <div className="info-item">
+                      <label>Formação:</label>
+                      <span>{professor.formacao}</span>
+                    </div>
+                  )}
+                  {professor.experiencia && (
+                    <div className="info-item">
+                      <label>Anos de Experiência:</label>
+                      <span>{professor.experiencia}</span>
+                    </div>
+                  )}
+                  {professor.escola && (
+                    <div className="info-item">
+                      <label>Instituição:</label>
+                      <span>{professor.escola}</span>
                     </div>
                   )}
                   <div className="info-item">

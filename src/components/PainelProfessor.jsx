@@ -13,10 +13,17 @@ const AREAS = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Text
 
 function PainelProfessor({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
-  const [atividades, setAtividades] = useState(() => {
-    const saved = localStorage.getItem('atividades')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [atividades, setAtividades] = useState([])
+
+  useEffect(() => {
+    fetch(`https://learnwaveback-8.onrender.com/api/atividades/professor/${user.id}`)
+      .then(r => r.json())
+      .then(data => setAtividades(data))
+      .catch(() => {
+        const saved = JSON.parse(localStorage.getItem('atividades') || '[]')
+        setAtividades(saved.filter(a => a.professorId === user.id))
+      })
+  }, [user.id])
   const [videoaulas, setVideoaulas] = useState(() => {
     const saved = localStorage.getItem('videoaulas')
     return saved ? JSON.parse(saved) : []
