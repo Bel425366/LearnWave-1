@@ -1,181 +1,189 @@
 import { useState } from 'react'
 import UsuarioAPI from '../services/api-learnwave'
-import Mascot from './Mascot'
 
 function Login({ userType, onLogin, onNavigate }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [showEsqueceuSenha, setShowEsqueceuSenha] = useState(false)
-  const [mascotMessage, setMascotMessage] = useState('Bem-vindo de volta! Entre na sua conta para continuar aprendendo.')
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    setMascotMessage('Deixa eu verificar seus dados...')
     if (email && senha) {
       try {
         const tipoUsuario = userType.toUpperCase()
         const usuario = await UsuarioAPI.login(email.trim(), senha.trim(), tipoUsuario)
-        setMascotMessage(`Que bom te ver, ${usuario.nome.split(' ')[0]}!`)
         onLogin(usuario)
+        
         const tipo = (usuario.tipoUsuario || usuario.tipo || userType).toLowerCase()
-        if (tipo === 'aluno' || tipo === 'estudante') onNavigate('area-aluno')
-        else if (tipo === 'professor') onNavigate('painel-professor')
-        else if (tipo === 'admin' || tipo === 'administrador') onNavigate('painel-admin')
-      } catch (error) {
-        const msg = error.message || ''
-        if (msg.includes('aguardando aprova')) {
-          setMascotMessage('Seu cadastro ainda está sendo analisado!')
-          alert('Seu cadastro ainda está aguardando aprovação do administrador.')
-        } else if (msg.includes('reprovado') || msg.includes('rejeitado')) {
-          setMascotMessage('Infelizmente seu cadastro foi reprovado.')
-          alert('Seu cadastro foi reprovado pelo administrador. Entre em contato para mais informações.')
-        } else {
-          setMascotMessage('Hmm, algo deu errado. Confere seus dados!')
-          alert(msg || 'Email ou senha incorretos!')
+        if (tipo === 'aluno' || tipo === 'estudante') {
+          onNavigate('area-aluno')
+        } else if (tipo === 'professor') {
+          onNavigate('painel-professor')
+        } else if (tipo === 'admin' || tipo === 'administrador') {
+          onNavigate('painel-admin')
         }
+      } catch (error) {
+        alert(error.message)
       }
     }
   }
 
   return (
     <div className="auth-container">
-      <div className="auth-split-wrapper">
-        <div className="auth-split-left">
-          <Mascot message={mascotMessage} />
-        </div>
-        <div className="auth-split-right">
-          <div className="auth-card">
-            <div className="auth-card-header">
-              <div className="auth-card-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-              <div>
-                <h2 className="auth-card-title">Entrar</h2>
-                <p className="auth-card-subtitle">Acesse sua conta LearnWave</p>
-              </div>
-            </div>
-
-            <form onSubmit={handleLogin}>
-              <div className="auth-field">
-                <label>Email</label>
-                <input
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setMascotMessage('Digite seu email cadastrado!')}
-                  required
-                />
-              </div>
-              <div className="auth-field">
-                <label>Senha</label>
-                <input
-                  type="password"
-                  placeholder="Sua senha"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  onFocus={() => setMascotMessage('Psiu... não conta pra ninguém!')}
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="auth-btn-primary"
-                onMouseEnter={() => setMascotMessage('Vamos lá! Clica para entrar!')}
-              >
-                Entrar
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </button>
-            </form>
-
-            <div className="auth-card-footer">
-              <p className="auth-footer-text">
-                <button type="button" className="esqueceu-senha-btn" onClick={() => { setShowEsqueceuSenha(true); setMascotMessage('Sem problema, vamos recuperar sua senha!') }}>
-                  Esqueceu a senha?
-                </button>
-              </p>
-              {userType === 'administrador' ? (
-                <p className="auth-footer-text admin-info"><small>Administradores já estão cadastrados no sistema</small></p>
-              ) : (
-                <p className="auth-footer-text">
-                  Não tem conta?&nbsp;
-                  <button type="button" className="auth-link-btn" onClick={() => onNavigate('cadastro')} onMouseEnter={() => setMascotMessage('Vem se cadastrar, vai ser rápido!')}>Cadastre-se</button>
-                </p>
-              )}
-              <button type="button" className="auth-back-btn" onClick={() => onNavigate('user-type-selection')} onMouseEnter={() => setMascotMessage('Voltando para a seleção...')}>
-                ← Voltar à seleção
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <form className="auth-form" onSubmit={handleLogin}>
+        <h2>Login</h2>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Senha"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          required
+        />
+        <button type="submit">Entrar</button>
+        
+        <p>
+          <button type="button" className="esqueceu-senha-btn" onClick={() => setShowEsqueceuSenha(true)}>
+            Esqueceu a senha?
+          </button>
+        </p>
+        {userType === 'administrador' ? (
+          <p className="admin-info">
+            <small>Administradores já estão cadastrados no sistema</small>
+          </p>
+        ) : (
+          <p>
+            Não tem conta? 
+            <button type="button" onClick={() => onNavigate('cadastro')}>
+              Cadastre-se aqui
+            </button>
+          </p>
+        )}
+        <p>
+          <button type="button" onClick={() => onNavigate('user-type-selection')}>
+            Voltar à seleção
+          </button>
+        </p>
+      </form>
+      
       {showEsqueceuSenha && (
-        <EsqueceuSenha onClose={() => setShowEsqueceuSenha(false)} userType={userType} />
+        <EsqueceuSenha 
+          onClose={() => setShowEsqueceuSenha(false)} 
+          userType={userType}
+        />
       )}
     </div>
   )
 }
 
+export default Login
 function EsqueceuSenha({ onClose, userType }) {
   const [email, setEmail] = useState('')
   const [novaSenha, setNovaSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(1) // 1: email, 2: nova senha
 
   const verificarEmail = (e) => {
     e.preventDefault()
+    
     try {
       const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
       const usuario = usuarios.find(u => u.email === email && u.tipo === userType)
-      if (!usuario) { alert('Email não encontrado para este tipo de usuário!'); return }
+      
+      if (!usuario) {
+        alert('Email não encontrado para este tipo de usuário!')
+        return
+      }
+      
       setStep(2)
-    } catch { alert('Erro ao verificar email. Tente novamente.') }
+    } catch (error) {
+      alert('Erro ao verificar email. Tente novamente.')
+    }
   }
 
   const redefinirSenha = (e) => {
     e.preventDefault()
-    if (novaSenha !== confirmarSenha) { alert('Senhas não coincidem!'); return }
-    if (novaSenha.length < 6) { alert('Nova senha deve ter pelo menos 6 caracteres!'); return }
+    
+    if (novaSenha !== confirmarSenha) {
+      alert('Senhas não coincidem!')
+      return
+    }
+
+    if (novaSenha.length < 6) {
+      alert('Nova senha deve ter pelo menos 6 caracteres!')
+      return
+    }
+
     try {
       const usuarios = JSON.parse(localStorage.getItem('learnwave_users') || '[]')
-      const idx = usuarios.findIndex(u => u.email === email)
-      if (idx !== -1) {
-        usuarios[idx].senha = novaSenha
+      const usuarioIndex = usuarios.findIndex(u => u.email === email)
+      
+      if (usuarioIndex !== -1) {
+        usuarios[usuarioIndex].senha = novaSenha
         localStorage.setItem('learnwave_users', JSON.stringify(usuarios))
         alert('Senha redefinida com sucesso!')
         onClose()
       }
-    } catch { alert('Erro ao redefinir senha. Tente novamente.') }
+    } catch (error) {
+      alert('Erro ao redefinir senha. Tente novamente.')
+    }
   }
 
   return (
     <div className="modal-overlay">
       <div className="modal-content esqueceu-senha-modal">
         <h3>🔒 Redefinir Senha</h3>
+        
         {step === 1 ? (
           <form onSubmit={verificarEmail}>
             <p>Digite seu email para redefinir a senha:</p>
-            <input type="email" placeholder="Seu email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input
+              type="email"
+              placeholder="Seu email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
             <div className="modal-actions">
-              <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
-              <button type="submit" className="btn-confirm">Verificar Email</button>
+              <button type="button" className="btn-cancel" onClick={onClose}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn-confirm">
+                Verificar Email
+              </button>
             </div>
           </form>
         ) : (
           <form onSubmit={redefinirSenha}>
             <p>Email: <strong>{email}</strong></p>
             <p>Digite sua nova senha:</p>
-            <input type="password" placeholder="Nova senha (mín. 6 caracteres)" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} required />
-            <input type="password" placeholder="Confirmar nova senha" value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} required />
+            <input
+              type="password"
+              placeholder="Nova senha (mín. 6 caracteres)"
+              value={novaSenha}
+              onChange={(e) => setNovaSenha(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Confirmar nova senha"
+              value={confirmarSenha}
+              onChange={(e) => setConfirmarSenha(e.target.value)}
+              required
+            />
             <div className="modal-actions">
-              <button type="button" className="btn-cancel" onClick={() => setStep(1)}>Voltar</button>
-              <button type="submit" className="btn-confirm">Redefinir Senha</button>
+              <button type="button" className="btn-cancel" onClick={() => setStep(1)}>
+                Voltar
+              </button>
+              <button type="submit" className="btn-confirm">
+                Redefinir Senha
+              </button>
             </div>
           </form>
         )}
@@ -183,5 +191,3 @@ function EsqueceuSenha({ onClose, userType }) {
     </div>
   )
 }
-
-export default Login

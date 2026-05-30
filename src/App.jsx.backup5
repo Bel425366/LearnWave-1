@@ -88,6 +88,11 @@ function App() {
   }
 
   const renderPage = () => {
+    const paginasProtegidas = ['dashboard', 'painel-professor', 'painel-admin', 'area-aluno', 'videoaulas', 'atividades', 'materiais', 'gerenciar-usuarios']
+    if (!user && paginasProtegidas.includes(currentPage)) {
+      return <UserTypeSelection onSelectUserType={handleUserTypeSelection} />
+    }
+
     switch (currentPage) {
       case 'user-type-selection':
         return <UserTypeSelection onSelectUserType={handleUserTypeSelection} />

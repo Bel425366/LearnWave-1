@@ -18,7 +18,7 @@ function PainelProfessor({ user, onNavigate }) {
   useEffect(() => {
     fetch(`https://learnwaveback2.onrender.com/api/atividades/professor/${user.id}`)
       .then(r => r.json())
-      .then(data => setAtividades(data))
+      .then(data => setAtividades(Array.isArray(data) ? data : []))
       .catch(() => {
         const saved = JSON.parse(localStorage.getItem('atividades') || '[]')
         setAtividades(saved.filter(a => a.professorId === user.id))
