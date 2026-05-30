@@ -43,14 +43,14 @@ function AreaAluno({ user, onNavigate }) {
   })()
 
   useEffect(() => {
-    fetch('https://learnwaveback-8.onrender.com/api/atividades')
+    fetch('https://learnwaveback2.onrender.com/api/atividades')
       .then(r => r.json())
       .then(data => setTodasAtividades(data))
       .catch(() => {
         const local = JSON.parse(localStorage.getItem('atividades') || '[]').filter(a => !a.excluido)
         setTodasAtividades(local)
       })
-    fetch('https://learnwaveback-8.onrender.com/api/usuarios/professores/aprovados')
+    fetch('https://learnwaveback2.onrender.com/api/usuarios/professores/aprovados')
       .then(r => r.json())
       .then(data => setProfessores(data))
       .catch(() => {})
@@ -133,7 +133,7 @@ function AreaAluno({ user, onNavigate }) {
   const salvarPerfil = async (novosDados) => {
     try {
       console.log('user.id:', user.id, '| novo nome:', novosDados.apelido)
-      const response = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(novosDados.apelido)}`, {
+      const response = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(novosDados.apelido)}`, {
         method: 'PATCH'
       })
       console.log('resposta status:', response.status)
@@ -255,7 +255,7 @@ function AreaAluno({ user, onNavigate }) {
         )}
         {activeTab === 'materiais' && (
           <TabMateriais
-            materiais={todosMateriais}
+            professores={professores}
             progressoAluno={progressoAluno}
             onBaixar={baixarMaterial}
           />
@@ -393,32 +393,132 @@ function TabVideoaulas({ videoaulas, progressoAluno, onMarcar }) {
   )
 }
 
-function TabMateriais({ materiais, progressoAluno, onBaixar }) {
-  if (materiais.length === 0) {
+function TabMateriais({ professores, progressoAluno, onBaixar }) {
+  const [professorSelecionado, setProfessorSelecionado] = useState(null)
+  const [materiais, setMateriais] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [areasAbertas, setAreasAbertas] = useState({})
+  const [professoresComMaterial, setProfessoresComMaterial] = useState([])
+  const [loadingProfessores, setLoadingProfessores] = useState(true)
+  const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
+
+  useEffect(() => {
+    const verificar = async () => {
+      setLoadingProfessores(true)
+      const resultado = []
+      await Promise.all(professores.map(async (prof) => {
+        try {
+          const res = await fetch(`https://learnwaveback2.onrender.com/api/materiais/professor/${prof.id}`)
+          const data = await res.json()
+          const temPublicado = data.some(m => (m.status === 'PUBLICADO' || m.status === 'publicado') && m.situacao !== 'lixeira' && m.situacao !== 'excluido')
+          if (temPublicado) resultado.push(prof)
+        } catch {}
+      }))
+      setProfessoresComMaterial(resultado)
+      setLoadingProfessores(false)
+    }
+    if (professores.length > 0) verificar()
+    else setLoadingProfessores(false)
+  }, [professores])
+
+  const selecionarProfessor = async (prof) => {
+    setProfessorSelecionado(prof)
+    setAreasAbertas({})
+    setLoading(true)
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/materiais/professor/${prof.id}`)
+      const data = await res.json()
+      setMateriais(data.filter(m => (m.status === 'PUBLICADO' || m.status === 'publicado') && m.situacao !== 'lixeira' && m.situacao !== 'excluido'))
+    } catch {
+      setMateriais([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (professorSelecionado) {
+    const porArea = materiais.reduce((acc, m) => {
+      acc[m.area] = acc[m.area] || []
+      acc[m.area].push(m)
+      return acc
+    }, {})
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <button onClick={() => { setProfessorSelecionado(null); setMateriais([]) }} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '0.4rem 0.9rem', cursor: 'pointer', color: 'inherit', marginBottom: '0.5rem' }}>
+          ← Voltar aos professores
+        </button>
+        <h3 style={{ margin: '0 0 0.75rem', opacity: 0.9 }}>Materiais de {professorSelecionado.nome}</h3>
+        {loading && <p style={{ opacity: 0.6 }}>Carregando...</p>}
+        {!loading && materiais.length === 0 && <EstadoVazio mensagem="Nenhum material publicado ainda." />}
+        {!loading && Object.entries(porArea).map(([area, itens]) => {
+          const aberta = areasAbertas[area] === true
+          return (
+            <div key={area} style={{ marginBottom: '0.5rem' }}>
+              <button onClick={() => toggleArea(area)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: aberta ? '8px 8px 0 0' : '8px', cursor: 'pointer', color: 'inherit', fontSize: '1rem', fontWeight: 600 }}>
+                <span>{area} <span style={{ fontWeight: 400, opacity: 0.6, fontSize: '0.85rem' }}>({itens.length})</span></span>
+                <span>{aberta ? '▲' : '▼'}</span>
+              </button>
+              {aberta && (
+                <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '0.5rem' }} className="aluno-grid">
+                  {itens.map(material => {
+                    const baixado = progressoAluno.materiaisBaixados.includes(material.id)
+                    return (
+                      <div key={material.id} className="aluno-card">
+                        <div className="aluno-card-header">
+                          <span className="aluno-card-tag">{material.tipoArquivo}</span>
+                          {baixado && <span className="aluno-badge badge-ok">Baixado</span>}
+                        </div>
+                        <h3 className="aluno-card-title">{material.titulo}</h3>
+                        {material.descricao && <p className="aluno-card-desc">{material.descricao}</p>}
+                        {material.arquivoUrl && (
+                          <a
+                            href={material.arquivoUrl}
+                            download={`${material.titulo}.${(material.tipoArquivo || 'pdf').toLowerCase()}`}
+                            className="aluno-btn"
+                            onClick={() => onBaixar(material.id)}
+                          >
+                            Baixar
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          </a>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  const professoresComMateriais = professoresComMaterial
+
+  if (loadingProfessores) {
+    return <EstadoVazio mensagem="Carregando materiais..." />
+  }
+
+  if (professoresComMateriais.length === 0) {
     return <EstadoVazio mensagem="Nenhum material disponível no momento." />
   }
 
   return (
     <div className="aluno-grid">
-      {materiais.map(material => {
-        const baixado = progressoAluno.materiaisBaixados.includes(material.id)
-        return (
-          <div key={material.id} className="aluno-card">
-            <div className="aluno-card-header">
-              <span className="aluno-card-tag">{material.area}</span>
-              {baixado && <span className="aluno-badge badge-ok">Baixado</span>}
-            </div>
-            <h3 className="aluno-card-title">{material.titulo}</h3>
-            <p className="aluno-card-meta">{material.tipo} · {material.arquivo}</p>
-            {!baixado && (
-              <button className="aluno-btn" onClick={() => onBaixar(material.id)}>
-                Baixar
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </button>
-            )}
+      {professoresComMateriais.map(prof => (
+        <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer' }} onClick={() => selecionarProfessor(prof)}>
+          <div className="aluno-card-header">
+            <span className="aluno-card-tag">Professor</span>
           </div>
-        )
-      })}
+          <h3 className="aluno-card-title">{prof.nome}</h3>
+          {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
+          <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
+            Ver materiais
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -664,7 +764,7 @@ function AlterarSenha({ userEmail, userId }) {
     if (senhaData.novaSenha !== senhaData.confirmarSenha) { setErro('As senhas não coincidem.'); return }
     try {
       const params = new URLSearchParams({ senhaAtual: senhaData.senhaAtual, novaSenha: senhaData.novaSenha })
-      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
       if (!res.ok) { setErro(await res.text()); return }
       setSenhaData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
       setSucesso(true)
@@ -707,7 +807,7 @@ function DesativarConta({ user, onDesativar }) {
     setLoading(true)
     setErro('')
     try {
-      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
       if (!res.ok) throw new Error(await res.text())
       localStorage.clear()
       onDesativar()

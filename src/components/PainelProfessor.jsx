@@ -16,7 +16,7 @@ function PainelProfessor({ user, onNavigate }) {
   const [atividades, setAtividades] = useState([])
 
   useEffect(() => {
-    fetch(`https://learnwaveback-8.onrender.com/api/atividades/professor/${user.id}`)
+    fetch(`https://learnwaveback2.onrender.com/api/atividades/professor/${user.id}`)
       .then(r => r.json())
       .then(data => setAtividades(data))
       .catch(() => {
@@ -28,10 +28,7 @@ function PainelProfessor({ user, onNavigate }) {
     const saved = localStorage.getItem('videoaulas')
     return saved ? JSON.parse(saved) : []
   })
-  const [materiais, setMateriais] = useState(() => {
-    const saved = localStorage.getItem('materiais')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [materiais, setMateriais] = useState([])
 
   const renderContent = () => {
     switch (activeTab) {
@@ -40,7 +37,7 @@ function PainelProfessor({ user, onNavigate }) {
       case 'videoaulas':
         return <GerenciarVideoaulas videoaulas={videoaulas} setVideoaulas={setVideoaulas} />
       case 'materiais':
-        return <GerenciarMateriais materiais={materiais} setMateriais={setMateriais} />
+        return <GerenciarMateriais materiais={materiais} setMateriais={setMateriais} professorId={user.id} />
       case 'progresso':
         return <AcompanharProgresso />
       case 'lixeira':
@@ -155,7 +152,7 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
     try {
       let atividadeSalva
       if (editingId) {
-        const res = await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${editingId}`, {
+        const res = await fetch(`https://learnwaveback2.onrender.com/api/atividades/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -166,7 +163,7 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
         setAtividades(newAtividades)
         localStorage.setItem('atividades', JSON.stringify(newAtividades))
       } else {
-        const res = await fetch('https://learnwaveback-8.onrender.com/api/atividades', {
+        const res = await fetch('https://learnwaveback2.onrender.com/api/atividades', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -203,7 +200,7 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
 
   const confirmDelete = async () => {
     try {
-      const res = await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${deleteModal.id}/lixeira`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/atividades/${deleteModal.id}/lixeira`, { method: 'PATCH' })
       if (!res.ok) throw new Error(await res.text())
     } catch (err) {
       console.error('Erro ao mover para lixeira:', err)
@@ -418,773 +415,90 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas }) {
   )
 }
 
-function GerenciarMateriais({ materiais, setMateriais }) {
+function GerenciarMateriais({ materiais, setMateriais, professorId }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [formData, setFormData] = useState({ titulo: '', area: '', tipo: 'PDF', arquivo: '' })
+  const [formData, setFormData] = useState({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'PUBLICADO' })
+  const [arquivo, setArquivo] = useState(null)
+  const [areasAbertas, setAreasAbertas] = useState({})
+  const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetch(`https://learnwaveback2.onrender.com/api/materiais/professor/${professorId}`)
+      .then(r => r.json())
+      .then(data => setMateriais(data))
+      .catch(() => {})
+  }, [professorId])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    let newMateriais
-    if (editingId) {
-      newMateriais = materiais.map(m => m.id === editingId ? { ...m, ...formData } : m)
-    } else {
-      newMateriais = [...materiais, { id: Date.now(), ...formData, excluido: false }]
+    if (!editingId && !arquivo) {
+      alert('Selecione um arquivo.')
+      return
     }
-    setMateriais(newMateriais)
-    localStorage.setItem('materiais', JSON.stringify(newMateriais))
-    setFormData({ titulo: '', area: '', tipo: 'PDF', arquivo: '' })
+    let arquivoBase64 = formData.arquivoUrl || null
+    if (arquivo) {
+      arquivoBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (e) => resolve(e.target.result)
+        reader.onerror = () => reject(new Error('Erro ao ler o arquivo'))
+        reader.readAsDataURL(arquivo)
+      })
+    }
+    const payload = {
+      titulo: formData.titulo,
+      descricao: formData.descricao,
+      area: formData.area,
+      professorId,
+      tipoArquivo: formData.tipoArquivo,
+      arquivoUrl: arquivoBase64,
+      status: formData.status
+    }
+    try {
+      let salvo
+      if (editingId) {
+        const res = await fetch(`https://learnwaveback2.onrender.com/api/materiais/${editingId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error(await res.text())
+        salvo = await res.json()
+        setMateriais(materiais.map(m => m.id === editingId ? salvo : m))
+      } else {
+        const res = await fetch('https://learnwaveback2.onrender.com/api/materiais', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error(await res.text())
+        salvo = await res.json()
+        setMateriais([...materiais, salvo])
+      }
+    } catch (err) {
+      alert('Erro ao salvar material: ' + err.message)
+      return
+    }
+    setFormData({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'PUBLICADO' })
+    setArquivo(null)
     setShowForm(false)
     setEditingId(null)
   }
 
   const handleEdit = (material) => {
-    setFormData(material)
+    setFormData({
+      titulo: material.titulo || '',
+      descricao: material.descricao || '',
+      area: material.area || '',
+      tipoArquivo: material.tipoArquivo || 'PDF',
+      arquivoUrl: material.arquivoUrl || '',
+      status: material.status || 'PUBLICADO'
+    })
+    setArquivo(null)
     setEditingId(material.id)
     setShowForm(true)
   }
 
-  const handleDelete = (id) => {
-    if (confirm('Mover para lixeira?')) {
-      const newMateriais = materiais.map(m => m.id === id ? { ...m, excluido: true } : m)
-      setMateriais(newMateriais)
-      localStorage.setItem('materiais', JSON.stringify(newMateriais))
-    }
-  }
-
-  return (
-    <div className="gerenciar-materiais">
-      <div className="header-actions">
-        <h3>Gerenciar Materiais</h3>
-        <button className="btn-primary" onClick={() => setShowForm(true)}>Novo Material</button>
-      </div>
-      
-      {showForm && (
-        <form onSubmit={handleSubmit} className="form-atividade">
-          <input
-            type="text"
-            placeholder="Título do material"
-            value={formData.titulo}
-            onChange={(e) => setFormData({...formData, titulo: e.target.value})}
-            required
-          />
-          <select
-            value={formData.area}
-            onChange={(e) => setFormData({...formData, area: e.target.value})}
-            required
-          >
-            <option value="">Área</option>
-            {AREAS.map(area => <option key={area} value={area}>{area}</option>)}
-          </select>
-          <select
-            value={formData.tipo}
-            onChange={(e) => setFormData({...formData, tipo: e.target.value})}
-          >
-            <option value="PDF">PDF</option>
-            <option value="DOC">DOC</option>
-            <option value="PPT">PPT</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Nome do arquivo"
-            value={formData.arquivo}
-            onChange={(e) => setFormData({...formData, arquivo: e.target.value})}
-            required
-          />
-          <div className="form-actions">
-            <button type="submit">{editingId ? 'Atualizar' : 'Criar'}</button>
-            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ titulo: '', area: '', tipo: 'PDF', arquivo: '' }); }}>Cancelar</button>
-          </div>
-        </form>
-      )}
-      
-      <div className="atividades-lista">
-        {materiais.filter(m => !m.excluido).map(material => (
-          <div key={material.id} className="atividade-item">
-            <div>
-              <h4>{material.titulo}</h4>
-              <p>Área: {material.area} | Tipo: {material.tipo}</p>
-              <p>Arquivo: {material.arquivo}</p>
-            </div>
-            <div className="actions">
-              <button onClick={() => handleEdit(material)}>Editar</button>
-              <button onClick={() => handleDelete(material.id)}>Excluir</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function AcompanharProgresso() {
-  const [submissoes, setSubmissoes] = useState(() => {
-    return JSON.parse(localStorage.getItem('submissoes')) || []
-  })
-  const [usuarios, setUsuarios] = useState([])
-  const [atividades, setAtividades] = useState([])
-
-  useEffect(() => {
-    const buscarAlunos = async () => {
-      try {
-        const response = await fetch('https://learnwaveback-8.onrender.com/api/usuarios/tipo/ALUNO')
-        if (response.ok) setUsuarios((await response.json()).filter(a => a.status !== 'inativo'))
-      } catch (error) {
-        console.error('Erro ao buscar alunos:', error)
-      }
-    }
-    const buscarAtividades = async () => {
-      try {
-        const response = await fetch('https://learnwaveback-8.onrender.com/api/atividades')
-        if (response.ok) setAtividades(await response.json())
-      } catch (error) {
-        console.error('Erro ao buscar atividades:', error)
-      }
-    }
-    buscarAlunos()
-    buscarAtividades()
-  }, [])
-
-  const atividadesAtivas = atividades.filter(a => a.situacao === 'ativo' || !a.situacao)
-
-  const submissoesValidas = submissoes.filter(s =>
-    atividadesAtivas.some(a => a.id === s.atividadeId)
-  )
-
-  const darNota = (submissaoId, nota) => {
-    const notaNum = parseFloat(nota)
-    if (isNaN(notaNum) || notaNum < 0 || notaNum > 10) {
-      alert('Nota deve ser um número entre 0 e 10')
-      return
-    }
+  const handleDelete = async (id) => {
+    if (!confirm('Mover para lixeira?')) return
     try {
-      const novasSubmissoes = submissoes.map(s =>
-        s.id === submissaoId ? { ...s, nota: notaNum, status: 'corrigida' } : s
-      )
-      setSubmissoes(novasSubmissoes)
-      localStorage.setItem('submissoes', JSON.stringify(novasSubmissoes))
-    } catch (error) {
-      alert('Erro ao salvar nota. Tente novamente.')
-    }
-  }
-
-  const submissoesPendentes = submissoesValidas.filter(s => {
-    if (s.status !== 'pendente') return false
-    const atividade = atividadesAtivas.find(a => a.id === s.atividadeId)
-    return !!atividade
-  })
-
-  return (
-    <div className="acompanhar-progresso">
-      <h3>Progresso de Todos os Alunos</h3>
-      
-      <div className="secao-correcao">
-        <h4>Alunos Cadastrados ({usuarios.length})</h4>
-        {usuarios.map(aluno => {
-          const submissoesAluno = submissoesValidas.filter(s => s.alunoEmail === aluno.email && s.nota !== null)
-          const notaMedia = submissoesAluno.length > 0
-            ? (submissoesAluno.reduce((acc, s) => acc + s.nota, 0) / submissoesAluno.length).toFixed(1)
-            : 0
-          
-          return (
-            <div key={aluno.id} className="aluno-progresso">
-              <h5>{aluno.nome} ({aluno.email})</h5>
-              <p>Atividades realizadas: {submissoesAluno.length}</p>
-              <p>Nota média: {notaMedia}</p>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="secao-correcao">
-        <h4>Pendentes de Correção ({submissoesPendentes.length})</h4>
-        {submissoesPendentes.map(submissao => (
-          <div key={submissao.id} className="submissao-item">
-            <div className="submissao-info">
-              <h5>Atividade: {submissao.atividadeId}</h5>
-              <p><strong>Aluno:</strong> {submissao.alunoNome}</p>
-              {submissao.resposta && <p><strong>Resposta:</strong> {submissao.resposta}</p>}
-            </div>
-            <div className="correcao-actions">
-              <input 
-                type="number" 
-                min="0" 
-                max="10" 
-                step="0.1" 
-                placeholder="Nota (0-10)"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    darNota(submissao.id, e.target.value)
-                    e.target.value = ''
-                  }
-                }}
-              />
-              <button onClick={(e) => {
-                const input = e.target.previousElementSibling
-                darNota(submissao.id, input.value)
-                input.value = ''
-              }}>Dar Nota</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materiais, setMateriais }) {
-  const [activeType, setActiveType] = useState('atividades')
-
-  const restaurarAtividade = async (id) => {
-    try {
-      await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${id}/restaurar`, { method: 'PATCH' })
+      await fetch(`https://learnwaveback2.onrender.com/api/materiais/${id}`, { method: 'DELETE' })
     } catch (err) {
-      console.error('Erro ao restaurar:', err)
+      console.error('Erro ao mover para lixeira:', err)
     }
-    const newAtividades = atividades.map(a => a.id === id ? { ...a, situacao: 'ativo', excluido: false } : a)
-    setAtividades(newAtividades)
-    localStorage.setItem('atividades', JSON.stringify(newAtividades))
-  }
-
-  const excluirPermanente = async (id) => {
-    if (!window.confirm('Tem certeza que deseja excluir permanentemente? Esta ação não pode ser desfeita!')) return
-    try {
-      await fetch(`https://learnwaveback-8.onrender.com/api/atividades/${id}`, { method: 'DELETE' })
-    } catch (err) {
-      console.error('Erro ao excluir:', err)
-    }
-    const newAtividades = atividades.filter(a => a.id !== id)
-    setAtividades(newAtividades)
-    localStorage.setItem('atividades', JSON.stringify(newAtividades))
-  }
-
-  const restaurarVideoaula = (id) => {
-    const newVideoaulas = videoaulas.map(v => v.id === id ? { ...v, excluido: false } : v)
-    setVideoaulas(newVideoaulas)
-    localStorage.setItem('videoaulas', JSON.stringify(newVideoaulas))
-  }
-
-  const restaurarMaterial = (id) => {
-    const newMateriais = materiais.map(m => m.id === id ? { ...m, excluido: false } : m)
-    setMateriais(newMateriais)
-    localStorage.setItem('materiais', JSON.stringify(newMateriais))
-  }
-
-  const renderContent = () => {
-    switch (activeType) {
-      case 'atividades':
-        return atividades.filter(a => a.excluido || a.situacao === 'lixeira').map(atividade => (
-          <div key={atividade.id} className="atividade-item">
-            <div>
-              <h4>{atividade.titulo}</h4>
-              <p>Área: {atividade.area} | Status: {atividade.status}</p>
-            </div>
-            <div className="actions">
-              <button onClick={() => restaurarAtividade(atividade.id)}>Restaurar</button>
-              <button onClick={() => excluirPermanente(atividade.id)}>Excluir permanentemente</button>
-            </div>
-          </div>
-        ))
-      case 'videoaulas':
-        return videoaulas.filter(v => v.excluido).map(video => (
-          <div key={video.id} className="atividade-item">
-            <div>
-              <h4>{video.titulo}</h4>
-              <p>Área: {video.area} | Duração: {video.duracao}</p>
-            </div>
-            <button onClick={() => restaurarVideoaula(video.id)}>Restaurar</button>
-          </div>
-        ))
-      case 'materiais':
-        return materiais.filter(m => m.excluido).map(material => (
-          <div key={material.id} className="atividade-item">
-            <div>
-              <h4>{material.titulo}</h4>
-              <p>Área: {material.area} | Tipo: {material.tipo}</p>
-            </div>
-            <button onClick={() => restaurarMaterial(material.id)}>Restaurar</button>
-          </div>
-        ))
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="lixeira">
-      <h3>Lixeira</h3>
-      <div className="lixeira-tabs">
-        <button 
-          className={activeType === 'atividades' ? 'active' : ''}
-          onClick={() => setActiveType('atividades')}
-        >
-          Atividades ({atividades.filter(a => a.excluido).length})
-        </button>
-        <button 
-          className={activeType === 'videoaulas' ? 'active' : ''}
-          onClick={() => setActiveType('videoaulas')}
-        >
-          Videoaulas ({videoaulas.filter(v => v.excluido).length})
-        </button>
-        <button 
-          className={activeType === 'materiais' ? 'active' : ''}
-          onClick={() => setActiveType('materiais')}
-        >
-          Materiais ({materiais.filter(m => m.excluido).length})
-        </button>
-      </div>
-      <div className="lixeira-content">
-        {renderContent()}
-      </div>
-    </div>
-  )
-}
-
-function PerfilProfessor({ user }) {
-  const [perfilData, setPerfilData] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`perfil_${user.email}`)
-      return saved ? JSON.parse(saved) : {
-        apelido: user.nome,
-        bio: '',
-        fotoPerfil: null
-      }
-    } catch {
-      return {
-        apelido: user.nome,
-        bio: '',
-        fotoPerfil: null
-      }
-    }
-  })
-
-  const [formData, setFormData] = useState(perfilData)
-  const [previewFoto, setPreviewFoto] = useState(perfilData.fotoPerfil)
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleFotoChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const fotoBase64 = e.target.result
-        setPreviewFoto(fotoBase64)
-        setFormData({ ...formData, fotoPerfil: fotoBase64 })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      const response = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(formData.apelido)}`, {
-        method: 'PATCH'
-      })
-      if (!response.ok) throw new Error(await response.text())
-      setPerfilData(formData)
-      localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
-      alert('Perfil atualizado com sucesso!')
-      window.dispatchEvent(new Event('storage'))
-    } catch (error) {
-      console.error('Erro ao atualizar perfil:', error)
-      alert('Erro ao salvar perfil: ' + error.message)
-    }
-  }
-
-  return (
-    <div className="perfil-aluno">
-      <h3>Meu Perfil</h3>
-      <form onSubmit={handleSubmit} className="form-perfil">
-        <div className="foto-perfil-section">
-          <div className="foto-preview">
-            {previewFoto ? (
-              <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
-            ) : (
-              <div className="foto-placeholder">
-                <span>📷</span>
-                <p>Adicionar foto</p>
-              </div>
-            )}
-          </div>
-          <input
-            type="file"
-            id="fotoPerfil"
-            accept="image/*"
-            onChange={handleFotoChange}
-            className="foto-input"
-          />
-          <label htmlFor="fotoPerfil" className="btn-foto">
-            {previewFoto ? 'Alterar Foto' : 'Adicionar Foto'}
-          </label>
-        </div>
-
-        <div className="campo-perfil">
-          <label>Apelido:</label>
-          <input
-            type="text"
-            name="apelido"
-            value={formData.apelido}
-            onChange={handleChange}
-            placeholder="Como você gostaria de ser chamado?"
-            maxLength="30"
-            required
-          />
-        </div>
-
-        <div className="campo-perfil">
-          <label>Bio:</label>
-          <textarea
-            name="bio"
-            value={formData.bio}
-            onChange={handleChange}
-            placeholder="Conte um pouco sobre você..."
-            maxLength="200"
-            rows="4"
-          />
-          <small>{formData.bio.length}/200 caracteres</small>
-        </div>
-
-        <button type="submit" className="btn-salvar-perfil">
-          Salvar Perfil
-        </button>
-      </form>
-      
-      <AlterarSenhaProfessor userId={user.id} />
-      <DesativarContaProfessor user={user} />
-    </div>
-  )
-}
-function VisualizarAlunos() {
-  const [alunos, setAlunos] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const buscarAlunos = async () => {
-      try {
-        const response = await fetch('https://learnwaveback-8.onrender.com/api/usuarios/tipo/ALUNO')
-        if (response.ok) {
-          const alunosData = await response.json()
-          setAlunos(alunosData.filter(a => a.status !== 'inativo'))
-        }
-      } catch (error) {
-        console.error('Erro ao buscar alunos:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    buscarAlunos()
-  }, [])
-
-  const obterPerfilAluno = (email) => {
-    try {
-      const perfil = JSON.parse(localStorage.getItem(`perfil_${email}`))
-      return perfil || { apelido: '', bio: '', fotoPerfil: null }
-    } catch {
-      return { apelido: '', bio: '', fotoPerfil: null }
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="visualizar-alunos">
-        <h3>Perfis dos Alunos</h3>
-        <p>Carregando alunos...</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="visualizar-alunos">
-      <h3>Perfis dos Alunos</h3>
-      <div className="alunos-grid">
-        {alunos.map(aluno => {
-          const perfil = obterPerfilAluno(aluno.email)
-          return (
-            <div key={aluno.id} className="aluno-perfil-card">
-              <div className="aluno-foto">
-                {perfil.fotoPerfil ? (
-                  <img src={perfil.fotoPerfil} alt="Foto do aluno" className="foto-aluno" />
-                ) : (
-                  <div className="foto-placeholder-aluno">
-                    <span>A</span>
-                  </div>
-                )}
-              </div>
-              <div className="aluno-info">
-                <h4>{perfil.apelido || aluno.nome}</h4>
-                <p className="nome-real">{aluno.nome}</p>
-                <p className="email-aluno">{aluno.email}</p>
-                {perfil.bio && (
-                  <div className="bio-aluno">
-                    <strong>Bio:</strong>
-                    <p>{perfil.bio}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      {alunos.length === 0 && (
-        <div className="sem-alunos">
-          <p>Nenhum aluno cadastrado ainda.</p>
-        </div>
-      )}
-    </div>
-  )
-}
-function AlterarSenhaProfessor({ userId }) {
-  const [senhaData, setSenhaData] = useState({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
-  const [erro, setErro] = useState('')
-  const [sucesso, setSucesso] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setErro('')
-    setSucesso(false)
-    if (!SENHA_FORTE(senhaData.novaSenha)) { setErro('A nova senha não atende aos requisitos de segurança.'); return }
-    if (senhaData.novaSenha !== senhaData.confirmarSenha) { setErro('As senhas não coincidem.'); return }
-    try {
-      const params = new URLSearchParams({ senhaAtual: senhaData.senhaAtual, novaSenha: senhaData.novaSenha })
-      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${userId}/senha?${params}`, { method: 'PATCH' })
-      if (!res.ok) { setErro(await res.text()); return }
-      setSenhaData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
-      setSucesso(true)
-    } catch {
-      setErro('Erro ao conectar com o servidor. Tente novamente.')
-    }
-  }
-
-  return (
-    <div className="alterar-senha-section">
-      <h4>Alterar senha</h4>
-      <form onSubmit={handleSubmit} className="form-senha">
-        <div className="campo-perfil">
-          <label>Senha atual</label>
-          <input type="password" name="senhaAtual" value={senhaData.senhaAtual} onChange={(e) => setSenhaData({ ...senhaData, senhaAtual: e.target.value })} placeholder="Digite sua senha atual" required />
-        </div>
-        <div className="campo-perfil">
-          <label>Nova senha</label>
-          <input type="password" name="novaSenha" value={senhaData.novaSenha} onChange={(e) => setSenhaData({ ...senhaData, novaSenha: e.target.value })} placeholder="Crie uma senha forte" required />
-        </div>
-        {senhaData.novaSenha && <PasswordValidator password={senhaData.novaSenha} />}
-        <div className="campo-perfil">
-          <label>Confirmar nova senha</label>
-          <input type="password" name="confirmarSenha" value={senhaData.confirmarSenha} onChange={(e) => setSenhaData({ ...senhaData, confirmarSenha: e.target.value })} placeholder="Repita a nova senha" required />
-        </div>
-        {erro && <p className="senha-erro">{erro}</p>}
-        {sucesso && <p className="senha-sucesso">Senha alterada com sucesso.</p>}
-        <button type="submit" className="btn-alterar-senha">Salvar nova senha</button>
-      </form>
-    </div>
-  )
-}
-
-function FormularioQuestoes({ formData, setFormData }) {
-  const adicionarQuestao = () => {
-    const novaQuestao = {
-      pergunta: '',
-      opcaoA: '',
-      opcaoB: '',
-      opcaoC: '',
-      opcaoD: '',
-      respostaCorreta: ''
-    }
-    const questoesAtuais = formData.questoes || []
-    setFormData({...formData, questoes: [...questoesAtuais, novaQuestao]})
-  }
-
-  const removerQuestao = (index) => {
-    const novasQuestoes = formData.questoes.filter((_, i) => i !== index)
-    setFormData({...formData, questoes: novasQuestoes})
-  }
-
-  const atualizarQuestao = (index, campo, valor) => {
-    const novasQuestoes = [...formData.questoes]
-    novasQuestoes[index] = {...novasQuestoes[index], [campo]: valor}
-    setFormData({...formData, questoes: novasQuestoes})
-  }
-
-  return (
-    <div className="formulario-questoes">
-      <div className="questoes-header">
-        <h4>Questões ({formData.questoes?.length || 0})</h4>
-        <button type="button" onClick={adicionarQuestao} className="btn-adicionar">
-          + Adicionar Questão
-        </button>
-      </div>
-      
-      {formData.questoes?.map((questao, index) => (
-        <div key={index} className="questao-item">
-          <div className="questao-header">
-            <h5>Questão {index + 1}</h5>
-            <button type="button" onClick={() => removerQuestao(index)} className="btn-remover">
-              ×
-            </button>
-          </div>
-          
-          <input
-            type="text"
-            placeholder="Digite a pergunta"
-            value={questao.pergunta || ''}
-            onChange={(e) => atualizarQuestao(index, 'pergunta', e.target.value)}
-            required
-          />
-          
-          <div className="opcoes-grid">
-            <input
-              type="text"
-              placeholder="Opção A"
-              value={questao.opcaoA || ''}
-              onChange={(e) => atualizarQuestao(index, 'opcaoA', e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Opção B"
-              value={questao.opcaoB || ''}
-              onChange={(e) => atualizarQuestao(index, 'opcaoB', e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Opção C"
-              value={questao.opcaoC || ''}
-              onChange={(e) => atualizarQuestao(index, 'opcaoC', e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Opção D"
-              value={questao.opcaoD || ''}
-              onChange={(e) => atualizarQuestao(index, 'opcaoD', e.target.value)}
-              required
-            />
-          </div>
-          
-          <select
-            value={questao.respostaCorreta || ''}
-            onChange={(e) => atualizarQuestao(index, 'respostaCorreta', e.target.value)}
-            required
-          >
-            <option value="">Resposta Correta</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-          </select>
-        </div>
-      ))}
-      
-      {(!formData.questoes || formData.questoes.length === 0) && (
-        <div className="opcoes-multipla">
-          <h4>Questão Única</h4>
-          <input
-            type="text"
-            placeholder="Opção A"
-            value={formData.opcaoA || ''}
-            onChange={(e) => setFormData({...formData, opcaoA: e.target.value})}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Opção B"
-            value={formData.opcaoB || ''}
-            onChange={(e) => setFormData({...formData, opcaoB: e.target.value})}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Opção C"
-            value={formData.opcaoC || ''}
-            onChange={(e) => setFormData({...formData, opcaoC: e.target.value})}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Opção D"
-            value={formData.opcaoD || ''}
-            onChange={(e) => setFormData({...formData, opcaoD: e.target.value})}
-            required
-          />
-          <select
-            value={formData.respostaCorreta || ''}
-            onChange={(e) => setFormData({...formData, respostaCorreta: e.target.value})}
-            required
-          >
-            <option value="">Resposta Correta</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-          </select>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function DesativarContaProfessor({ user }) {
-  const [showModal, setShowModal] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState('')
-
-  const confirmarDesativacao = async () => {
-    setLoading(true)
-    setErro('')
-    try {
-      // Apagar atividades do professor no backend
-      const atividadesRes = await fetch(`https://learnwaveback-8.onrender.com/api/atividades/professor/${user.id}`)
-      if (atividadesRes.ok) {
-        const atividades = await atividadesRes.json()
-        await Promise.all(atividades.map(a =>
-          fetch(`https://learnwaveback-8.onrender.com/api/atividades/${a.id}`, { method: 'DELETE' })
-        ))
-      }
-      // Desativar conta
-      const res = await fetch(`https://learnwaveback-8.onrender.com/api/usuarios/${user.id}/status?status=inativo`, { method: 'PATCH' })
-      if (!res.ok) throw new Error(await res.text())
-      localStorage.clear()
-      window.location.href = '/'
-    } catch {
-      setErro('Erro ao desativar conta. Tente novamente.')
-      setLoading(false)
-    }
-  }
-
-  return (
-    <>
-      <div className="desativar-conta-section">
-        <h4>Desativar conta</h4>
-        <p>Ao desativar sua conta, todas as suas atividades serão removidas e os alunos não terão mais acesso a elas.</p>
-        <button onClick={() => setShowModal(true)} className="btn-desativar-conta">Desativar minha conta</button>
-      </div>
-
-      {showModal && (
-        <div className="modal-overlay" onClick={() => !loading && setShowModal(false)}>
-          <div className="modal-desativar" onClick={e => e.stopPropagation()}>
-            <div className="modal-desativar-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </div>
-            <h3>Desativar conta?</h3>
-            <p>Tem certeza que deseja desativar sua conta? Você será desconectado imediatamente e <strong>todas as suas atividades serão apagadas</strong>.</p>
-            <p className="modal-desativar-aviso">Esta ação não pode ser desfeita sem contato com o administrador.</p>
-            {erro && <p className="senha-erro">{erro}</p>}
-            <div className="modal-desativar-actions">
-              <button onClick={() => setShowModal(false)} className="btn-cancelar-desativar" disabled={loading}>Cancelar</button>
-              <button onClick={confirmarDesativacao} className="btn-confirmar-desativar" disabled={loading}>
-                {loading ? 'Desativando...' : 'Sim, desativar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
-
-export default PainelProfessor

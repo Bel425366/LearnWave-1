@@ -1,7 +1,7 @@
 // API LearnWave - Funções para conectar com o backend
 import mockData from '../data/mock-data.json';
 
-const API_BASE = 'https://learnwaveback-8.onrender.com/api';
+const API_BASE = 'https://learnwaveback2.onrender.com/api';
 const USE_MOCK_DATA = false; // Ativar dados mockados quando backend não estiver disponível
 
 // USUÁRIOS
