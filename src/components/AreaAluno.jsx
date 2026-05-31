@@ -33,14 +33,6 @@ function AreaAluno({ user, onNavigate }) {
 
   const [todasAtividades, setTodasAtividades] = useState([])
   const [professores, setProfessores] = useState([])
-  const todasVideoaulas = (() => {
-    try { return (JSON.parse(localStorage.getItem('videoaulas')) || []).filter(v => !v.excluido) }
-    catch { return [] }
-  })()
-  const todosMateriais = (() => {
-    try { return (JSON.parse(localStorage.getItem('materiais')) || []).filter(m => !m.excluido) }
-    catch { return [] }
-  })()
 
   useEffect(() => {
     fetch('https://learnwaveback2.onrender.com/api/atividades')
@@ -248,7 +240,7 @@ function AreaAluno({ user, onNavigate }) {
         )}
         {activeTab === 'videoaulas' && (
           <TabVideoaulas
-            videoaulas={todasVideoaulas}
+            professores={professores}
             progressoAluno={progressoAluno}
             onMarcar={marcarVideoaulaAssistida}
           />
@@ -358,37 +350,198 @@ function TabAtividades({ atividades, professores, progressoAluno, userEmail, onA
   )
 }
 
-function TabVideoaulas({ videoaulas, progressoAluno, onMarcar }) {
-  if (videoaulas.length === 0) {
+function TabVideoaulas({ professores, progressoAluno, onMarcar }) {
+  const [professorSelecionado, setProfessorSelecionado] = useState(null)
+  const [videoaulas, setVideoaulas] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [professoresComVideo, setProfessoresComVideo] = useState([])
+  const [loadingProfessores, setLoadingProfessores] = useState(true)
+
+  // Extrair ID do YouTube a partir de uma URL
+  const getYoutubeId = (url) => {
+    if (!url) return null
+    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+    const match = url.match(regExp)
+    return (match && match[2].length === 11) ? match[2] : null
+  }
+
+  // Gerar thumbnail do YouTube
+  const getYoutubeThumbnail = (url) => {
+    const id = getYoutubeId(url)
+    return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null
+  }
+
+  useEffect(() => {
+    const verificar = async () => {
+      setLoadingProfessores(true)
+      const resultado = []
+
+      // Tentar buscar da API para cada professor
+      await Promise.all(professores.map(async (prof) => {
+        try {
+          const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/professor/${prof.id}`)
+          if (res.ok) {
+            const data = await res.json()
+            const temPublicado = Array.isArray(data) && data.some(v =>
+              (v.status === 'PUBLICADO' || v.status === 'publicado') && v.situacao !== 'lixeira' && v.situacao !== 'excluido' && !v.excluido
+            )
+            if (temPublicado) resultado.push(prof)
+          }
+        } catch {
+          // API não disponível — fallback para localStorage
+        }
+      }))
+
+      // Fallback: se a API não retornou nada, verificar localStorage
+      if (resultado.length === 0) {
+        try {
+          const locais = JSON.parse(localStorage.getItem('videoaulas') || '[]')
+          const videoaulasAtivas = locais.filter(v => !v.excluido)
+          if (videoaulasAtivas.length > 0) {
+            // Agrupar por professorId e verificar quais professores têm videoaulas
+            const profIds = [...new Set(videoaulasAtivas.map(v => v.professorId).filter(Boolean))]
+            profIds.forEach(pid => {
+              const prof = professores.find(p => p.id === pid)
+              if (prof && !resultado.find(r => r.id === pid)) resultado.push(prof)
+            })
+            // Se não tem professorId, mostrar todas como "geral"
+            if (profIds.length === 0 && videoaulasAtivas.length > 0) {
+              // Adicionar todos os professores que existem como fallback
+              professores.forEach(p => {
+                if (!resultado.find(r => r.id === p.id)) resultado.push(p)
+              })
+            }
+          }
+        } catch {}
+      }
+
+      setProfessoresComVideo(resultado)
+      setLoadingProfessores(false)
+    }
+
+    if (professores.length > 0) verificar()
+    else setLoadingProfessores(false)
+  }, [professores])
+
+  const selecionarProfessor = async (prof) => {
+    setProfessorSelecionado(prof)
+    setLoading(true)
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/professor/${prof.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        setVideoaulas(
+          Array.isArray(data)
+            ? data.filter(v => (v.status === 'PUBLICADO' || v.status === 'publicado') && v.situacao !== 'lixeira' && v.situacao !== 'excluido' && !v.excluido)
+            : []
+        )
+      } else {
+        throw new Error('API indisponível')
+      }
+    } catch {
+      // Fallback para localStorage
+      try {
+        const locais = JSON.parse(localStorage.getItem('videoaulas') || '[]')
+        setVideoaulas(locais.filter(v => !v.excluido && (v.professorId === prof.id || !v.professorId)))
+      } catch {
+        setVideoaulas([])
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (professorSelecionado) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <button
+          onClick={() => { setProfessorSelecionado(null); setVideoaulas([]) }}
+          style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '0.4rem 0.9rem', cursor: 'pointer', color: 'inherit', marginBottom: '0.5rem' }}
+        >
+          ← Voltar aos professores
+        </button>
+        <h3 style={{ margin: '0 0 0.75rem', opacity: 0.9 }}>Videoaulas de {professorSelecionado.nome}</h3>
+        {loading && <p style={{ opacity: 0.6 }}>Carregando videoaulas...</p>}
+        {!loading && videoaulas.length === 0 && <EstadoVazio mensagem="Nenhuma videoaula publicada ainda." />}
+        {!loading && videoaulas.length > 0 && (
+          <div className="aluno-grid">
+            {videoaulas.map(video => {
+              const assistida = progressoAluno.videoaulasAssistidas.includes(video.id)
+              const thumbnail = getYoutubeThumbnail(video.url)
+              const youtubeId = getYoutubeId(video.url)
+              return (
+                <div key={video.id} className="aluno-card">
+                  {thumbnail && (
+                    <div style={{ borderRadius: '10px', overflow: 'hidden', marginBottom: '0.75rem', position: 'relative' }}>
+                      <img
+                        src={thumbnail}
+                        alt={video.titulo}
+                        style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
+                        onError={(e) => { e.target.style.display = 'none' }}
+                      />
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)', opacity: 0, transition: 'opacity 0.2s' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.opacity = 1 }}
+                        onMouseLeave={(e) => { e.currentTarget.style.opacity = 0 }}
+                      >
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white" opacity="0.9"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                      </div>
+                    </div>
+                  )}
+                  <div className="aluno-card-header">
+                    <span className="aluno-card-tag">{video.area || 'Videoaula'}</span>
+                    {assistida && <span className="aluno-badge badge-ok">Assistida</span>}
+                  </div>
+                  <h3 className="aluno-card-title">{video.titulo}</h3>
+                  {video.descricao && <p className="aluno-card-desc">{video.descricao}</p>}
+                  {video.duracao && <p className="aluno-card-meta">Duração: {video.duracao}</p>}
+                  <div className="aluno-card-actions">
+                    <a
+                      href={youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : video.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="aluno-btn aluno-btn-outline"
+                    >
+                      Assistir
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                    {!assistida && (
+                      <button className="aluno-btn" onClick={() => onMarcar(video.id)}>
+                        Marcar como assistida
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (loadingProfessores) {
+    return <EstadoVazio mensagem="Carregando videoaulas..." />
+  }
+
+  if (professoresComVideo.length === 0) {
     return <EstadoVazio mensagem="Nenhuma videoaula disponível no momento." />
   }
 
   return (
     <div className="aluno-grid">
-      {videoaulas.map(video => {
-        const assistida = progressoAluno.videoaulasAssistidas.includes(video.id)
-        return (
-          <div key={video.id} className="aluno-card">
-            <div className="aluno-card-header">
-              <span className="aluno-card-tag">{video.area}</span>
-              {assistida && <span className="aluno-badge badge-ok">Assistida</span>}
-            </div>
-            <h3 className="aluno-card-title">{video.titulo}</h3>
-            {video.duracao && <p className="aluno-card-meta">Duração: {video.duracao}</p>}
-            <div className="aluno-card-actions">
-              <a href={video.url} target="_blank" rel="noopener noreferrer" className="aluno-btn aluno-btn-outline">
-                Assistir
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-              {!assistida && (
-                <button className="aluno-btn" onClick={() => onMarcar(video.id)}>
-                  Marcar como assistida
-                </button>
-              )}
-            </div>
+      {professoresComVideo.map(prof => (
+        <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer' }} onClick={() => selecionarProfessor(prof)}>
+          <div className="aluno-card-header">
+            <span className="aluno-card-tag">Professor</span>
           </div>
-        )
-      })}
+          <h3 className="aluno-card-title">{prof.nome}</h3>
+          {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
+          <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
+            Ver videoaulas
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </div>
+      ))}
     </div>
   )
 }

@@ -106,48 +106,6 @@ function Atividades({ area, onNavigate, user }) {
       
       <h2>Atividades - {areaNames[area] || area}</h2>
       
-      <button 
-        onClick={() => {
-          const atividadeTeste = {
-            id: "teste_" + Date.now(),
-            titulo: "TESTE DIRETO - 2 Questões",
-            area: "Gramática",
-            tipo: "multipla_escolha",
-            status: "Publicada",
-            excluido: false,
-            questoes: [
-              {
-                pergunta: "Qual é a capital do Brasil?",
-                opcaoA: "São Paulo",
-                opcaoB: "Rio de Janeiro",
-                opcaoC: "Brasília",
-                opcaoD: "Salvador",
-                respostaCorreta: "C"
-              },
-              {
-                pergunta: "Quantos dias tem uma semana?",
-                opcaoA: "5",
-                opcaoB: "6",
-                opcaoC: "7",
-                opcaoD: "8",
-                respostaCorreta: "C"
-              }
-            ]
-          }
-          
-          const atividadesExistentes = JSON.parse(localStorage.getItem('atividades') || '[]')
-          const novasAtividades = [...atividadesExistentes, atividadeTeste]
-          localStorage.setItem('atividades', JSON.stringify(novasAtividades))
-          
-          alert('Atividade de teste criada! Recarregue a página.')
-          window.location.reload()
-        }}
-        style={{background: 'green', color: 'white', padding: '10px', margin: '10px'}}
-      >
-        CRIAR ATIVIDADE TESTE DIRETO
-      </button>
-      
-
       
       <div className="activities-list">
         {atividades.map(atividade => (
@@ -176,20 +134,15 @@ function Atividades({ area, onNavigate, user }) {
           <div className="modal-content">
             <h3>{selectedActivity.titulo}</h3>
             <p>{selectedActivity.descricao}</p>
-            <p>DEBUG: {selectedActivity.questoes ? `${selectedActivity.questoes.length} questões encontradas` : 'Nenhuma questão encontrada'}</p>
 
             
             {!jaRespondeu ? (
               <div className="questoes-container">
-                {/* SEMPRE MOSTRAR QUESTÕES SE EXISTIREM */}
                 {selectedActivity.questoes && selectedActivity.questoes.length > 0 ? (
-                  selectedActivity.questoes.map((questao, index) => {
-                    console.log('Renderizando questão:', index, questao)
-                    return (
+                  selectedActivity.questoes.map((questao, index) => (
                       <div key={index} className="questao-item">
                         <h4>Questão {index + 1}</h4>
                         <p className="pergunta">{questao.pergunta}</p>
-                        <p>DEBUG QUESTÃO: A={questao.opcaoA} B={questao.opcaoB} C={questao.opcaoC} D={questao.opcaoD}</p>
                         <div className="opcoes">
                           <label>
                             <input 
@@ -198,7 +151,7 @@ function Atividades({ area, onNavigate, user }) {
                               value="A"
                               onChange={(e) => setRespostas({...respostas, [index]: e.target.value})}
                             />
-                            <span>A) {questao.opcaoA || 'VAZIO'}</span>
+                            <span>A) {questao.opcaoA}</span>
                           </label>
                           <label>
                             <input 
@@ -207,7 +160,7 @@ function Atividades({ area, onNavigate, user }) {
                               value="B"
                               onChange={(e) => setRespostas({...respostas, [index]: e.target.value})}
                             />
-                            <span>B) {questao.opcaoB || 'VAZIO'}</span>
+                            <span>B) {questao.opcaoB}</span>
                           </label>
                           <label>
                             <input 
@@ -216,7 +169,7 @@ function Atividades({ area, onNavigate, user }) {
                               value="C"
                               onChange={(e) => setRespostas({...respostas, [index]: e.target.value})}
                             />
-                            <span>C) {questao.opcaoC || 'VAZIO'}</span>
+                            <span>C) {questao.opcaoC}</span>
                           </label>
                           <label>
                             <input 
@@ -225,14 +178,12 @@ function Atividades({ area, onNavigate, user }) {
                               value="D"
                               onChange={(e) => setRespostas({...respostas, [index]: e.target.value})}
                             />
-                            <span>D) {questao.opcaoD || 'VAZIO'}</span>
+                            <span>D) {questao.opcaoD}</span>
                           </label>
                         </div>
                       </div>
-                    )
-                  })
+                    ))
                 ) : (
-                  /* FORMATO ANTIGO */
                   <div className="questao-multipla">
                     <h4>Questão Única:</h4>
                     <div className="opcoes">

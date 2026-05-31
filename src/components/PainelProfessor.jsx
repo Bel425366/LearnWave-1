@@ -11,6 +11,8 @@ const SENHA_FORTE = (pwd) =>
 
 const AREAS = ['Gramática', 'Literatura', 'Redação', 'Interpretação de Texto', 'Ortografia', 'Fonética', 'Semântica', 'Estilística', 'Morfologia', 'Sintaxe', 'Pontuação', 'Versificação']
 
+const normalizarMateriais = (data) => (Array.isArray(data) ? data : [])
+
 function PainelProfessor({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
   const [atividades, setAtividades] = useState([])
@@ -85,7 +87,7 @@ function PainelProfessor({ user, onNavigate }) {
             <span className="painel-stat-lbl">Videoaulas</span>
           </div>
           <div className="painel-stat">
-            <span className="painel-stat-val">{materiais.filter(m => !m.excluido).length}</span>
+            <span className="painel-stat-val">{normalizarMateriais(materiais).filter(m => !m.excluido).length}</span>
             <span className="painel-stat-lbl">Materiais</span>
           </div>
         </div>
@@ -425,10 +427,14 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
 
   useEffect(() => {
     fetch(`https://learnwaveback2.onrender.com/api/materiais/professor/${professorId}`)
-      .then(r => r.json())
+      .then(async (r) => {
+        if (!r.ok) return []
+        const data = await r.json()
+        return normalizarMateriais(data)
+      })
       .then(data => setMateriais(data))
-      .catch(() => {})
-  }, [professorId])
+      .catch(() => setMateriais([]))
+  }, [professorId, setMateriais])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -462,14 +468,14 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
         })
         if (!res.ok) throw new Error(await res.text())
         salvo = await res.json()
-        setMateriais(materiais.map(m => m.id === editingId ? salvo : m))
+        setMateriais(normalizarMateriais(materiais).map(m => m.id === editingId ? salvo : m))
       } else {
         const res = await fetch('https://learnwaveback2.onrender.com/api/materiais', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
         })
         if (!res.ok) throw new Error(await res.text())
         salvo = await res.json()
-        setMateriais([...materiais, salvo])
+        setMateriais([...normalizarMateriais(materiais), salvo])
       }
     } catch (err) {
       alert('Erro ao salvar material: ' + err.message)
@@ -502,10 +508,10 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
     } catch (err) {
       console.error('Erro ao mover para lixeira:', err)
     }
-    setMateriais(materiais.filter(m => m.id !== id))
+    setMateriais(normalizarMateriais(materiais).filter(m => m.id !== id))
   }
 
-  const ativos = materiais.filter(m => m.situacao !== 'lixeira' && m.situacao !== 'excluido')
+  const ativos = normalizarMateriais(materiais).filter(m => m.situacao !== 'lixeira' && m.situacao !== 'excluido')
   const porArea = ativos.reduce((acc, m) => {
     acc[m.area] = acc[m.area] || []
     acc[m.area].push(m)
@@ -692,7 +698,7 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
   }
 
   const restaurarMaterial = (id) => {
-    const novos = materiais.map(m => m.id === id ? { ...m, excluido: false } : m)
+    const novos = normalizarMateriais(materiais).map(m => m.id === id ? { ...m, excluido: false } : m)
     setMateriais(novos)
     localStorage.setItem('materiais', JSON.stringify(novos))
   }
@@ -717,7 +723,7 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
           </div>
         ))
       case 'materiais':
-        return materiais.filter(m => m.excluido).map(material => (
+        return normalizarMateriais(materiais).filter(m => m.excluido).map(material => (
           <div key={material.id} className="atividade-item">
             <div><h4>{material.titulo}</h4><p>Área: {material.area} | Tipo: {material.tipoArquivo}</p></div>
             <button onClick={() => restaurarMaterial(material.id)}>Restaurar</button>
@@ -738,7 +744,7 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
           Videoaulas ({videoaulas.filter(v => v.excluido).length})
         </button>
         <button className={activeType === 'materiais' ? 'active' : ''} onClick={() => setActiveType('materiais')}>
-          Materiais ({materiais.filter(m => m.excluido).length})
+          Materiais ({normalizarMateriais(materiais).filter(m => m.excluido).length})
         </button>
       </div>
       <div className="lixeira-content">{renderContent()}</div>

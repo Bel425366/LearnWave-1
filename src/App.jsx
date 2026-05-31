@@ -3,15 +3,9 @@ import UserTypeSelection from './components/UserTypeSelection'
 import Login from './components/Login'
 import Cadastro from './components/Cadastro'
 import CadastroProfessor from './components/CadastroProfessor'
-import Dashboard from './components/Dashboard'
 import PainelProfessor from './components/PainelProfessor'
 import PainelAdmin from './components/PainelAdmin'
-import Videoaulas from './components/Videoaulas'
-import Atividades from './components/Atividades'
-import AtividadesSimples from './components/AtividadesSimples'
-import Materiais from './components/Materiais'
 import AreaAluno from './components/AreaAluno'
-import GerenciarUsuarios from './components/GerenciarUsuarios'
 import Preloader from './components/Preloader'
 import Mascot from './components/Mascot'
 import { Security } from './utils/security'
@@ -29,9 +23,6 @@ function App() {
   const [user, setUser] = useState(() => {
     return Security.getSessionData()
   })
-  const [selectedArea, setSelectedArea] = useState(() => {
-    return localStorage.getItem('selectedArea') || ''
-  })
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
     const saved = localStorage.getItem('isDarkTheme')
     return saved ? JSON.parse(saved) : true
@@ -42,7 +33,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 2000)
+    }, 1200)
     return () => clearTimeout(timer)
   }, [])
 
@@ -68,13 +59,9 @@ function App() {
     return () => clearInterval(interval)
   }, [user])
 
-  const navigate = (page, area = '') => {
+  const navigate = (page) => {
     setCurrentPage(page)
     localStorage.setItem('currentPage', page)
-    if (area) {
-      setSelectedArea(area)
-      localStorage.setItem('selectedArea', area)
-    }
   }
 
   const handleUserTypeSelection = (type) => {
@@ -92,6 +79,7 @@ function App() {
       case 'user-type-selection':
         return <UserTypeSelection onSelectUserType={handleUserTypeSelection} />
       case 'login':
+      case 'login-professor':
         return <Login userType={userType} onLogin={(userData) => {
           setUser(userData)
           Security.createSession(userData)
@@ -100,22 +88,12 @@ function App() {
         return <Cadastro userType={userType} onNavigate={navigate} />
       case 'cadastro-professor':
         return <CadastroProfessor onNavigate={navigate} />
-      case 'dashboard':
-        return <Dashboard user={user} userType={user?.tipo || userType} onNavigate={navigate} />
       case 'painel-professor':
         return <PainelProfessor user={user} onNavigate={navigate} />
       case 'painel-admin':
         return <PainelAdmin user={user} onNavigate={navigate} />
-      case 'videoaulas':
-        return <Videoaulas area={selectedArea} onNavigate={navigate} />
-      case 'atividades':
-        return <AtividadesSimples />
-      case 'materiais':
-        return <Materiais area={selectedArea} onNavigate={navigate} />
       case 'area-aluno':
         return <AreaAluno user={user} onNavigate={navigate} />
-      case 'gerenciar-usuarios':
-        return <GerenciarUsuarios />
       default:
         return <UserTypeSelection onSelectUserType={handleUserTypeSelection} />
     }
@@ -135,7 +113,7 @@ function App() {
               alt="LearnWave Logo" 
               className="site-logo"
             />
-            <h1>LearnWave - Plataforma Educacional</h1>
+            <h1>LearnWave</h1>
           </div>
           <div className="header-actions">
             {currentPage === 'area-aluno' && <Mascot mini />}
