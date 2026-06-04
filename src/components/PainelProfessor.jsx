@@ -40,7 +40,7 @@ function PainelProfessor({ user, onNavigate }) {
       case 'progresso':
         return <AcompanharProgresso />
       case 'lixeira':
-        return <Lixeira atividades={atividades} setAtividades={setAtividades} videoaulas={videoaulas} setVideoaulas={setVideoaulas} materiais={materiais} setMateriais={setMateriais} />
+        return <Lixeira atividades={atividades} setAtividades={setAtividades} videoaulas={videoaulas} setVideoaulas={setVideoaulas} materiais={materiais} setMateriais={setMateriais} professorId={user.id} />
       case 'perfil':
         return <PerfilProfessor user={user} />
       case 'alunos':
@@ -320,12 +320,19 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas, professorId }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({ titulo: '', descricao: '', area: '', duracao: '', url: '', status: 'RASCUNHO' })
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null })
 
   useEffect(() => {
     fetch(`https://learnwaveback2.onrender.com/api/videoaulas/professor/${professorId}`)
-      .then(r => r.ok ? r.json() : [])
+      .then(r => {
+        if (!r.ok) throw new Error(`Erro ${r.status}`)
+        return r.json()
+      })
       .then(data => setVideoaulas(Array.isArray(data) ? data : []))
-      .catch(() => {})
+      .catch((err) => {
+        console.error('Erro ao carregar videoaulas:', err)
+        setVideoaulas([])
+      })
   }, [professorId, setVideoaulas])
 
   const handleSubmit = async (e) => {
@@ -334,20 +341,24 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas, professorId }) {
       titulo: formData.titulo,
       descricao: formData.descricao,
       area: formData.area,
-      professorId: professorId,
+      professorId: Number(professorId),
       urlVideo: formData.url,
       duracao: formData.duracao
     }
 
     try {
+      let salva
       if (editingId) {
         const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
-        if (!res.ok) throw new Error(await res.text())
-        const salva = await res.json()
+        if (!res.ok) {
+          const errText = await res.text()
+          throw new Error(errText || `Erro ${res.status}`)
+        }
+        salva = await res.json()
         setVideoaulas(videoaulas.map(v => v.id === editingId ? salva : v))
       } else {
         const res = await fetch('https://learnwaveback2.onrender.com/api/videoaulas', {
@@ -355,19 +366,23 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas, professorId }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
-        if (!res.ok) throw new Error(await res.text())
-        const salva = await res.json()
+        if (!res.ok) {
+          const errText = await res.text()
+          throw new Error(errText || `Erro ${res.status}`)
+        }
+        salva = await res.json()
 
         // Se o status selecionado é PUBLICADO, publicar imediatamente
         if (formData.status === 'PUBLICADO') {
           try {
-            await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${salva.id}/publicar`, { method: 'PATCH' })
-            salva.status = 'PUBLICADO'
+            const pubRes = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${salva.id}/publicar`, { method: 'PATCH' })
+            if (pubRes.ok) salva.status = 'PUBLICADO'
           } catch {}
         }
 
         setVideoaulas([...videoaulas, salva])
       }
+      alert('Videoaula salva com sucesso!')
     } catch (err) {
       alert('Erro ao salvar videoaula: ' + err.message)
       return
@@ -401,15 +416,19 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas, professorId }) {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Mover para lixeira?')) return
+  const handleDelete = (id) => {
+    setDeleteModal({ isOpen: true, id })
+  }
+
+  const confirmDelete = async () => {
     try {
-      const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/lixeira`, { method: 'PATCH' })
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${deleteModal.id}/lixeira`, { method: 'PATCH' })
       if (!res.ok) throw new Error(await res.text())
-      setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, status: 'LIXEIRA' } : v))
+      setVideoaulas(videoaulas.map(v => v.id === deleteModal.id ? { ...v, status: 'LIXEIRA' } : v))
     } catch (err) {
       alert('Erro ao mover para lixeira: ' + err.message)
     }
+    setDeleteModal({ isOpen: false, id: null })
   }
 
   const ativas = videoaulas.filter(v => v.status !== 'LIXEIRA')
@@ -489,6 +508,14 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas, professorId }) {
           </div>
         ))}
       </div>
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={confirmDelete}
+        title="Confirmar Exclusão"
+        message="Deseja mover esta videoaula para a lixeira?"
+        confirmText="Mover"
+      />
     </div>
   )
 }
@@ -577,17 +604,24 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
     setShowForm(true)
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Mover para lixeira?')) return
-    try {
-      await fetch(`https://learnwaveback2.onrender.com/api/materiais/${id}`, { method: 'DELETE' })
-    } catch (err) {
-      console.error('Erro ao mover para lixeira:', err)
-    }
-    setMateriais(normalizarMateriais(materiais).filter(m => m.id !== id))
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null })
+
+  const handleDelete = (id) => {
+    setDeleteModal({ isOpen: true, id })
   }
 
-  const ativos = normalizarMateriais(materiais).filter(m => m.situacao !== 'lixeira' && m.situacao !== 'excluido')
+  const confirmDelete = async () => {
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/materiais/${deleteModal.id}/lixeira`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      setMateriais(normalizarMateriais(materiais).map(m => m.id === deleteModal.id ? { ...m, status: 'LIXEIRA' } : m))
+    } catch (err) {
+      alert('Erro ao mover para lixeira: ' + err.message)
+    }
+    setDeleteModal({ isOpen: false, id: null })
+  }
+
+  const ativos = normalizarMateriais(materiais).filter(m => m.status !== 'LIXEIRA')
   const porArea = ativos.reduce((acc, m) => {
     acc[m.area] = acc[m.area] || []
     acc[m.area].push(m)
@@ -676,6 +710,14 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
           )
         })}
       </div>
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={confirmDelete}
+        title="Confirmar Exclusão"
+        message="Deseja mover este material para a lixeira?"
+        confirmText="Mover"
+      />
     </div>
   )
 }
@@ -749,8 +791,34 @@ function AcompanharProgresso() {
   )
 }
 
-function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materiais, setMateriais }) {
+function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materiais, setMateriais, professorId }) {
   const [activeType, setActiveType] = useState('atividades')
+  const [materiaisLixeira, setMateriaisLixeira] = useState([])
+  const [videoaulasLixeira, setVideoaulasLixeira] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  // Buscar itens da lixeira via API quando a aba muda
+  useEffect(() => {
+    if (activeType === 'materiais') {
+      setLoading(true)
+      fetch(`https://learnwaveback2.onrender.com/api/materiais/lixeira/professor/${professorId}`)
+        .then(r => r.ok ? r.json() : [])
+        .then(data => setMateriaisLixeira(Array.isArray(data) ? data : []))
+        .catch(() => setMateriaisLixeira([]))
+        .finally(() => setLoading(false))
+    }
+    if (activeType === 'videoaulas') {
+      setLoading(true)
+      fetch(`https://learnwaveback2.onrender.com/api/videoaulas/lixeira/professor/${professorId}`)
+        .then(r => r.ok ? r.json() : [])
+        .then(data => setVideoaulasLixeira(Array.isArray(data) ? data : []))
+        .catch(() => {
+          // Fallback: filtrar do state local
+          setVideoaulasLixeira(videoaulas.filter(v => v.status === 'LIXEIRA'))
+        })
+        .finally(() => setLoading(false))
+    }
+  }, [activeType, professorId, videoaulas])
 
   const restaurarAtividade = async (id) => {
     try { await fetch(`https://learnwaveback2.onrender.com/api/atividades/${id}/restaurar`, { method: 'PATCH' }) } catch {}
@@ -768,20 +836,34 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
   }
 
   const restaurarVideoaula = async (id) => {
-    try { await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/restaurar`, { method: 'PATCH' }) } catch {}
-    setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, status: 'RASCUNHO' } : v))
+    try {
+      await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/restaurar`, { method: 'PATCH' })
+      setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, status: 'RASCUNHO' } : v))
+      setVideoaulasLixeira(videoaulasLixeira.filter(v => v.id !== id))
+    } catch (err) {
+      alert('Erro ao restaurar videoaula: ' + err.message)
+    }
   }
 
-  const restaurarMaterial = (id) => {
-    const novos = normalizarMateriais(materiais).map(m => m.id === id ? { ...m, excluido: false } : m)
-    setMateriais(novos)
-    localStorage.setItem('materiais', JSON.stringify(novos))
+  const restaurarMaterial = async (id) => {
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/materiais/${id}/restaurar`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      setMateriais(normalizarMateriais(materiais).map(m => m.id === id ? { ...m, status: 'RASCUNHO' } : m))
+      setMateriaisLixeira(materiaisLixeira.filter(m => m.id !== id))
+    } catch (err) {
+      alert('Erro ao restaurar material: ' + err.message)
+    }
   }
 
   const renderContent = () => {
+    if (loading) return <p style={{ opacity: 0.6, textAlign: 'center', padding: '2rem' }}>Carregando...</p>
+
     switch (activeType) {
       case 'atividades':
-        return atividades.filter(a => a.excluido || a.situacao === 'lixeira').map(atividade => (
+        const atividadesNaLixeira = atividades.filter(a => a.excluido || a.situacao === 'lixeira')
+        if (atividadesNaLixeira.length === 0) return <p style={{ opacity: 0.5, textAlign: 'center', padding: '2rem' }}>Nenhuma atividade na lixeira.</p>
+        return atividadesNaLixeira.map(atividade => (
           <div key={atividade.id} className="atividade-item">
             <div><h4>{atividade.titulo}</h4><p>Área: {atividade.area} | Status: {atividade.status}</p></div>
             <div className="actions">
@@ -791,17 +873,23 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
           </div>
         ))
       case 'videoaulas':
-        return videoaulas.filter(v => v.status === 'LIXEIRA').map(video => (
+        if (videoaulasLixeira.length === 0) return <p style={{ opacity: 0.5, textAlign: 'center', padding: '2rem' }}>Nenhuma videoaula na lixeira.</p>
+        return videoaulasLixeira.map(video => (
           <div key={video.id} className="atividade-item">
             <div><h4>{video.titulo}</h4><p>Área: {video.area} | Duração: {video.duracao}</p></div>
-            <button onClick={() => restaurarVideoaula(video.id)}>Restaurar</button>
+            <div className="actions">
+              <button onClick={() => restaurarVideoaula(video.id)}>Restaurar</button>
+            </div>
           </div>
         ))
       case 'materiais':
-        return normalizarMateriais(materiais).filter(m => m.excluido).map(material => (
+        if (materiaisLixeira.length === 0) return <p style={{ opacity: 0.5, textAlign: 'center', padding: '2rem' }}>Nenhum material na lixeira.</p>
+        return materiaisLixeira.map(material => (
           <div key={material.id} className="atividade-item">
             <div><h4>{material.titulo}</h4><p>Área: {material.area} | Tipo: {material.tipoArquivo}</p></div>
-            <button onClick={() => restaurarMaterial(material.id)}>Restaurar</button>
+            <div className="actions">
+              <button onClick={() => restaurarMaterial(material.id)}>Restaurar</button>
+            </div>
           </div>
         ))
       default: return null
@@ -813,13 +901,13 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
       <h3>Lixeira</h3>
       <div className="lixeira-tabs">
         <button className={activeType === 'atividades' ? 'active' : ''} onClick={() => setActiveType('atividades')}>
-          Atividades ({atividades.filter(a => a.excluido).length})
+          Atividades ({atividades.filter(a => a.excluido || a.situacao === 'lixeira').length})
         </button>
         <button className={activeType === 'videoaulas' ? 'active' : ''} onClick={() => setActiveType('videoaulas')}>
-          Videoaulas ({videoaulas.filter(v => v.status === 'LIXEIRA').length})
+          Videoaulas ({videoaulasLixeira.length})
         </button>
         <button className={activeType === 'materiais' ? 'active' : ''} onClick={() => setActiveType('materiais')}>
-          Materiais ({normalizarMateriais(materiais).filter(m => m.excluido).length})
+          Materiais ({materiaisLixeira.length})
         </button>
       </div>
       <div className="lixeira-content">{renderContent()}</div>
