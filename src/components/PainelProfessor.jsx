@@ -26,10 +26,7 @@ function PainelProfessor({ user, onNavigate }) {
         setAtividades(saved.filter(a => a.professorId === user.id))
       })
   }, [user.id])
-  const [videoaulas, setVideoaulas] = useState(() => {
-    const saved = localStorage.getItem('videoaulas')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [videoaulas, setVideoaulas] = useState([])
   const [materiais, setMateriais] = useState([])
 
   const renderContent = () => {
@@ -37,7 +34,7 @@ function PainelProfessor({ user, onNavigate }) {
       case 'atividades':
         return <GerenciarAtividades atividades={atividades} setAtividades={setAtividades} professorId={user.id} />
       case 'videoaulas':
-        return <GerenciarVideoaulas videoaulas={videoaulas} setVideoaulas={setVideoaulas} />
+        return <GerenciarVideoaulas videoaulas={videoaulas} setVideoaulas={setVideoaulas} professorId={user.id} />
       case 'materiais':
         return <GerenciarMateriais materiais={materiais} setMateriais={setMateriais} professorId={user.id} />
       case 'progresso':
@@ -83,7 +80,7 @@ function PainelProfessor({ user, onNavigate }) {
             <span className="painel-stat-lbl">Atividades</span>
           </div>
           <div className="painel-stat">
-            <span className="painel-stat-val">{videoaulas.filter(v => !v.excluido).length}</span>
+            <span className="painel-stat-val">{videoaulas.filter(v => v.status !== 'LIXEIRA').length}</span>
             <span className="painel-stat-lbl">Videoaulas</span>
           </div>
           <div className="painel-stat">
@@ -319,39 +316,103 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
   )
 }
 
-function GerenciarVideoaulas({ videoaulas, setVideoaulas }) {
+function GerenciarVideoaulas({ videoaulas, setVideoaulas, professorId }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [formData, setFormData] = useState({ titulo: '', area: '', duracao: '', url: '' })
+  const [formData, setFormData] = useState({ titulo: '', descricao: '', area: '', duracao: '', url: '', status: 'RASCUNHO' })
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetch(`https://learnwaveback2.onrender.com/api/videoaulas/professor/${professorId}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setVideoaulas(Array.isArray(data) ? data : []))
+      .catch(() => {})
+  }, [professorId, setVideoaulas])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    let newVideoaulas
-    if (editingId) {
-      newVideoaulas = videoaulas.map(v => v.id === editingId ? { ...v, ...formData } : v)
-    } else {
-      newVideoaulas = [...videoaulas, { id: Date.now(), ...formData, excluido: false }]
+    const payload = {
+      titulo: formData.titulo,
+      descricao: formData.descricao,
+      area: formData.area,
+      professorId: professorId,
+      urlVideo: formData.url,
+      duracao: formData.duracao
     }
-    setVideoaulas(newVideoaulas)
-    localStorage.setItem('videoaulas', JSON.stringify(newVideoaulas))
-    setFormData({ titulo: '', area: '', duracao: '', url: '' })
+
+    try {
+      if (editingId) {
+        const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error(await res.text())
+        const salva = await res.json()
+        setVideoaulas(videoaulas.map(v => v.id === editingId ? salva : v))
+      } else {
+        const res = await fetch('https://learnwaveback2.onrender.com/api/videoaulas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error(await res.text())
+        const salva = await res.json()
+
+        // Se o status selecionado é PUBLICADO, publicar imediatamente
+        if (formData.status === 'PUBLICADO') {
+          try {
+            await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${salva.id}/publicar`, { method: 'PATCH' })
+            salva.status = 'PUBLICADO'
+          } catch {}
+        }
+
+        setVideoaulas([...videoaulas, salva])
+      }
+    } catch (err) {
+      alert('Erro ao salvar videoaula: ' + err.message)
+      return
+    }
+
+    setFormData({ titulo: '', descricao: '', area: '', duracao: '', url: '', status: 'RASCUNHO' })
     setShowForm(false)
     setEditingId(null)
   }
 
   const handleEdit = (video) => {
-    setFormData(video)
+    setFormData({
+      titulo: video.titulo || '',
+      descricao: video.descricao || '',
+      area: video.area || '',
+      duracao: video.duracao || '',
+      url: video.urlVideo || video.url || '',
+      status: video.status || 'RASCUNHO'
+    })
     setEditingId(video.id)
     setShowForm(true)
   }
 
-  const handleDelete = (id) => {
-    if (confirm('Mover para lixeira?')) {
-      const newVideoaulas = videoaulas.map(v => v.id === id ? { ...v, excluido: true } : v)
-      setVideoaulas(newVideoaulas)
-      localStorage.setItem('videoaulas', JSON.stringify(newVideoaulas))
+  const handlePublicar = async (id) => {
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/publicar`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, status: 'PUBLICADO' } : v))
+    } catch (err) {
+      alert('Erro ao publicar: ' + err.message)
     }
   }
+
+  const handleDelete = async (id) => {
+    if (!confirm('Mover para lixeira?')) return
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/lixeira`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, status: 'LIXEIRA' } : v))
+    } catch (err) {
+      alert('Erro ao mover para lixeira: ' + err.message)
+    }
+  }
+
+  const ativas = videoaulas.filter(v => v.status !== 'LIXEIRA')
 
   return (
     <div className="gerenciar-videoaulas">
@@ -377,36 +438,51 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas }) {
             <option value="">Área</option>
             {AREAS.map(area => <option key={area} value={area}>{area}</option>)}
           </select>
+          <textarea
+            placeholder="Descrição da videoaula"
+            value={formData.descricao}
+            onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+          />
           <input
             type="text"
-            placeholder="Duração (ex: 15 min)"
+            placeholder="Duração (ex: 10:30)"
             value={formData.duracao}
             onChange={(e) => setFormData({...formData, duracao: e.target.value})}
             required
           />
           <input
             type="url"
-            placeholder="URL do vídeo"
+            placeholder="URL do YouTube (ex: https://www.youtube.com/watch?v=...)"
             value={formData.url}
             onChange={(e) => setFormData({...formData, url: e.target.value})}
             required
           />
+          <select
+            value={formData.status}
+            onChange={(e) => setFormData({...formData, status: e.target.value})}
+          >
+            <option value="RASCUNHO">Rascunho</option>
+            <option value="PUBLICADO">Publicada</option>
+          </select>
           <div className="form-actions">
             <button type="submit">{editingId ? 'Atualizar' : 'Criar'}</button>
-            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ titulo: '', area: '', duracao: '', url: '' }); }}>Cancelar</button>
+            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ titulo: '', descricao: '', area: '', duracao: '', url: '', status: 'RASCUNHO' }); }}>Cancelar</button>
           </div>
         </form>
       )}
       
       <div className="atividades-lista">
-        {videoaulas.filter(v => !v.excluido).map(video => (
+        {ativas.map(video => (
           <div key={video.id} className="atividade-item">
             <div>
               <h4>{video.titulo}</h4>
-              <p>Área: {video.area} | Duração: {video.duracao}</p>
-              <p>URL: {video.url}</p>
+              <p>Área: {video.area} | Duração: {video.duracao} | Status: {video.status}</p>
+              <p>URL: {video.urlVideo || video.url}</p>
             </div>
             <div className="actions">
+              {video.status === 'RASCUNHO' && (
+                <button onClick={() => handlePublicar(video.id)}>Publicar</button>
+              )}
               <button onClick={() => handleEdit(video)}>Editar</button>
               <button onClick={() => handleDelete(video.id)}>Excluir</button>
             </div>
@@ -691,10 +767,9 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
     localStorage.setItem('atividades', JSON.stringify(novas))
   }
 
-  const restaurarVideoaula = (id) => {
-    const novas = videoaulas.map(v => v.id === id ? { ...v, excluido: false } : v)
-    setVideoaulas(novas)
-    localStorage.setItem('videoaulas', JSON.stringify(novas))
+  const restaurarVideoaula = async (id) => {
+    try { await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/restaurar`, { method: 'PATCH' }) } catch {}
+    setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, status: 'RASCUNHO' } : v))
   }
 
   const restaurarMaterial = (id) => {
@@ -716,7 +791,7 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
           </div>
         ))
       case 'videoaulas':
-        return videoaulas.filter(v => v.excluido).map(video => (
+        return videoaulas.filter(v => v.status === 'LIXEIRA').map(video => (
           <div key={video.id} className="atividade-item">
             <div><h4>{video.titulo}</h4><p>Área: {video.area} | Duração: {video.duracao}</p></div>
             <button onClick={() => restaurarVideoaula(video.id)}>Restaurar</button>
@@ -741,7 +816,7 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
           Atividades ({atividades.filter(a => a.excluido).length})
         </button>
         <button className={activeType === 'videoaulas' ? 'active' : ''} onClick={() => setActiveType('videoaulas')}>
-          Videoaulas ({videoaulas.filter(v => v.excluido).length})
+          Videoaulas ({videoaulas.filter(v => v.status === 'LIXEIRA').length})
         </button>
         <button className={activeType === 'materiais' ? 'active' : ''} onClick={() => setActiveType('materiais')}>
           Materiais ({normalizarMateriais(materiais).filter(m => m.excluido).length})
