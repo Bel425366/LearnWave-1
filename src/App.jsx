@@ -116,7 +116,7 @@ function App() {
             <h1>LearnWave</h1>
           </div>
           <div className="header-actions">
-            {currentPage === 'area-aluno' && <Mascot mini />}
+            {currentPage === 'area-aluno' && <Mascot mini isAluno />}
             <button 
               className="theme-toggle" 
               onClick={() => {

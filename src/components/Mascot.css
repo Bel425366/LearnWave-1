@@ -671,3 +671,148 @@
 .mascot-mini .hand {
   box-shadow: none;
 }
+
+
+/* ── Mini Mascote com Balão Interativo ── */
+.mascot-mini-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.mascot-mini-bubble {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 280px;
+  background: #ffffff;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 16px;
+  padding: 1.1rem 1.3rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(102, 126, 234, 0.12);
+  z-index: 200;
+  animation: miniBubbleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mascot-mini-bubble.fading-out {
+  animation: miniBubbleOut 0.4s ease-out forwards;
+}
+
+.mini-bubble-tail {
+  position: absolute;
+  top: -8px;
+  right: 28px;
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border-left: 1px solid rgba(102, 126, 234, 0.2);
+  border-top: 1px solid rgba(102, 126, 234, 0.2);
+  transform: rotate(45deg);
+  border-radius: 3px 0 0 0;
+}
+
+.mini-bubble-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  color: #666;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: none;
+}
+
+.mini-bubble-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: none;
+  box-shadow: none;
+}
+
+.mini-bubble-text {
+  margin: 0 0 0.7rem;
+  color: #1e293b;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.5;
+  padding-right: 1.2rem;
+}
+
+.mini-bubble-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+.mini-bubble-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+@keyframes miniBubbleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes miniBubbleOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.97);
+  }
+}
+
+/* Responsivo - Mini Bubble */
+@media (max-width: 768px) {
+  .mascot-mini-bubble {
+    position: fixed;
+    top: auto;
+    bottom: 80px;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+    max-width: 320px;
+  }
+
+  .mini-bubble-tail {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .mascot-mini-bubble {
+    right: 0.5rem;
+    left: 0.5rem;
+    max-width: none;
+  }
+}

@@ -9,7 +9,7 @@ const IDLE_MESSAGES = [
   'Estou aqui se precisar!',
 ]
 
-function Mascot({ mood = 'happy', message = '', position = 'left', mini = false }) {
+function Mascot({ mood = 'happy', message = '', position = 'left', mini = false, isAluno = false }) {
   const [isBlinking, setIsBlinking] = useState(false)
   const [currentMessage, setCurrentMessage] = useState(message)
   const [showMessage, setShowMessage] = useState(false)
@@ -17,7 +17,10 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false 
   const [isJumping, setIsJumping] = useState(false)
   const [clickCount, setClickCount] = useState(0)
   const [currentMood, setCurrentMood] = useState(mood)
+  const [showMiniBubble, setShowMiniBubble] = useState(false)
+  const [miniBubbleFading, setMiniBubbleFading] = useState(false)
   const hideTimer = useRef(null)
+  const miniBubbleTimer = useRef(null)
 
   const showBubble = (msg, duration = 3000) => {
     clearTimeout(hideTimer.current)
@@ -75,35 +78,91 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false 
     else setCurrentMood('happy')
   }
 
+  // Auto-mostrar balão na primeira visita do aluno
+  useEffect(() => {
+    if (mini && isAluno) {
+      const jaViu = localStorage.getItem('mascoteMensagemVista')
+      if (!jaViu) {
+        const timer = setTimeout(() => {
+          setShowMiniBubble(true)
+          localStorage.setItem('mascoteMensagemVista', 'true')
+          // Auto-fechar após 8 segundos
+          miniBubbleTimer.current = setTimeout(() => {
+            setMiniBubbleFading(true)
+            setTimeout(() => { setShowMiniBubble(false); setMiniBubbleFading(false) }, 400)
+          }, 8000)
+        }, 1500) // Aguarda 1.5s após o componente montar
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [mini, isAluno])
+
+  const handleMiniBubbleOpen = () => {
+    clearTimeout(miniBubbleTimer.current)
+    setMiniBubbleFading(false)
+    setShowMiniBubble(true)
+    // Auto-fechar após 8 segundos
+    miniBubbleTimer.current = setTimeout(() => {
+      setMiniBubbleFading(true)
+      setTimeout(() => { setShowMiniBubble(false); setMiniBubbleFading(false) }, 400)
+    }, 8000)
+  }
+
+  const handleMiniBubbleClose = () => {
+    clearTimeout(miniBubbleTimer.current)
+    setMiniBubbleFading(true)
+    setTimeout(() => { setShowMiniBubble(false); setMiniBubbleFading(false) }, 400)
+  }
+
   if (mini) {
     return (
-      <div className="mascot-mini">
-        <div className="mascot mascot-happy">
-          <div className="mascot-body">
-            <div className="mascot-head">
-              <div className="mascot-eyes">
-                <div className={`eye eye-left ${isBlinking ? 'blink' : ''}`}><div className="pupil" /><div className="shine" /></div>
-                <div className={`eye eye-right ${isBlinking ? 'blink' : ''}`}><div className="pupil" /><div className="shine" /></div>
+      <div className="mascot-mini-wrapper">
+        <div className="mascot-mini" onClick={isAluno ? handleMiniBubbleOpen : undefined} style={isAluno ? { cursor: 'pointer' } : undefined}>
+          <div className="mascot mascot-happy">
+            <div className="mascot-body">
+              <div className="mascot-head">
+                <div className="mascot-eyes">
+                  <div className={`eye eye-left ${isBlinking ? 'blink' : ''}`}><div className="pupil" /><div className="shine" /></div>
+                  <div className={`eye eye-right ${isBlinking ? 'blink' : ''}`}><div className="pupil" /><div className="shine" /></div>
+                </div>
+                <div className="mascot-mouth mouth-happy">
+                  <svg viewBox="0 0 100 50" className="mouth-svg">
+                    <path d="M 20 20 Q 50 40 80 20" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div className="mascot-antenna"><div className="antenna-stick" /><div className="antenna-ball" /></div>
               </div>
-              <div className="mascot-mouth mouth-happy">
-                <svg viewBox="0 0 100 50" className="mouth-svg">
-                  <path d="M 20 20 Q 50 40 80 20" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <div className="mascot-antenna"><div className="antenna-stick" /><div className="antenna-ball" /></div>
-            </div>
-            <div className="mascot-torso">
-              <div className="mascot-arm arm-left"><div className="arm-upper" /><div className="arm-lower" /><div className="hand" /></div>
-              <div className="mascot-arm arm-right"><div className="arm-upper" /><div className="arm-lower" /><div className="hand" /></div>
-              <div className="mascot-emblem">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                </svg>
+              <div className="mascot-torso">
+                <div className="mascot-arm arm-left"><div className="arm-upper" /><div className="arm-lower" /><div className="hand" /></div>
+                <div className="mascot-arm arm-right"><div className="arm-upper" /><div className="arm-lower" /><div className="hand" /></div>
+                <div className="mascot-emblem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Balão interativo para aluno */}
+        {isAluno && showMiniBubble && (
+          <div className={`mascot-mini-bubble ${miniBubbleFading ? 'fading-out' : ''}`}>
+            <button className="mini-bubble-close" onClick={(e) => { e.stopPropagation(); handleMiniBubbleClose() }} aria-label="Fechar">×</button>
+            <div className="mini-bubble-tail" />
+            <p className="mini-bubble-text">Ei! 📱 Acesse pelo celular para conversar com seu professor!</p>
+            <a
+              href="https://github.com/biadionisio/LearnWave.git"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mini-bubble-link"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Acessar App Mobile →
+            </a>
+          </div>
+        )}
       </div>
     )
   }
