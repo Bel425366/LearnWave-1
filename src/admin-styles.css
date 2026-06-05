@@ -834,123 +834,127 @@
 }
 
 
+
+
 /* ══════════════════════════════════════════════════════════════
    MODO CLARO MODERNO - Admin Override
    ══════════════════════════════════════════════════════════════ */
 
 .light-theme .painel-hero--admin {
-  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(118,75,162,0.12)) !important;
-  border-color: rgba(99,102,241,0.2) !important;
+  background: linear-gradient(135deg, #eef2ff, #ede9fe) !important;
+  border-color: #c7d2fe !important;
 }
 .light-theme .admin-hero-badge {
-  background: rgba(99,102,241,0.15) !important;
-  border-color: rgba(99,102,241,0.3) !important;
-  color: #a78bfa !important;
+  background: rgba(99,102,241,0.08) !important;
+  border-color: #c7d2fe !important;
+  color: #4f46e5 !important;
 }
 .light-theme .admin-section-title {
-  color: #f0f0f5 !important;
-  border-bottom-color: rgba(255,255,255,0.08) !important;
+  color: #1e293b !important;
+  border-bottom-color: #e2e8f0 !important;
 }
 .light-theme .admin-card {
-  background: rgba(255,255,255,0.05) !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
-.light-theme .admin-card-label { color: rgba(255,255,255,0.4) !important; }
+.light-theme .admin-card-label { color: #64748b !important; }
 .light-theme .admin-stat-card {
-  background: rgba(255,255,255,0.05) !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
-.light-theme .admin-stat-card:hover { background: rgba(255,255,255,0.08) !important; }
-.light-theme .admin-stat-lbl { color: #9ca3b4 !important; }
+.light-theme .admin-stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important; }
+.light-theme .admin-stat-lbl { color: #64748b !important; }
 .light-theme .admin-activity-item {
-  color: #b0b8c8 !important;
-  border-bottom-color: rgba(255,255,255,0.06) !important;
+  color: #475569 !important;
+  border-bottom-color: #f1f5f9 !important;
 }
-.light-theme .admin-activity-item strong { color: #a78bfa !important; }
-.light-theme .admin-form-group label { color: rgba(255,255,255,0.7) !important; }
+.light-theme .admin-activity-item strong { color: #6d28d9 !important; }
+.light-theme .admin-form-group label { color: #374151 !important; }
 .light-theme .admin-input {
-  background: rgba(255,255,255,0.06) !important;
-  border-color: rgba(255,255,255,0.12) !important;
-  color: #e2e8f0 !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
 }
 .light-theme .admin-input:focus {
-  background: rgba(255,255,255,0.1) !important;
   border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
 }
-.light-theme .admin-checkbox-label { color: rgba(255,255,255,0.8) !important; }
-.light-theme .admin-loading { color: #9ca3b4 !important; }
+.light-theme .admin-checkbox-label { color: #374151 !important; }
+.light-theme .admin-loading { color: #64748b !important; }
 
 .light-theme .usuarios-section .section-header h2 {
-  color: #f0f0f5 !important;
-  border-bottom-color: rgba(255,255,255,0.08) !important;
+  color: #1e293b !important;
+  border-bottom-color: #e2e8f0 !important;
 }
 .light-theme .usuario-card {
-  background: rgba(255,255,255,0.05) !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
-.light-theme .usuario-card:hover { background: rgba(255,255,255,0.08) !important; }
-.light-theme .usuario-info h3 { color: #f0f0f5 !important; }
-.light-theme .usuario-info .email { color: #9ca3b4 !important; }
+.light-theme .usuario-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important; }
+.light-theme .usuario-info h3 { color: #1e293b !important; }
+.light-theme .usuario-info .email { color: #64748b !important; }
 
-.light-theme .verificacao-professores .section-header h2 { color: #f0f0f5 !important; }
-.light-theme .section-subtitle { color: #9ca3b4 !important; }
+.light-theme .verificacao-professores .section-header h2 { color: #1e293b !important; }
+.light-theme .section-subtitle { color: #64748b !important; }
 .light-theme .empty-state {
-  background: rgba(255,255,255,0.03) !important;
-  border-color: rgba(255,255,255,0.08) !important;
-  color: #9ca3b4 !important;
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
 }
-.light-theme .empty-state h3 { color: #b0b8c8 !important; }
+.light-theme .empty-state h3 { color: #475569 !important; }
 
 .light-theme .professor-card-formal {
-  background: rgba(255,255,255,0.05) !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
-.light-theme .professor-card-formal:hover { background: rgba(255,255,255,0.07) !important; }
 .light-theme .card-header {
-  background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.12)) !important;
-  border-bottom-color: rgba(255,255,255,0.06) !important;
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff) !important;
+  border-bottom-color: #e2e8f0 !important;
 }
-.light-theme .professor-nome { color: #f0f0f5 !important; }
-.light-theme .professor-email { color: #9ca3b4 !important; }
-.light-theme .info-item label { color: rgba(255,255,255,0.4) !important; }
-.light-theme .info-item span { color: rgba(255,255,255,0.85) !important; }
-.light-theme .documento-section { border-top-color: rgba(255,255,255,0.06) !important; }
-.light-theme .documento-section > label { color: rgba(255,255,255,0.4) !important; }
+.light-theme .professor-nome { color: #1e293b !important; }
+.light-theme .professor-email { color: #64748b !important; }
+.light-theme .info-item label { color: #64748b !important; }
+.light-theme .info-item span { color: #1e293b !important; }
+.light-theme .documento-section { border-top-color: #e2e8f0 !important; }
+.light-theme .documento-section > label { color: #64748b !important; }
 .light-theme .documento-preview {
-  background: rgba(255,255,255,0.03) !important;
-  border-color: rgba(255,255,255,0.06) !important;
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
 }
-.light-theme .documento-nome { color: #9ca3b4 !important; }
+.light-theme .documento-nome { color: #64748b !important; }
 .light-theme .btn-visualizar {
-  background: rgba(102,126,234,0.15) !important;
-  border-color: rgba(102,126,234,0.25) !important;
-  color: #a78bfa !important;
+  background: #eef2ff !important;
+  border-color: #c7d2fe !important;
+  color: #4f46e5 !important;
 }
 .light-theme .card-footer {
-  background: rgba(0,0,0,0.15) !important;
-  border-top-color: rgba(255,255,255,0.06) !important;
+  background: #f8fafc !important;
+  border-top-color: #e2e8f0 !important;
 }
 
 .light-theme .modal-content {
-  background: rgba(42, 45, 62, 0.98) !important;
-  border-color: rgba(255,255,255,0.1) !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
 }
 .light-theme .modal-header {
-  background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.12)) !important;
-  border-bottom-color: rgba(255,255,255,0.06) !important;
+  background: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
 }
-.light-theme .modal-header h3 { color: #f0f0f5 !important; }
+.light-theme .modal-header h3 { color: #1e293b !important; }
 .light-theme .modal-close {
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(255,255,255,0.12) !important;
-  color: rgba(255,255,255,0.6) !important;
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
 }
 .light-theme .modal-footer {
-  background: rgba(0,0,0,0.2) !important;
-  border-top-color: rgba(255,255,255,0.06) !important;
+  background: #f8fafc !important;
+  border-top-color: #e2e8f0 !important;
 }
 .light-theme .btn-fechar {
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(255,255,255,0.12) !important;
-  color: rgba(255,255,255,0.6) !important;
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #475569 !important;
 }

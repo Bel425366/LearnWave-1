@@ -19,8 +19,8 @@
 }
 
 .light-theme {
-  background: #2a2d3e;
-  color: #e2e8f0;
+  background: #f0f2f8;
+  color: #1e293b;
 }
 
 .header {
@@ -1204,46 +1204,46 @@ textarea[name="experiencia"] {
 }
 
 .light-theme .auth-form input, .light-theme .auth-form textarea, .light-theme .auth-form select {
-  color: #e2e8f0 !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 .light-theme .auth-form select option {
-  color: #e2e8f0 !important;
-  background: #2a2d3e !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
 }
 
 .light-theme .form-atividade input, .light-theme .form-atividade textarea, .light-theme .form-atividade select {
-  color: #e2e8f0 !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 .light-theme .form-atividade select option {
-  color: #e2e8f0 !important;
-  background: #2a2d3e !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
 }
 
 .light-theme .correcao-actions input {
-  color: #e2e8f0 !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 .light-theme .resposta-dissertativa textarea {
-  color: #e2e8f0 !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 /* Estilos específicos para modo claro */
 .light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme h5, .light-theme h6 {
-  color: #f0f0f5 !important;
+  color: #1e293b !important;
 }
 
 .light-theme p {
-  color: #b0b8c8 !important;
+  color: #475569 !important;
 }
 
 .light-theme .welcome-section {
@@ -1743,53 +1743,53 @@ select:focus-visible {
 
 /* Modo claro - Header */
 .light-theme .header {
-  background: rgba(35, 38, 52, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.05);
 }
 
 .light-theme .header h1 {
-  background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .light-theme .theme-toggle {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  color: #c4b5fd !important;
+  background: rgba(99, 102, 241, 0.08) !important;
+  border: 1px solid rgba(99, 102, 241, 0.15) !important;
+  color: #4f46e5 !important;
 }
 
 .light-theme .theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(99, 102, 241, 0.14) !important;
 }
 
 .light-theme .user-info {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.12);
 }
 
 .light-theme .user-info:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .light-theme .user-info span {
-  color: #e2e8f0;
+  color: #1e293b;
 }
 
 .light-theme .user-info button {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
 }
 
 .light-theme .user-info button:hover {
-  background: rgba(239, 68, 68, 0.25);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #fecaca;
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
 }
 
 /* Responsividade */
@@ -4650,315 +4650,320 @@ html {
 }
 
 
+
+
 /* ══════════════════════════════════════════════════════════════
-   MODO CLARO MODERNO - Override completo
-   Background escuro suave (#2a2d3e) em vez de branco puro
+   MODO CLARO MODERNO
+   Fundo off-white aconchegante, cards brancos, bom contraste
    ══════════════════════════════════════════════════════════════ */
 
-.light-theme .auth-form h2 { color: #f0f0f5 !important; }
-.light-theme .auth-form p { color: #b0b8c8 !important; }
-.light-theme .auth-form button[type="button"] { color: #a78bfa !important; }
+.light-theme .auth-form h2 { color: #1e293b !important; }
+.light-theme .auth-form p { color: #475569 !important; }
+.light-theme .auth-form button[type="button"] { color: #6366f1 !important; }
 
 .light-theme .painel-professor h2,
 .light-theme .painel-admin h2,
-.light-theme .area-aluno h2 { color: #f0f0f5 !important; }
+.light-theme .area-aluno h2 { color: #1e293b !important; }
 
 .light-theme .tabs button {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  color: #b0b8c8 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
 }
-.light-theme .tabs button:hover { background: rgba(255,255,255,0.1) !important; color: #e2e8f0 !important; }
+.light-theme .tabs button:hover { background: #f8fafc !important; color: #1e293b !important; }
 .light-theme .tabs button.active { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; border-color: transparent !important; }
-.light-theme .tab-content { background: rgba(255,255,255,0.03) !important; }
+.light-theme .tab-content { background: rgba(255,255,255,0.5) !important; }
 
 .light-theme .gerenciar-atividades,
 .light-theme .gerenciar-videoaulas,
 .light-theme .gerenciar-materiais,
-.light-theme .acompanhar-progresso { color: #e2e8f0 !important; }
+.light-theme .acompanhar-progresso { color: #1e293b !important; }
 
 .light-theme .atividade-item {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
-.light-theme .atividade-item:hover { background: rgba(255,255,255,0.08) !important; }
-.light-theme .atividade-item h4 { color: #f0f0f5 !important; }
-.light-theme .atividade-item p { color: #9ca3b4 !important; }
+.light-theme .atividade-item:hover { background: #f8fafc !important; box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important; }
+.light-theme .atividade-item h4 { color: #1e293b !important; }
+.light-theme .atividade-item p { color: #64748b !important; }
 
 .light-theme .atividades-disponiveis,
 .light-theme .videoaulas-disponiveis,
 .light-theme .materiais-disponiveis,
-.light-theme .meu-progresso { color: #e2e8f0 !important; }
+.light-theme .meu-progresso { color: #1e293b !important; }
 
 .light-theme .atividade-card,
 .light-theme .video-card,
 .light-theme .material-card {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
 .light-theme .atividade-card:hover,
 .light-theme .video-card:hover,
-.light-theme .material-card:hover { background: rgba(255,255,255,0.08) !important; }
-.light-theme .atividade-card h4, .light-theme .video-card h4, .light-theme .material-card h4 { color: #f0f0f5 !important; }
-.light-theme .atividade-card p, .light-theme .video-card p, .light-theme .material-card p { color: #9ca3b4 !important; }
+.light-theme .material-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; }
+.light-theme .atividade-card h4, .light-theme .video-card h4, .light-theme .material-card h4 { color: #1e293b !important; }
+.light-theme .atividade-card p, .light-theme .video-card p, .light-theme .material-card p { color: #64748b !important; }
 
 .light-theme .stat-card {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
-.light-theme .stat-card h4 { color: #e2e8f0 !important; }
-.light-theme .stat-card p { color: #ff6b9d !important; }
+.light-theme .stat-card h4 { color: #475569 !important; }
+.light-theme .stat-card p { color: #6366f1 !important; }
 
 .light-theme .detalhes-progresso {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .detalhes-progresso h4 { color: #f0f0f5 !important; }
-.light-theme .atividade-concluida span:first-child { color: #e2e8f0 !important; }
+.light-theme .detalhes-progresso h4 { color: #1e293b !important; }
+.light-theme .atividade-concluida span:first-child { color: #1e293b !important; }
 
 .light-theme .progresso-item {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .progresso-item h4 { color: #f0f0f5 !important; }
-.light-theme .progresso-stats span { color: #9ca3b4 !important; }
+.light-theme .progresso-item h4 { color: #1e293b !important; }
+.light-theme .progresso-stats span { color: #64748b !important; }
 
-.light-theme .lixeira { color: #e2e8f0 !important; }
+.light-theme .lixeira { color: #1e293b !important; }
 .light-theme .lixeira-tabs button {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  color: #b0b8c8 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
 }
-.light-theme .lixeira-tabs button:hover { background: rgba(255,255,255,0.1) !important; color: #e2e8f0 !important; }
-.light-theme .lixeira-tabs button.active { background: rgba(239,68,68,0.15) !important; border-color: rgba(239,68,68,0.3) !important; color: #fca5a5 !important; }
+.light-theme .lixeira-tabs button:hover { background: #f8fafc !important; color: #1e293b !important; }
+.light-theme .lixeira-tabs button.active { background: rgba(239,68,68,0.08) !important; border-color: rgba(239,68,68,0.2) !important; color: #dc2626 !important; }
 
-.light-theme .secao-correcao h4 { color: #f0f0f5 !important; }
+.light-theme .secao-correcao h4 { color: #1e293b !important; }
 .light-theme .submissao-item {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .submissao-info h5 { color: #f0f0f5 !important; }
-.light-theme .submissao-info p { color: #9ca3b4 !important; }
+.light-theme .submissao-info h5 { color: #1e293b !important; }
+.light-theme .submissao-info p { color: #64748b !important; }
 
 .light-theme .btn-voltar {
-  background: rgba(255,255,255,0.08) !important;
-  border: 1px solid rgba(255,255,255,0.15) !important;
-  color: #e2e8f0 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
 }
 
 .light-theme .atividade-container {
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .atividade-container h2 { color: #f0f0f5 !important; }
-.light-theme .descricao-atividade { background: rgba(255,255,255,0.06) !important; }
+.light-theme .atividade-container h2 { color: #1e293b !important; }
+.light-theme .descricao-atividade { background: #f8fafc !important; }
 .light-theme .opcoes-resposta h4,
-.light-theme .resposta-dissertativa h4 { color: #f0f0f5 !important; }
+.light-theme .resposta-dissertativa h4 { color: #1e293b !important; }
 
 .light-theme .opcao-label {
-  background: rgba(255,255,255,0.05) !important;
-  color: #e2e8f0 !important;
+  background: #f8fafc !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0;
 }
-.light-theme .opcao-label:hover { background: rgba(255,255,255,0.09) !important; }
+.light-theme .opcao-label:hover { background: #eef2ff !important; border-color: #c7d2fe !important; }
 
 .light-theme .aluno-progresso {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .aluno-progresso h5 { color: #f0f0f5 !important; }
-.light-theme .aluno-progresso p { color: #9ca3b4 !important; }
+.light-theme .aluno-progresso h5 { color: #1e293b !important; }
+.light-theme .aluno-progresso p { color: #64748b !important; }
 
 .light-theme .form-atividade {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
 .light-theme .form-actions button[type="button"] {
-  background: rgba(255,255,255,0.06) !important;
-  color: #b0b8c8 !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 .light-theme .modal-content {
-  background: rgba(42, 45, 62, 0.98) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
 }
-.light-theme .modal-content h3 { color: #f0f0f5 !important; }
-.light-theme .modal-content p { color: #b0b8c8 !important; }
+.light-theme .modal-content h3 { color: #1e293b !important; }
+.light-theme .modal-content p { color: #475569 !important; }
 .light-theme .btn-cancel {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  color: #e2e8f0 !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
 }
 
 .light-theme .loading-spinner {
-  border: 3px solid rgba(255,255,255,0.1) !important;
-  border-top: 3px solid #a78bfa !important;
+  border: 3px solid #e2e8f0 !important;
+  border-top: 3px solid #6366f1 !important;
 }
-.light-theme .loading-container p { color: #b0b8c8 !important; }
+.light-theme .loading-container p { color: #64748b !important; }
 
 /* Light-theme: Painel Hero */
 .light-theme .painel-hero--aluno {
-  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.12)) !important;
-  border-color: rgba(99,102,241,0.2) !important;
+  background: linear-gradient(135deg, #eef2ff, #ede9fe) !important;
+  border-color: #c7d2fe !important;
 }
 .light-theme .painel-hero--prof {
-  background: linear-gradient(135deg, rgba(240,147,251,0.12), rgba(139,92,246,0.1)) !important;
-  border-color: rgba(240,147,251,0.2) !important;
+  background: linear-gradient(135deg, #fdf2f8, #ede9fe) !important;
+  border-color: #e9d5ff !important;
 }
-.light-theme .painel-hero-info h2 { color: #f0f0f5 !important; }
-.light-theme .painel-hero-info p { color: #9ca3b4 !important; }
-.light-theme .painel-stat-lbl { color: #9ca3b4 !important; }
+.light-theme .painel-hero-info h2 { color: #1e293b !important; }
+.light-theme .painel-hero-info p { color: #64748b !important; }
+.light-theme .painel-stat-lbl { color: #64748b !important; }
 
 .light-theme .painel-tabs {
-  background: rgba(255,255,255,0.04) !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
-.light-theme .painel-tab { color: #9ca3b4 !important; }
-.light-theme .painel-tab:hover { background: rgba(255,255,255,0.08) !important; color: #e2e8f0 !important; }
+.light-theme .painel-tab { color: #64748b !important; }
+.light-theme .painel-tab:hover { background: #f8fafc !important; color: #1e293b !important; }
 
 /* Light-theme: Aluno Cards */
 .light-theme .aluno-card {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
 .light-theme .aluno-card:hover {
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(99,102,241,0.25) !important;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.1) !important;
+  border-color: #c7d2fe !important;
 }
-.light-theme .aluno-card-title { color: #f0f0f5 !important; }
-.light-theme .aluno-card-desc { color: #9ca3b4 !important; }
-.light-theme .aluno-card-meta { color: #7a8299 !important; }
+.light-theme .aluno-card-title { color: #1e293b !important; }
+.light-theme .aluno-card-desc { color: #64748b !important; }
+.light-theme .aluno-card-meta { color: #94a3b8 !important; }
 .light-theme .aluno-btn-outline {
-  color: #a78bfa !important;
-  border-color: rgba(167,139,250,0.4) !important;
+  color: #6366f1 !important;
+  border-color: #c7d2fe !important;
 }
-.light-theme .aluno-btn-outline:hover { background: rgba(167,139,250,0.1) !important; }
+.light-theme .aluno-btn-outline:hover { background: #eef2ff !important; }
 
 /* Light-theme: Perfil */
-.light-theme .perfil-aluno { color: #e2e8f0 !important; }
+.light-theme .perfil-aluno { color: #1e293b !important; }
 .light-theme .form-perfil {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .campo-perfil label { color: #e2e8f0 !important; }
+.light-theme .campo-perfil label { color: #374151 !important; }
 .light-theme .campo-perfil input,
 .light-theme .campo-perfil textarea {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  color: #e2e8f0 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
 }
 .light-theme .campo-perfil input:focus,
 .light-theme .campo-perfil textarea:focus {
-  background: rgba(255,255,255,0.1) !important;
   border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
 }
-.light-theme .campo-perfil small { color: rgba(255,255,255,0.5) !important; }
-.light-theme .foto-placeholder { color: rgba(255,255,255,0.5) !important; }
+.light-theme .campo-perfil small { color: #94a3b8 !important; }
+.light-theme .foto-placeholder { color: #94a3b8 !important; }
 
 /* Light-theme: Alterar Senha & Desativar */
-.light-theme .alterar-senha-section { border-top-color: rgba(255,255,255,0.08) !important; }
-.light-theme .alterar-senha-section h4 { color: #f0f0f5 !important; }
+.light-theme .alterar-senha-section { border-top-color: #e2e8f0 !important; }
+.light-theme .alterar-senha-section h4 { color: #1e293b !important; }
 .light-theme .form-senha {
-  background: rgba(255,255,255,0.03) !important;
-  border-color: rgba(255,255,255,0.06) !important;
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
 }
-.light-theme .desativar-conta-section { border-top-color: rgba(255,255,255,0.08) !important; }
-.light-theme .desativar-conta-section h4 { color: #f0f0f5 !important; }
-.light-theme .desativar-conta-section p { color: rgba(255,255,255,0.45) !important; }
+.light-theme .desativar-conta-section { border-top-color: #e2e8f0 !important; }
+.light-theme .desativar-conta-section h4 { color: #1e293b !important; }
+.light-theme .desativar-conta-section p { color: #64748b !important; }
 
 /* Light-theme: Visualizar Alunos */
-.light-theme .visualizar-alunos { color: #e2e8f0 !important; }
+.light-theme .visualizar-alunos { color: #1e293b !important; }
 .light-theme .aluno-perfil-card {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .aluno-perfil-card:hover { background: rgba(255,255,255,0.08) !important; }
-.light-theme .aluno-info h4 { color: #f0f0f5 !important; }
-.light-theme .nome-real { color: #9ca3b4 !important; }
-.light-theme .email-aluno { color: #7a8299 !important; }
+.light-theme .aluno-info h4 { color: #1e293b !important; }
+.light-theme .nome-real { color: #64748b !important; }
+.light-theme .email-aluno { color: #94a3b8 !important; }
 
-/* Light-theme: Auth Card (Login/Cadastro) */
+/* Light-theme: Auth Card */
 .light-theme .auth-card {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  box-shadow: 0 25px 70px rgba(0,0,0,0.3) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08) !important;
 }
-.light-theme .auth-card-title { color: #f0f0f5 !important; }
-.light-theme .auth-card-subtitle { color: #9ca3b4 !important; }
-.light-theme .auth-field label { color: rgba(255,255,255,0.7) !important; }
+.light-theme .auth-card-title { color: #1e293b !important; }
+.light-theme .auth-card-subtitle { color: #64748b !important; }
+.light-theme .auth-field label { color: #374151 !important; }
 .light-theme .auth-field input,
 .light-theme .auth-field select {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  color: #e2e8f0 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
 }
-.light-theme .auth-field input::placeholder { color: rgba(255,255,255,0.35) !important; }
+.light-theme .auth-field input::placeholder { color: #94a3b8 !important; }
 .light-theme .auth-field input:focus,
 .light-theme .auth-field select:focus {
-  background: rgba(255,255,255,0.1) !important;
-  border-color: #667eea !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
 }
-.light-theme .auth-footer-text { color: rgba(255,255,255,0.5) !important; }
-.light-theme .auth-link-btn { color: #a78bfa !important; }
+.light-theme .auth-footer-text { color: #64748b !important; }
+.light-theme .auth-link-btn { color: #6366f1 !important; }
 .light-theme .auth-back-btn {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  color: rgba(255,255,255,0.5) !important;
-}
-.light-theme .auth-back-btn:hover {
-  background: rgba(255,255,255,0.1) !important;
-  color: rgba(255,255,255,0.8) !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
 }
 
 /* Light-theme: Selection page */
 .light-theme .selection-brand {
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
-.light-theme .brand-tagline { color: rgba(255,255,255,0.6) !important; }
+.light-theme .brand-tagline { color: #64748b !important; }
 .light-theme .selection-content {
-  background: rgba(255,255,255,0.06) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  box-shadow: 0 25px 70px rgba(0,0,0,0.3) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08) !important;
 }
-.light-theme .selection-question { color: #f0f0f5 !important; }
+.light-theme .selection-question { color: #1e293b !important; }
 .light-theme .type-card {
-  background: rgba(255,255,255,0.04) !important;
-  border: 2px solid rgba(255,255,255,0.08) !important;
+  background: #f8fafc !important;
+  border: 2px solid #e2e8f0 !important;
 }
 .light-theme .type-card:hover {
-  background: rgba(255,255,255,0.07) !important;
+  background: #eef2ff !important;
   border-color: var(--accent-color) !important;
 }
 .light-theme .type-card.active {
-  background: rgba(255,255,255,0.08) !important;
+  background: #eef2ff !important;
   border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
 }
-.light-theme .card-icon { color: rgba(255,255,255,0.8) !important; }
-.light-theme .card-label { color: #f0f0f5 !important; }
-.light-theme .card-desc { color: rgba(255,255,255,0.6) !important; }
+.light-theme .card-icon { color: #4f46e5 !important; }
+.light-theme .card-label { color: #1e293b !important; }
+.light-theme .card-desc { color: #64748b !important; }
 
-/* Light-theme: No activities / empty states */
+/* Light-theme: Empty states */
 .light-theme .no-activities {
-  color: rgba(255,255,255,0.5) !important;
-  background: rgba(255,255,255,0.03) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
+  color: #64748b !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 /* Light-theme: Password validator */
 .light-theme .password-validator {
-  background: rgba(139, 92, 246, 0.08) !important;
-  border-color: rgba(139, 92, 246, 0.15) !important;
+  background: #f5f3ff !important;
+  border-color: #ddd6fe !important;
 }
-.light-theme .password-validator h4 { color: #a78bfa !important; }
+.light-theme .password-validator h4 { color: #6d28d9 !important; }
 
 /* Light-theme: Fazer atividade */
-.light-theme .fazer-atividade { color: #e2e8f0 !important; }
+.light-theme .fazer-atividade { color: #1e293b !important; }
 
 /* Light-theme: Focus visible */
 .light-theme button:focus-visible,
 .light-theme input:focus-visible,
 .light-theme textarea:focus-visible,
 .light-theme select:focus-visible {
-  outline: 2px solid #a78bfa !important;
+  outline: 2px solid #6366f1 !important;
 }
