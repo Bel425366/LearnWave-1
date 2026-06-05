@@ -52,13 +52,13 @@ body {
 
 .dark-theme body,
 .dark-theme #root {
-  background-color: #1a1a2e;
+  background-color: #0B1120;
   color: #e0e0e0;
 }
 
 .light-theme body,
 .light-theme #root {
-  background: linear-gradient(160deg, #F5F7FB 0%, #EEF1F8 100%);
+  background: #F5F7FB;
   color: #1e293b;
 }
 
