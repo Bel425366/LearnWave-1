@@ -23,7 +23,7 @@
   :root {
     color-scheme: light;
     color: #1e293b;
-    background-color: #f0f2f8;
+    background-color: #E8ECF4;
   }
 }
 
@@ -58,7 +58,7 @@ body {
 
 .light-theme body,
 .light-theme #root {
-  background: #F5F7FB;
+  background: #E8ECF4;
   color: #1e293b;
 }
 
