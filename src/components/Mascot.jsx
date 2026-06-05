@@ -151,7 +151,7 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false,
           <div className={`mascot-mini-bubble ${miniBubbleFading ? 'fading-out' : ''}`}>
             <button className="mini-bubble-close" onClick={(e) => { e.stopPropagation(); handleMiniBubbleClose() }} aria-label="Fechar">×</button>
             <div className="mini-bubble-tail" />
-            <p className="mini-bubble-text">Ei! 📱 Acesse pelo celular para conversar com seu professor!</p>
+            <p className="mini-bubble-text">Ei! Acesse pelo celular para conversar com seu professor!</p>
             <a
               href="https://github.com/biadionisio/LearnWave.git"
               target="_blank"

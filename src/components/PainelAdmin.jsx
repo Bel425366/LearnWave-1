@@ -112,13 +112,28 @@ function ConfiguracoesSite() {
 
 function RelatoriosGerais() {
   const [usuarios, setUsuarios] = useState([])
+  const [conteudo, setConteudo] = useState({ atividades: 0, videoaulas: 0, materiais: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    UsuarioAPI.listar()
-      .then(data => setUsuarios(data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    const carregarDados = async () => {
+      try {
+        const [usuariosRes, atividadesRes, videoaulasRes, materiaisRes] = await Promise.all([
+          UsuarioAPI.listar(),
+          fetch('https://learnwaveback2.onrender.com/api/atividades').then(r => r.ok ? r.json() : []),
+          fetch('https://learnwaveback2.onrender.com/api/videoaulas').then(r => r.ok ? r.json() : []),
+          fetch('https://learnwaveback2.onrender.com/api/materiais').then(r => r.ok ? r.json() : [])
+        ])
+        setUsuarios(usuariosRes)
+        setConteudo({
+          atividades: Array.isArray(atividadesRes) ? atividadesRes.length : 0,
+          videoaulas: Array.isArray(videoaulasRes) ? videoaulasRes.length : 0,
+          materiais: Array.isArray(materiaisRes) ? materiaisRes.length : 0
+        })
+      } catch {}
+      setLoading(false)
+    }
+    carregarDados()
   }, [])
 
   if (loading) return <div className="admin-loading">Carregando...</div>
@@ -134,10 +149,6 @@ function RelatoriosGerais() {
     { val: professores, lbl: 'Professores',         cor: '#a78bfa' },
     { val: admins,      lbl: 'Administradores',     cor: '#f59e0b' },
   ]
-
-  const atividades = JSON.parse(localStorage.getItem('atividades') || '[]').filter(a => !a.excluido).length
-  const videoaulas = JSON.parse(localStorage.getItem('videoaulas') || '[]').filter(v => !v.excluido).length
-  const materiais  = JSON.parse(localStorage.getItem('materiais')  || '[]').filter(m => !m.excluido).length
 
   return (
     <div className="admin-section">
@@ -155,9 +166,9 @@ function RelatoriosGerais() {
       <div className="admin-card">
         <div className="admin-card-label">Conteúdo da Plataforma</div>
         {[
-          { lbl: 'Atividades criadas', val: atividades },
-          { lbl: 'Videoaulas',         val: videoaulas },
-          { lbl: 'Materiais',          val: materiais  },
+          { lbl: 'Atividades criadas', val: conteudo.atividades },
+          { lbl: 'Videoaulas',         val: conteudo.videoaulas },
+          { lbl: 'Materiais',          val: conteudo.materiais  },
         ].map((item, i) => (
           <div key={i} className="admin-activity-item">
             <span>{item.lbl}</span>
@@ -170,16 +181,23 @@ function RelatoriosGerais() {
 }
 
 function PerfilAdmin({ user }) {
-  const [perfilData, setPerfilData] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`perfil_${user.email}`)
-      return saved ? JSON.parse(saved) : { apelido: user.nome, bio: '', fotoPerfil: null }
-    } catch {
-      return { apelido: user.nome, bio: '', fotoPerfil: null }
-    }
-  })
-  const [formData, setFormData] = useState(perfilData)
-  const [previewFoto, setPreviewFoto] = useState(perfilData.fotoPerfil)
+  const [perfilData, setPerfilData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null })
+  const [formData, setFormData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null })
+  const [previewFoto, setPreviewFoto] = useState(null)
+
+  useEffect(() => {
+    fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/perfil`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          const perfil = { apelido: data.nome || user.nome, bio: data.bio || '', fotoPerfil: data.fotoPerfil || null }
+          setPerfilData(perfil)
+          setFormData(perfil)
+          setPreviewFoto(data.fotoPerfil || null)
+        }
+      })
+      .catch(() => {})
+  }, [user.id, user.nome])
 
   const handleFotoChange = (e) => {
     const file = e.target.files[0]
@@ -196,17 +214,21 @@ function PerfilAdmin({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}`, {
-        method: 'PUT',
+      const nomeRes = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(formData.apelido)}`, { method: 'PATCH' })
+      if (!nomeRes.ok) throw new Error(await nomeRes.text())
+
+      await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/perfil`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...user, nome: formData.apelido, bio: formData.bio, fotoPerfil: formData.fotoPerfil })
+        body: JSON.stringify({ bio: formData.bio, fotoPerfil: formData.fotoPerfil })
       })
-      if (!response.ok) throw new Error()
-    } catch {}
-    setPerfilData(formData)
-    localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
-    alert('Perfil atualizado!')
-    window.dispatchEvent(new Event('storage'))
+
+      setPerfilData(formData)
+      alert('Perfil atualizado!')
+      window.dispatchEvent(new Event('perfilAtualizado'))
+    } catch (err) {
+      alert('Erro ao salvar: ' + err.message)
+    }
   }
 
   const iniciais = (formData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()

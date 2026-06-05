@@ -28,6 +28,7 @@ function App() {
     return saved ? JSON.parse(saved) : true
   })
   const [perfilAtualizado, setPerfilAtualizado] = useState(0)
+  const [userPerfil, setUserPerfil] = useState(null)
 
   // Preloader
   useEffect(() => {
@@ -37,11 +38,23 @@ function App() {
     return () => clearTimeout(timer)
   }, [])
 
+  // Carregar perfil da API quando user muda
+  useEffect(() => {
+    if (user && user.id) {
+      fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/perfil`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => setUserPerfil(data))
+        .catch(() => setUserPerfil(null))
+    } else {
+      setUserPerfil(null)
+    }
+  }, [user, perfilAtualizado])
+
   // Força re-render quando perfil é atualizado
   useEffect(() => {
-    const handleStorageChange = () => setPerfilAtualizado(prev => prev + 1)
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+    const handlePerfilChange = () => setPerfilAtualizado(prev => prev + 1)
+    window.addEventListener('perfilAtualizado', handlePerfilChange)
+    return () => window.removeEventListener('perfilAtualizado', handlePerfilChange)
   }, [])
 
   // Verificar sessão periodicamente
@@ -136,27 +149,14 @@ function App() {
             </button>
             {user && (
               <div className="user-info">
-                {(() => {
-                  try {
-                    const perfil = JSON.parse(localStorage.getItem(`perfil_${user.email}`))
-                    return perfil?.fotoPerfil ? (
-                      <img src={perfil.fotoPerfil} alt="Perfil" className="header-foto-perfil" />
-                    ) : null
-                  } catch {
-                    return null
-                  }
-                })()}
-                <span>Olá, {(() => {
-                  try {
-                    const perfil = JSON.parse(localStorage.getItem(`perfil_${user.email}`))
-                    return Security.sanitizeInput(perfil?.apelido || user.nome)
-                  } catch {
-                    return Security.sanitizeInput(user.nome)
-                  }
-                })()}! ({user.tipo})</span>
+                {userPerfil?.fotoPerfil && (
+                  <img src={userPerfil.fotoPerfil} alt="Perfil" className="header-foto-perfil" />
+                )}
+                <span>Olá, {Security.sanitizeInput(userPerfil?.nome || user.nome)}! ({user.tipo})</span>
                 <button onClick={() => { 
                   setUser(null)
                   setUserType('')
+                  setUserPerfil(null)
                   Security.clearSession()
                   navigate('user-type-selection')
                 }}>Sair</button>

@@ -9,97 +9,146 @@ const SENHA_FORTE = (pwd) =>
   /\d/.test(pwd) &&
   /[!@#$%^&*(),.?":{}|<>]/.test(pwd)
 
+const API_BASE = 'https://learnwaveback2.onrender.com/api'
+
 function AreaAluno({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
   const [atividadeAtual, setAtividadeAtual] = useState(null)
-  const [perfilData, setPerfilData] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`perfil_${user.email}`)
-      return saved ? JSON.parse(saved) : { apelido: user.nome, bio: '', fotoPerfil: null }
-    } catch {
-      return { apelido: user.nome, bio: '', fotoPerfil: null }
-    }
-  })
-  const [progressoAluno, setProgressoAluno] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`progresso_${user.email}`)
-      return saved ? JSON.parse(saved) : {
-        atividadesConcluidas: [], videoaulasAssistidas: [], materiaisBaixados: [], notas: {}
-      }
-    } catch {
-      return { atividadesConcluidas: [], videoaulasAssistidas: [], materiaisBaixados: [], notas: {} }
-    }
-  })
+  const [perfilData, setPerfilData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null })
 
+  // Carregar perfil da API
+  useEffect(() => {
+    fetch(`${API_BASE}/usuarios/${user.id}/perfil`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          setPerfilData({
+            apelido: data.nome || user.nome,
+            bio: data.bio || '',
+            fotoPerfil: data.fotoPerfil || null
+          })
+        }
+      })
+      .catch(() => {})
+  }, [user.id, user.nome])
+
+  // States do backend
   const [todasAtividades, setTodasAtividades] = useState([])
   const [professores, setProfessores] = useState([])
+  const [progressoAtividades, setProgressoAtividades] = useState([])
+  const [progressoVideoaulas, setProgressoVideoaulas] = useState([])
+  const [downloadsAluno, setDownloadsAluno] = useState([])
+  const [progressoGeral, setProgressoGeral] = useState(null)
+  const [notasDetalhadas, setNotasDetalhadas] = useState([])
 
+  // Carregar dados iniciais
   useEffect(() => {
-    fetch('https://learnwaveback2.onrender.com/api/atividades')
-      .then(r => r.json())
-      .then(data => setTodasAtividades(data))
-      .catch(() => {
-        const local = JSON.parse(localStorage.getItem('atividades') || '[]').filter(a => !a.excluido)
-        setTodasAtividades(local)
-      })
-    fetch('https://learnwaveback2.onrender.com/api/usuarios/professores/aprovados')
-      .then(r => r.json())
-      .then(data => setProfessores(data))
-      .catch(() => {})
+    fetch(`${API_BASE}/atividades`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setTodasAtividades(Array.isArray(data) ? data : []))
+      .catch(() => setTodasAtividades([]))
+
+    fetch(`${API_BASE}/usuarios/professores/aprovados`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setProfessores(Array.isArray(data) ? data : []))
+      .catch(() => setProfessores([]))
   }, [])
 
+  // Carregar progresso do aluno da API
   useEffect(() => {
-    localStorage.setItem(`progresso_${user.email}`, JSON.stringify(progressoAluno))
-  }, [progressoAluno, user.email])
+    if (!user.id) return
 
-  useEffect(() => {
-    localStorage.setItem(`perfil_${user.email}`, JSON.stringify(perfilData))
-  }, [perfilData, user.email])
+    fetch(`${API_BASE}/progresso-atividades/aluno/${user.id}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setProgressoAtividades(Array.isArray(data) ? data : []))
+      .catch(() => setProgressoAtividades([]))
 
-  const enviarAtividade = (resposta) => {
+    fetch(`${API_BASE}/progresso-videoaulas/aluno/${user.id}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setProgressoVideoaulas(Array.isArray(data) ? data : []))
+      .catch(() => setProgressoVideoaulas([]))
+
+    fetch(`${API_BASE}/downloads/aluno/${user.id}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setDownloadsAluno(Array.isArray(data) ? data : []))
+      .catch(() => setDownloadsAluno([]))
+
+    fetch(`${API_BASE}/notas/progresso/${user.id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setProgressoGeral(data))
+      .catch(() => setProgressoGeral(null))
+
+    fetch(`${API_BASE}/notas/detalhado/${user.id}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setNotasDetalhadas(Array.isArray(data) ? data : []))
+      .catch(() => setNotasDetalhadas([]))
+  }, [user.id])
+
+  // salvarPerfil envia para a API
+
+  // Enviar atividade — integrado com API
+  const enviarAtividade = async (resposta) => {
     let notaAutomatica = null
-    let statusAutomatico = 'pendente'
+
+    const conteudo = (() => {
+      try { return atividadeAtual.conteudo ? JSON.parse(atividadeAtual.conteudo) : {} }
+      catch { return {} }
+    })()
+    const tipo = conteudo.tipo || atividadeAtual.tipo || 'dissertativa'
+    const questoes = conteudo.questoes?.length > 0 ? conteudo.questoes : []
+
+    // Calcular nota para múltipla escolha
+    if (tipo === 'multipla_escolha') {
+      if (questoes.length > 0) {
+        const respostasAluno = JSON.parse(resposta)
+        const acertos = questoes.filter((q, i) => respostasAluno[i] === q.respostaCorreta).length
+        notaAutomatica = parseFloat(((acertos / questoes.length) * 10).toFixed(1))
+      } else {
+        notaAutomatica = resposta === conteudo.respostaCorreta ? 10 : 0
+      }
+    }
 
     try {
-      const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
+      // 1. POST — criar progresso (iniciar atividade)
+      const postRes = await fetch(`${API_BASE}/progresso-atividades`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alunoId: Number(user.id), atividadeId: Number(atividadeAtual.id) })
+      })
 
-      const conteudo = (() => {
-        try { return atividadeAtual.conteudo ? JSON.parse(atividadeAtual.conteudo) : {} }
-        catch { return {} }
-      })()
-      const tipo = conteudo.tipo || atividadeAtual.tipo || 'dissertativa'
-      const questoes = conteudo.questoes?.length > 0 ? conteudo.questoes : []
-
-      if (tipo === 'multipla_escolha') {
-        if (questoes.length > 0) {
-          const respostasAluno = JSON.parse(resposta)
-          const acertos = questoes.filter((q, i) => respostasAluno[i] === q.respostaCorreta).length
-          notaAutomatica = parseFloat(((acertos / questoes.length) * 10).toFixed(1))
-        } else {
-          notaAutomatica = resposta === conteudo.respostaCorreta ? 10 : 0
-        }
-        statusAutomatico = 'corrigida'
+      if (!postRes.ok) {
+        const errText = await postRes.text()
+        throw new Error(errText || `Erro ${postRes.status}`)
       }
 
-      submissoes.push({
-        id: Date.now(),
-        atividadeId: atividadeAtual.id,
-        alunoEmail: user.email,
-        alunoNome: user.nome,
-        resposta: statusAutomatico === 'pendente' ? resposta : null,
-        data: new Date().toLocaleString(),
-        status: statusAutomatico,
-        nota: notaAutomatica
-      })
-      localStorage.setItem('submissoes', JSON.stringify(submissoes))
-    } catch {
-      alert('Erro ao enviar atividade. Tente novamente.')
-      return
+      const progressoCriado = await postRes.json()
+
+      // 2. PATCH — concluir com nota
+      if (notaAutomatica !== null) {
+        await fetch(`${API_BASE}/progresso-atividades/${progressoCriado.id}/concluir?nota=${notaAutomatica}`, {
+          method: 'PATCH'
+        })
+      }
+
+      // 3. Atualizar state local
+      setProgressoAtividades(prev => [...prev, { ...progressoCriado, nota: notaAutomatica, status: notaAutomatica !== null ? 'CONCLUIDO' : 'EM_ANDAMENTO' }])
+
+      // 4. Recarregar progresso geral
+      fetch(`${API_BASE}/notas/progresso/${user.id}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => setProgressoGeral(data))
+        .catch(() => {})
+
+      fetch(`${API_BASE}/notas/detalhado/${user.id}`)
+        .then(r => r.ok ? r.json() : [])
+        .then(data => setNotasDetalhadas(Array.isArray(data) ? data : []))
+        .catch(() => {})
+
+    } catch (err) {
+      console.error('Erro ao enviar atividade:', err)
+      alert('Erro ao registrar progresso: ' + err.message)
     }
-    setProgressoAluno(prev => ({
-      ...prev,
-      atividadesConcluidas: [...prev.atividadesConcluidas, atividadeAtual.id]
-    }))
+
     setAtividadeAtual(null)
     if (notaAutomatica !== null) {
       alert(`Atividade corrigida automaticamente! Sua nota: ${notaAutomatica}`)
@@ -108,65 +157,85 @@ function AreaAluno({ user, onNavigate }) {
     }
   }
 
-  const marcarVideoaulaAssistida = (videoId) => {
-    setProgressoAluno(prev => ({
-      ...prev,
-      videoaulasAssistidas: [...prev.videoaulasAssistidas, videoId]
-    }))
+  // Marcar videoaula como assistida — integrado com API
+  const marcarVideoaulaAssistida = async (videoId) => {
+    try {
+      // POST — criar progresso
+      const postRes = await fetch(`${API_BASE}/progresso-videoaulas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alunoId: Number(user.id), videoaulaId: Number(videoId) })
+      })
+
+      if (!postRes.ok) throw new Error(await postRes.text())
+      const progressoCriado = await postRes.json()
+
+      // PATCH — concluir
+      await fetch(`${API_BASE}/progresso-videoaulas/${progressoCriado.id}/concluir`, { method: 'PATCH' })
+
+      // Atualizar state
+      setProgressoVideoaulas(prev => [...prev, { ...progressoCriado, status: 'CONCLUIDO' }])
+    } catch (err) {
+      console.error('Erro ao marcar videoaula:', err)
+      // Fallback silencioso - não bloqueia UX
+    }
   }
 
-  const baixarMaterial = (materialId) => {
-    setProgressoAluno(prev => ({
-      ...prev,
-      materiaisBaixados: [...prev.materiaisBaixados, materialId]
-    }))
+  // Registrar download de material — integrado com API
+  const baixarMaterial = async (materialId) => {
+    try {
+      const postRes = await fetch(`${API_BASE}/downloads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alunoId: Number(user.id), materialId: Number(materialId) })
+      })
+
+      if (!postRes.ok) throw new Error(await postRes.text())
+      const downloadCriado = await postRes.json()
+
+      setDownloadsAluno(prev => [...prev, downloadCriado])
+    } catch (err) {
+      console.error('Erro ao registrar download:', err)
+    }
   }
 
   const salvarPerfil = async (novosDados) => {
     try {
-      console.log('user.id:', user.id, '| novo nome:', novosDados.apelido)
-      const response = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(novosDados.apelido)}`, {
+      // Atualizar nome
+      const nomeRes = await fetch(`${API_BASE}/usuarios/${user.id}/nome?nome=${encodeURIComponent(novosDados.apelido)}`, {
         method: 'PATCH'
       })
-      console.log('resposta status:', response.status)
-      if (!response.ok) throw new Error(await response.text())
+      if (!nomeRes.ok) throw new Error(await nomeRes.text())
+
+      // Atualizar bio e foto via /perfil
+      const perfilPayload = {}
+      if (novosDados.bio !== undefined) perfilPayload.bio = novosDados.bio
+      if (novosDados.fotoPerfil !== undefined) perfilPayload.fotoPerfil = novosDados.fotoPerfil
+
+      await fetch(`${API_BASE}/usuarios/${user.id}/perfil`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(perfilPayload)
+      })
+
       setPerfilData(novosDados)
       alert('Perfil atualizado com sucesso!')
-      window.dispatchEvent(new Event('storage'))
+      window.dispatchEvent(new Event('perfilAtualizado'))
     } catch (err) {
-      console.error('Erro ao salvar perfil:', err)
       setPerfilData(novosDados)
       alert('Erro ao salvar no servidor: ' + err.message)
-      window.dispatchEvent(new Event('storage'))
     }
   }
 
+  // Dados derivados
   const atividadesAtivas = todasAtividades.filter(a => a.situacao === 'ativo' || !a.situacao)
+  const notaMedia = progressoGeral?.media != null ? progressoGeral.media.toFixed(1) : '—'
 
-  const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
-  const minhasSubmissoes = submissoes.filter(s =>
-    s.alunoEmail === user.email &&
-    s.nota !== null &&
-    atividadesAtivas.some(a => a.id === s.atividadeId)
-  )
-  const notaMedia = minhasSubmissoes.length > 0
-    ? (minhasSubmissoes.reduce((acc, s) => acc + s.nota, 0) / minhasSubmissoes.length).toFixed(1)
-    : '—'
-
-  const notaMediaPorProfessor = (professorId) => {
-    const atividadesProf = atividadesAtivas.filter(a => a.professorId === professorId)
-    const submissoesProf = minhasSubmissoes.filter(s => atividadesProf.some(a => a.id === s.atividadeId))
-    return submissoesProf.length > 0
-      ? (submissoesProf.reduce((acc, s) => acc + s.nota, 0) / submissoesProf.length).toFixed(1)
-      : '—'
-  }
-
-  const mensagensPorAba = {
-    atividades: 'Vamos lá! Você consegue fazer todas as atividades!',
-    videoaulas: 'Hora de aprender algo novo. Bora assistir!',
-    materiais: 'Baixe os materiais e estude no seu ritmo!',
-    progresso: `Olha quanto você já evoluiu! Continue assim!`,
-    perfil: 'Personalize seu perfil e mostre quem você é!',
+  // Objeto compatível com componentes filhos
+  const progressoAluno = {
+    atividadesConcluidas: progressoAtividades.filter(p => p.status === 'CONCLUIDO').map(p => p.atividadeId),
+    videoaulasAssistidas: progressoVideoaulas.filter(p => p.status === 'CONCLUIDO').map(p => p.videoaulaId),
+    materiaisBaixados: downloadsAluno.map(d => d.materialId),
   }
 
   const tabs = [
@@ -199,11 +268,11 @@ function AreaAluno({ user, onNavigate }) {
         </div>
         <div className="painel-hero-stats">
           <div className="painel-stat">
-            <span className="painel-stat-val">{progressoAluno.atividadesConcluidas.filter(id => atividadesAtivas.some(a => a.id === id)).length}</span>
+            <span className="painel-stat-val">{progressoGeral?.atividadesConcluidas ?? 0}</span>
             <span className="painel-stat-lbl">Atividades</span>
           </div>
           <div className="painel-stat">
-            <span className="painel-stat-val">{progressoAluno.videoaulasAssistidas.length}</span>
+            <span className="painel-stat-val">{progressoVideoaulas.filter(p => p.status === 'CONCLUIDO').length}</span>
             <span className="painel-stat-lbl">Videoaulas</span>
           </div>
           <div className="painel-stat">
@@ -233,7 +302,7 @@ function AreaAluno({ user, onNavigate }) {
           <TabAtividades
             atividades={atividadesAtivas}
             professores={professores}
-            progressoAluno={progressoAluno}
+            progressoAtividades={progressoAtividades}
             userEmail={user.email}
             onAbrirAtividade={setAtividadeAtual}
           />
@@ -254,12 +323,13 @@ function AreaAluno({ user, onNavigate }) {
         )}
         {activeTab === 'progresso' && (
           <TabProgresso
-            progressoAluno={progressoAluno}
+            progressoGeral={progressoGeral}
+            progressoVideoaulas={progressoVideoaulas}
+            downloadsAluno={downloadsAluno}
+            notasDetalhadas={notasDetalhadas}
             todasAtividades={atividadesAtivas}
-            minhasSubmissoes={minhasSubmissoes}
             notaMedia={notaMedia}
             professores={professores}
-            notaMediaPorProfessor={notaMediaPorProfessor}
           />
         )}
         {activeTab === 'perfil' && (
@@ -270,9 +340,8 @@ function AreaAluno({ user, onNavigate }) {
   )
 }
 
-function TabAtividades({ atividades, professores, progressoAluno, userEmail, onAbrirAtividade }) {
+function TabAtividades({ atividades, professores, progressoAtividades, userEmail, onAbrirAtividade }) {
   const publicadas = atividades.filter(a => (a.status === 'Publicada' || a.status === 'PUBLICADO') && a.situacao !== 'lixeira' && a.situacao !== 'excluido')
-  const submissoes = JSON.parse(localStorage.getItem('submissoes')) || []
   const [professorSelecionado, setProfessorSelecionado] = useState(null)
 
   const professoresComAtividades = professores.filter(p =>
@@ -292,22 +361,22 @@ function TabAtividades({ atividades, professores, progressoAluno, userEmail, onA
         <h3 style={{ margin: '0 0 0.75rem', opacity: 0.9 }}>Atividades de {professorSelecionado.nome}</h3>
         <div className="aluno-grid">
           {atividadesDoProf.map(atividade => {
-            const minhaSubmissao = submissoes.find(s => s.atividadeId === atividade.id && s.alunoEmail === userEmail)
+            const meuProgresso = progressoAtividades.find(p => p.atividadeId === atividade.id)
             return (
               <div key={atividade.id} className="aluno-card">
                 <div className="aluno-card-header">
                   <span className="aluno-card-tag">{atividade.area}</span>
-                  {minhaSubmissao && (
-                    <span className={`aluno-badge ${minhaSubmissao.status === 'pendente' ? 'badge-pendente' : 'badge-ok'}`}>
-                      {minhaSubmissao.status === 'pendente' ? 'Aguardando correção' : 'Corrigida'}
+                  {meuProgresso && (
+                    <span className={`aluno-badge ${meuProgresso.status === 'EM_ANDAMENTO' ? 'badge-pendente' : 'badge-ok'}`}>
+                      {meuProgresso.status === 'EM_ANDAMENTO' ? 'Aguardando correção' : 'Concluída'}
                     </span>
                   )}
                 </div>
                 <h3 className="aluno-card-title">{atividade.titulo}</h3>
                 <p className="aluno-card-desc">{atividade.descricao}</p>
-                {minhaSubmissao ? (
-                  minhaSubmissao.nota !== null && (
-                    <div className="aluno-nota">Nota: <strong>{minhaSubmissao.nota}</strong></div>
+                {meuProgresso ? (
+                  meuProgresso.nota != null && (
+                    <div className="aluno-nota">Nota: <strong>{meuProgresso.nota}</strong></div>
                   )
                 ) : (
                   <button className="aluno-btn" onClick={() => onAbrirAtividade(atividade)}>
@@ -632,19 +701,13 @@ function TabMateriais({ professores, progressoAluno, onBaixar }) {
   )
 }
 
-function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaMedia, professores, notaMediaPorProfessor }) {
-  const atividadesConcluidasAtivas = progressoAluno.atividadesConcluidas.filter(id =>
-    todasAtividades.some(a => a.id === id)
-  )
-
+function TabProgresso({ progressoGeral, progressoVideoaulas, downloadsAluno, notasDetalhadas, todasAtividades, notaMedia, professores }) {
   const stats = [
-    { val: atividadesConcluidasAtivas.length, lbl: 'Atividades concluídas' },
-    { val: progressoAluno.videoaulasAssistidas.length, lbl: 'Videoaulas assistidas' },
-    { val: progressoAluno.materiaisBaixados.length, lbl: 'Materiais baixados' },
+    { val: progressoGeral?.atividadesConcluidas ?? 0, lbl: 'Atividades concluídas' },
+    { val: progressoVideoaulas.filter(p => p.status === 'CONCLUIDO').length, lbl: 'Videoaulas assistidas' },
+    { val: downloadsAluno.length, lbl: 'Materiais baixados' },
     { val: notaMedia, lbl: 'Média geral' },
   ]
-
-  const professoresComNota = professores.filter(p => notaMediaPorProfessor(p.id) !== '—')
 
   return (
     <div>
@@ -657,29 +720,31 @@ function TabProgresso({ progressoAluno, todasAtividades, minhasSubmissoes, notaM
         ))}
       </div>
 
-      {professoresComNota.length > 0 && (
+      {progressoGeral && (
         <div className="detalhes-progresso" style={{ marginBottom: '1.5rem' }}>
-          <h4>Média por professor</h4>
-          {professoresComNota.map(prof => (
-            <div key={prof.id} className="atividade-concluida">
-              <span>{prof.nome}</span>
-              <span>Média: {notaMediaPorProfessor(prof.id)}</span>
-            </div>
-          ))}
+          <h4>Resumo</h4>
+          <div className="atividade-concluida">
+            <span>Total de atividades</span>
+            <span>{progressoGeral.totalAtividades ?? 0}</span>
+          </div>
+          <div className="atividade-concluida">
+            <span>Percentual concluído</span>
+            <span>{progressoGeral.percentualConcluido != null ? `${progressoGeral.percentualConcluido.toFixed(0)}%` : '0%'}</span>
+          </div>
         </div>
       )}
 
-      {minhasSubmissoes.length > 0 && (
+      {notasDetalhadas.length > 0 && (
         <div className="detalhes-progresso">
-          <h4>Atividades corrigidas</h4>
-          {minhasSubmissoes.map(submissao => {
-            const atividade = todasAtividades.find(a => a.id === submissao.atividadeId)
-            return atividade ? (
-              <div key={submissao.id} className="atividade-concluida">
-                <span>{atividade.titulo}</span>
-                <span>Nota: {submissao.nota}</span>
+          <h4>Notas por atividade</h4>
+          {notasDetalhadas.map((nota, i) => {
+            const atividade = todasAtividades.find(a => a.id === nota.atividadeId)
+            return (
+              <div key={nota.id || i} className="atividade-concluida">
+                <span>{atividade ? atividade.titulo : `Atividade ${nota.atividadeId}`}</span>
+                <span>Nota: {nota.nota != null ? nota.nota : '—'}</span>
               </div>
-            ) : null
+            )
           })}
         </div>
       )}

@@ -21,10 +21,7 @@ function PainelProfessor({ user, onNavigate }) {
     fetch(`https://learnwaveback2.onrender.com/api/atividades/professor/${user.id}`)
       .then(r => r.json())
       .then(data => setAtividades(Array.isArray(data) ? data : []))
-      .catch(() => {
-        const saved = JSON.parse(localStorage.getItem('atividades') || '[]')
-        setAtividades(saved.filter(a => a.professorId === user.id))
-      })
+      .catch(() => setAtividades([]))
   }, [user.id])
   const [videoaulas, setVideoaulas] = useState([])
   const [materiais, setMateriais] = useState([])
@@ -160,7 +157,6 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
         atividadeSalva = await res.json()
         const newAtividades = atividades.map(a => a.id === editingId ? { ...a, ...formData, id: atividadeSalva.id } : a)
         setAtividades(newAtividades)
-        localStorage.setItem('atividades', JSON.stringify(newAtividades))
       } else {
         const res = await fetch('https://learnwaveback2.onrender.com/api/atividades', {
           method: 'POST',
@@ -172,7 +168,6 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
         const novaAtividade = { ...formData, id: atividadeSalva.id, excluido: false }
         const newAtividades = [...atividades, novaAtividade]
         setAtividades(newAtividades)
-        localStorage.setItem('atividades', JSON.stringify(newAtividades))
       }
     } catch (err) {
       console.error('Erro ao salvar atividade:', err)
@@ -206,7 +201,6 @@ function GerenciarAtividades({ atividades, setAtividades, professorId }) {
     }
     const newAtividades = atividades.map(a => a.id === deleteModal.id ? { ...a, situacao: 'lixeira', excluido: true } : a)
     setAtividades(newAtividades)
-    localStorage.setItem('atividades', JSON.stringify(newAtividades))
     setDeleteModal({ isOpen: false, id: null })
   }
 
@@ -723,32 +717,56 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
 }
 
 function AcompanharProgresso() {
-  const [submissoes, setSubmissoes] = useState(() => JSON.parse(localStorage.getItem('submissoes')) || [])
+  const [progressos, setProgressos] = useState([])
   const [usuarios, setUsuarios] = useState([])
   const [atividades, setAtividades] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('https://learnwaveback2.onrender.com/api/usuarios/tipo/ALUNO')
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setUsuarios(data.filter(a => a.status !== 'inativo')))
-      .catch(() => {})
-    fetch('https://learnwaveback2.onrender.com/api/atividades')
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setAtividades(data))
-      .catch(() => {})
+    const carregarDados = async () => {
+      try {
+        const [alunosRes, atividadesRes] = await Promise.all([
+          fetch('https://learnwaveback2.onrender.com/api/usuarios/tipo/ALUNO'),
+          fetch('https://learnwaveback2.onrender.com/api/atividades')
+        ])
+        const alunos = alunosRes.ok ? await alunosRes.json() : []
+        const atividadesData = atividadesRes.ok ? await atividadesRes.json() : []
+        setUsuarios(alunos.filter(a => a.status !== 'inativo'))
+        setAtividades(atividadesData)
+
+        // Buscar progresso de cada atividade
+        const todosProgressos = []
+        await Promise.all(atividadesData.map(async (atividade) => {
+          try {
+            const res = await fetch(`https://learnwaveback2.onrender.com/api/progresso-atividades/atividade/${atividade.id}`)
+            if (res.ok) {
+              const data = await res.json()
+              if (Array.isArray(data)) todosProgressos.push(...data)
+            }
+          } catch {}
+        }))
+        setProgressos(todosProgressos)
+      } catch {}
+      setLoading(false)
+    }
+    carregarDados()
   }, [])
 
-  const atividadesAtivas = atividades.filter(a => a.situacao === 'ativo' || !a.situacao)
-  const submissoesValidas = submissoes.filter(s => atividadesAtivas.some(a => a.id === s.atividadeId))
-  const submissoesPendentes = submissoesValidas.filter(s => s.status === 'pendente')
-
-  const darNota = (submissaoId, nota) => {
+  const darNota = async (progressoId, nota) => {
     const notaNum = parseFloat(nota)
     if (isNaN(notaNum) || notaNum < 0 || notaNum > 10) { alert('Nota deve ser entre 0 e 10'); return }
-    const novas = submissoes.map(s => s.id === submissaoId ? { ...s, nota: notaNum, status: 'corrigida' } : s)
-    setSubmissoes(novas)
-    localStorage.setItem('submissoes', JSON.stringify(novas))
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/progresso-atividades/${progressoId}/concluir?nota=${notaNum}`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      setProgressos(prev => prev.map(p => p.id === progressoId ? { ...p, nota: notaNum, status: 'CONCLUIDO' } : p))
+    } catch (err) {
+      alert('Erro ao dar nota: ' + err.message)
+    }
   }
+
+  if (loading) return <div className="acompanhar-progresso"><p style={{ opacity: 0.6 }}>Carregando...</p></div>
+
+  const progressosPendentes = progressos.filter(p => p.status === 'EM_ANDAMENTO')
 
   return (
     <div className="acompanhar-progresso">
@@ -756,36 +774,39 @@ function AcompanharProgresso() {
       <div className="secao-correcao">
         <h4>Alunos Cadastrados ({usuarios.length})</h4>
         {usuarios.map(aluno => {
-          const submissoesAluno = submissoesValidas.filter(s => s.alunoEmail === aluno.email && s.nota !== null)
-          const notaMedia = submissoesAluno.length > 0
-            ? (submissoesAluno.reduce((acc, s) => acc + s.nota, 0) / submissoesAluno.length).toFixed(1)
+          const progressosAluno = progressos.filter(p => p.alunoId === aluno.id && p.nota != null)
+          const notaMedia = progressosAluno.length > 0
+            ? (progressosAluno.reduce((acc, p) => acc + p.nota, 0) / progressosAluno.length).toFixed(1)
             : 0
           return (
             <div key={aluno.id} className="aluno-progresso">
               <h5>{aluno.nome} ({aluno.email})</h5>
-              <p>Atividades realizadas: {submissoesAluno.length}</p>
+              <p>Atividades realizadas: {progressosAluno.length}</p>
               <p>Nota média: {notaMedia}</p>
             </div>
           )
         })}
       </div>
       <div className="secao-correcao">
-        <h4>Pendentes de Correção ({submissoesPendentes.length})</h4>
-        {submissoesPendentes.map(submissao => (
-          <div key={submissao.id} className="submissao-item">
-            <div className="submissao-info">
-              <h5>Atividade: {submissao.atividadeId}</h5>
-              <p><strong>Aluno:</strong> {submissao.alunoNome}</p>
-              {submissao.resposta && <p><strong>Resposta:</strong> {submissao.resposta}</p>}
+        <h4>Pendentes de Correção ({progressosPendentes.length})</h4>
+        {progressosPendentes.map(progresso => {
+          const aluno = usuarios.find(u => u.id === progresso.alunoId)
+          const atividade = atividades.find(a => a.id === progresso.atividadeId)
+          return (
+            <div key={progresso.id} className="submissao-item">
+              <div className="submissao-info">
+                <h5>Atividade: {atividade ? atividade.titulo : progresso.atividadeId}</h5>
+                <p><strong>Aluno:</strong> {aluno ? aluno.nome : `ID ${progresso.alunoId}`}</p>
+              </div>
+              <div className="correcao-actions">
+                <input type="number" min="0" max="10" step="0.1" placeholder="Nota (0-10)"
+                  onKeyPress={(e) => { if (e.key === 'Enter') { darNota(progresso.id, e.target.value); e.target.value = '' } }}
+                />
+                <button onClick={(e) => { const input = e.target.previousElementSibling; darNota(progresso.id, input.value); input.value = '' }}>Dar Nota</button>
+              </div>
             </div>
-            <div className="correcao-actions">
-              <input type="number" min="0" max="10" step="0.1" placeholder="Nota (0-10)"
-                onKeyPress={(e) => { if (e.key === 'Enter') { darNota(submissao.id, e.target.value); e.target.value = '' } }}
-              />
-              <button onClick={(e) => { const input = e.target.previousElementSibling; darNota(submissao.id, input.value); input.value = '' }}>Dar Nota</button>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -824,7 +845,6 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
     try { await fetch(`https://learnwaveback2.onrender.com/api/atividades/${id}/restaurar`, { method: 'PATCH' }) } catch {}
     const novas = atividades.map(a => a.id === id ? { ...a, situacao: 'ativo', excluido: false } : a)
     setAtividades(novas)
-    localStorage.setItem('atividades', JSON.stringify(novas))
   }
 
   const excluirPermanente = async (id) => {
@@ -832,7 +852,6 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
     try { await fetch(`https://learnwaveback2.onrender.com/api/atividades/${id}`, { method: 'DELETE' }) } catch {}
     const novas = atividades.filter(a => a.id !== id)
     setAtividades(novas)
-    localStorage.setItem('atividades', JSON.stringify(novas))
   }
 
   const restaurarVideoaula = async (id) => {
@@ -916,14 +935,23 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
 }
 
 function PerfilProfessor({ user }) {
-  const [perfilData, setPerfilData] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`perfil_${user.email}`)
-      return saved ? JSON.parse(saved) : { apelido: user.nome, bio: '', fotoPerfil: null }
-    } catch { return { apelido: user.nome, bio: '', fotoPerfil: null } }
-  })
-  const [formData, setFormData] = useState(perfilData)
-  const [previewFoto, setPreviewFoto] = useState(perfilData.fotoPerfil)
+  const [perfilData, setPerfilData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null })
+  const [formData, setFormData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null })
+  const [previewFoto, setPreviewFoto] = useState(null)
+
+  useEffect(() => {
+    fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/perfil`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          const perfil = { apelido: data.nome || user.nome, bio: data.bio || '', fotoPerfil: data.fotoPerfil || null }
+          setPerfilData(perfil)
+          setFormData(perfil)
+          setPreviewFoto(data.fotoPerfil || null)
+        }
+      })
+      .catch(() => {})
+  }, [user.id, user.nome])
 
   const handleFotoChange = (e) => {
     const file = e.target.files[0]
@@ -937,12 +965,18 @@ function PerfilProfessor({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const res = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(formData.apelido)}`, { method: 'PATCH' })
-      if (!res.ok) throw new Error(await res.text())
+      const nomeRes = await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/nome?nome=${encodeURIComponent(formData.apelido)}`, { method: 'PATCH' })
+      if (!nomeRes.ok) throw new Error(await nomeRes.text())
+
+      await fetch(`https://learnwaveback2.onrender.com/api/usuarios/${user.id}/perfil`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bio: formData.bio, fotoPerfil: formData.fotoPerfil })
+      })
+
       setPerfilData(formData)
-      localStorage.setItem(`perfil_${user.email}`, JSON.stringify(formData))
       alert('Perfil atualizado com sucesso!')
-      window.dispatchEvent(new Event('storage'))
+      window.dispatchEvent(new Event('perfilAtualizado'))
     } catch (err) {
       alert('Erro ao salvar perfil: ' + err.message)
     }
@@ -988,33 +1022,24 @@ function VisualizarAlunos() {
       .finally(() => setLoading(false))
   }, [])
 
-  const obterPerfilAluno = (email) => {
-    try { return JSON.parse(localStorage.getItem(`perfil_${email}`)) || { apelido: '', bio: '', fotoPerfil: null } }
-    catch { return { apelido: '', bio: '', fotoPerfil: null } }
-  }
-
   if (loading) return <div className="visualizar-alunos"><h3>Perfis dos Alunos</h3><p>Carregando alunos...</p></div>
 
   return (
     <div className="visualizar-alunos">
       <h3>Perfis dos Alunos</h3>
       <div className="alunos-grid">
-        {alunos.map(aluno => {
-          const perfil = obterPerfilAluno(aluno.email)
-          return (
+        {alunos.map(aluno => (
             <div key={aluno.id} className="aluno-perfil-card">
               <div className="aluno-foto">
-                {perfil.fotoPerfil ? <img src={perfil.fotoPerfil} alt="Foto do aluno" className="foto-aluno" /> : <div className="foto-placeholder-aluno"><span>A</span></div>}
+                {aluno.fotoPerfil ? <img src={aluno.fotoPerfil} alt="Foto do aluno" className="foto-aluno" /> : <div className="foto-placeholder-aluno"><span>A</span></div>}
               </div>
               <div className="aluno-info">
-                <h4>{perfil.apelido || aluno.nome}</h4>
-                <p className="nome-real">{aluno.nome}</p>
+                <h4>{aluno.nome}</h4>
                 <p className="email-aluno">{aluno.email}</p>
-                {perfil.bio && <div className="bio-aluno"><strong>Bio:</strong><p>{perfil.bio}</p></div>}
+                {aluno.bio && <div className="bio-aluno"><strong>Bio:</strong><p>{aluno.bio}</p></div>}
               </div>
             </div>
-          )
-        })}
+          ))}
       </div>
       {alunos.length === 0 && <div className="sem-alunos"><p>Nenhum aluno cadastrado ainda.</p></div>}
     </div>

@@ -19,8 +19,8 @@
 }
 
 .light-theme {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #1e293b;
+  background: #2a2d3e;
+  color: #e2e8f0;
 }
 
 .header {
@@ -1204,51 +1204,51 @@ textarea[name="experiencia"] {
 }
 
 .light-theme .auth-form input, .light-theme .auth-form textarea, .light-theme .auth-form select {
-  color: #000000 !important;
-  background: #ffffff !important;
-  border: 2px solid #cccccc !important;
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .light-theme .auth-form select option {
-  color: #000000 !important;
-  background: #ffffff !important;
+  color: #e2e8f0 !important;
+  background: #2a2d3e !important;
 }
 
 .light-theme .form-atividade input, .light-theme .form-atividade textarea, .light-theme .form-atividade select {
-  color: #000000 !important;
-  background: #ffffff !important;
-  border: 2px solid #cccccc !important;
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .light-theme .form-atividade select option {
-  color: #000000 !important;
-  background: #ffffff !important;
+  color: #e2e8f0 !important;
+  background: #2a2d3e !important;
 }
 
 .light-theme .correcao-actions input {
-  color: #000000 !important;
-  background: #ffffff !important;
-  border: 2px solid #cccccc !important;
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .light-theme .resposta-dissertativa textarea {
-  color: #000000 !important;
-  background: #ffffff !important;
-  border: 2px solid #cccccc !important;
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Estilos específicos para modo claro */
 .light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme h5, .light-theme h6 {
-  color: #2d3748 !important;
+  color: #f0f0f5 !important;
 }
 
 .light-theme p {
-  color: #4a5568 !important;
+  color: #b0b8c8 !important;
 }
 
 .light-theme .welcome-section {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 25px 70px rgba(0,0,0,0.2);
 }
 
@@ -1260,34 +1260,34 @@ textarea[name="experiencia"] {
 }
 
 .light-theme .brand-text p {
-  color: rgba(76, 29, 149, 0.8);
+  color: rgba(200, 200, 220, 0.8);
 }
 
 .light-theme .user-type-selection h2 {
-  color: #2d3748 !important;
+  color: #f0f0f5 !important;
 }
 
 .light-theme .user-type-label {
-  color: #2d3748 !important;
+  color: #f0f0f5 !important;
 }
 
 .light-theme .user-type-description {
-  color: rgba(0, 0, 0, 0.7) !important;
+  color: rgba(200, 200, 220, 0.7) !important;
 }
 
 .light-theme .user-type-icon {
-  color: #7c3aed !important;
+  color: #a78bfa !important;
 }
 
 .light-theme .user-type-option {
-  color: #2d3748 !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .light-theme .user-type-option:hover {
-  background: rgba(255, 255, 255, 1) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
 }
 
 .light-theme .auth-form h2 {
@@ -1325,16 +1325,17 @@ textarea[name="experiencia"] {
 }
 
 .light-theme .atividade-item {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(99, 102, 241, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .light-theme .atividade-item h4 {
-  color: #2d3748 !important;
+  color: #1e1e2e !important;
 }
 
 .light-theme .atividade-item p {
-  color: #4a5568 !important;
+  color: #3b3b52 !important;
 }
 
 .light-theme .atividades-disponiveis, .light-theme .videoaulas-disponiveis, .light-theme .materiais-disponiveis, .light-theme .meu-progresso {
@@ -1342,25 +1343,27 @@ textarea[name="experiencia"] {
 }
 
 .light-theme .atividade-card, .light-theme .video-card, .light-theme .material-card {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(99, 102, 241, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .light-theme .atividade-card h4, .light-theme .video-card h4, .light-theme .material-card h4 {
-  color: #2d3748 !important;
+  color: #1e1e2e !important;
 }
 
 .light-theme .atividade-card p, .light-theme .video-card p, .light-theme .material-card p {
-  color: #4a5568 !important;
+  color: #3b3b52 !important;
 }
 
 .light-theme .stat-card {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .light-theme .stat-card h4 {
-  color: #2d3748 !important;
+  color: #1e1e2e !important;
 }
 
 .light-theme .detalhes-progresso {
@@ -1458,13 +1461,14 @@ textarea[name="experiencia"] {
 }
 
 .light-theme .form-atividade {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .light-theme .form-actions button[type="button"] {
-  background: rgba(255, 255, 255, 0.8) !important;
-  color: #2d3748 !important;
+  background: rgba(99, 102, 241, 0.08) !important;
+  color: #4f46e5 !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
 
@@ -1739,51 +1743,53 @@ select:focus-visible {
 
 /* Modo claro - Header */
 .light-theme .header {
-  background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  background: rgba(35, 38, 52, 0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
 }
 
 .light-theme .header h1 {
-  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .light-theme .theme-toggle {
-  background: rgba(0, 0, 0, 0.05) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #c4b5fd !important;
 }
 
 .light-theme .theme-toggle:hover {
-  background: rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
 }
 
 .light-theme .user-info {
-  background: rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .light-theme .user-info:hover {
-  background: rgba(0, 0, 0, 0.06);
-  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .light-theme .user-info span {
-  color: #1e293b;
+  color: #e2e8f0;
 }
 
 .light-theme .user-info button {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
 }
 
 .light-theme .user-info button:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fecaca;
 }
 
 /* Responsividade */
@@ -2107,10 +2113,10 @@ html {
 }
 
 .light-theme .auth-form {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(25px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 25px 70px rgba(0,0,0,0.08), 0 8px 30px rgba(0,0,0,0.04);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: 0 15px 50px rgba(99, 102, 241, 0.06), 0 4px 20px rgba(0,0,0,0.04);
 }
 
 
@@ -4294,14 +4300,14 @@ html {
 .painel-content { animation: fadeInUp 0.3s ease-out; }
 
 /* Modo claro */
-.light-theme .painel-hero--aluno { background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border-color: rgba(0,0,0,0.08); }
-.light-theme .painel-hero--prof  { background: linear-gradient(135deg, rgba(240,147,251,0.08), rgba(118,75,162,0.08)); border-color: rgba(0,0,0,0.08); }
-.light-theme .painel-hero-info h2 { color: #1e293b; }
-.light-theme .painel-hero-info p  { color: rgba(0,0,0,0.5); }
-.light-theme .painel-stat-lbl     { color: rgba(0,0,0,0.45); }
-.light-theme .painel-tabs { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.08); }
-.light-theme .painel-tab  { color: rgba(0,0,0,0.45); }
-.light-theme .painel-tab:hover { background: rgba(0,0,0,0.05); color: #1e293b; }
+.light-theme .painel-hero--aluno { background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08)); border-color: rgba(99,102,241,0.12); box-shadow: 0 2px 12px rgba(99,102,241,0.06); }
+.light-theme .painel-hero--prof  { background: linear-gradient(135deg, rgba(240,147,251,0.08), rgba(139,92,246,0.06)); border-color: rgba(240,147,251,0.12); box-shadow: 0 2px 12px rgba(240,147,251,0.06); }
+.light-theme .painel-hero-info h2 { color: #1e1e2e; }
+.light-theme .painel-hero-info p  { color: #3b3b52; }
+.light-theme .painel-stat-lbl     { color: #3b3b52; }
+.light-theme .painel-tabs { background: rgba(255,255,255,0.7); border-color: rgba(99,102,241,0.1); }
+.light-theme .painel-tab  { color: #3b3b52; }
+.light-theme .painel-tab:hover { background: rgba(99,102,241,0.08); color: #4f46e5; }
 
 /* Responsivo */
 @media (max-width: 768px) {
@@ -4474,18 +4480,20 @@ html {
 
 /* Modo claro */
 .light-theme .aluno-card {
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(99,102,241,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .light-theme .aluno-card:hover {
-  background: rgba(255,255,255,0.95);
-  border-color: rgba(102,126,234,0.25);
+  background: rgba(255,255,255,0.9);
+  border-color: rgba(99,102,241,0.2);
+  box-shadow: 0 6px 20px rgba(99,102,241,0.08);
 }
 
-.light-theme .aluno-card-title { color: #1e293b; }
-.light-theme .aluno-card-desc  { color: rgba(0,0,0,0.55); }
-.light-theme .aluno-card-meta  { color: rgba(0,0,0,0.4); }
+.light-theme .aluno-card-title { color: #1e1e2e; }
+.light-theme .aluno-card-desc  { color: #3b3b52; }
+.light-theme .aluno-card-meta  { color: #555; }
 
 .light-theme .aluno-btn-outline {
   color: #6366f1;
@@ -4639,4 +4647,318 @@ html {
 
 .light-theme .esqueceu-senha-dica strong {
   color: #6366f1;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MODO CLARO MODERNO - Override completo
+   Background escuro suave (#2a2d3e) em vez de branco puro
+   ══════════════════════════════════════════════════════════════ */
+
+.light-theme .auth-form h2 { color: #f0f0f5 !important; }
+.light-theme .auth-form p { color: #b0b8c8 !important; }
+.light-theme .auth-form button[type="button"] { color: #a78bfa !important; }
+
+.light-theme .painel-professor h2,
+.light-theme .painel-admin h2,
+.light-theme .area-aluno h2 { color: #f0f0f5 !important; }
+
+.light-theme .tabs button {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: #b0b8c8 !important;
+}
+.light-theme .tabs button:hover { background: rgba(255,255,255,0.1) !important; color: #e2e8f0 !important; }
+.light-theme .tabs button.active { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; border-color: transparent !important; }
+.light-theme .tab-content { background: rgba(255,255,255,0.03) !important; }
+
+.light-theme .gerenciar-atividades,
+.light-theme .gerenciar-videoaulas,
+.light-theme .gerenciar-materiais,
+.light-theme .acompanhar-progresso { color: #e2e8f0 !important; }
+
+.light-theme .atividade-item {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .atividade-item:hover { background: rgba(255,255,255,0.08) !important; }
+.light-theme .atividade-item h4 { color: #f0f0f5 !important; }
+.light-theme .atividade-item p { color: #9ca3b4 !important; }
+
+.light-theme .atividades-disponiveis,
+.light-theme .videoaulas-disponiveis,
+.light-theme .materiais-disponiveis,
+.light-theme .meu-progresso { color: #e2e8f0 !important; }
+
+.light-theme .atividade-card,
+.light-theme .video-card,
+.light-theme .material-card {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .atividade-card:hover,
+.light-theme .video-card:hover,
+.light-theme .material-card:hover { background: rgba(255,255,255,0.08) !important; }
+.light-theme .atividade-card h4, .light-theme .video-card h4, .light-theme .material-card h4 { color: #f0f0f5 !important; }
+.light-theme .atividade-card p, .light-theme .video-card p, .light-theme .material-card p { color: #9ca3b4 !important; }
+
+.light-theme .stat-card {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+.light-theme .stat-card h4 { color: #e2e8f0 !important; }
+.light-theme .stat-card p { color: #ff6b9d !important; }
+
+.light-theme .detalhes-progresso {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .detalhes-progresso h4 { color: #f0f0f5 !important; }
+.light-theme .atividade-concluida span:first-child { color: #e2e8f0 !important; }
+
+.light-theme .progresso-item {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .progresso-item h4 { color: #f0f0f5 !important; }
+.light-theme .progresso-stats span { color: #9ca3b4 !important; }
+
+.light-theme .lixeira { color: #e2e8f0 !important; }
+.light-theme .lixeira-tabs button {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: #b0b8c8 !important;
+}
+.light-theme .lixeira-tabs button:hover { background: rgba(255,255,255,0.1) !important; color: #e2e8f0 !important; }
+.light-theme .lixeira-tabs button.active { background: rgba(239,68,68,0.15) !important; border-color: rgba(239,68,68,0.3) !important; color: #fca5a5 !important; }
+
+.light-theme .secao-correcao h4 { color: #f0f0f5 !important; }
+.light-theme .submissao-item {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .submissao-info h5 { color: #f0f0f5 !important; }
+.light-theme .submissao-info p { color: #9ca3b4 !important; }
+
+.light-theme .btn-voltar {
+  background: rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  color: #e2e8f0 !important;
+}
+
+.light-theme .atividade-container {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .atividade-container h2 { color: #f0f0f5 !important; }
+.light-theme .descricao-atividade { background: rgba(255,255,255,0.06) !important; }
+.light-theme .opcoes-resposta h4,
+.light-theme .resposta-dissertativa h4 { color: #f0f0f5 !important; }
+
+.light-theme .opcao-label {
+  background: rgba(255,255,255,0.05) !important;
+  color: #e2e8f0 !important;
+}
+.light-theme .opcao-label:hover { background: rgba(255,255,255,0.09) !important; }
+
+.light-theme .aluno-progresso {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .aluno-progresso h5 { color: #f0f0f5 !important; }
+.light-theme .aluno-progresso p { color: #9ca3b4 !important; }
+
+.light-theme .form-atividade {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+.light-theme .form-actions button[type="button"] {
+  background: rgba(255,255,255,0.06) !important;
+  color: #b0b8c8 !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.light-theme .modal-content {
+  background: rgba(42, 45, 62, 0.98) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+.light-theme .modal-content h3 { color: #f0f0f5 !important; }
+.light-theme .modal-content p { color: #b0b8c8 !important; }
+.light-theme .btn-cancel {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: #e2e8f0 !important;
+}
+
+.light-theme .loading-spinner {
+  border: 3px solid rgba(255,255,255,0.1) !important;
+  border-top: 3px solid #a78bfa !important;
+}
+.light-theme .loading-container p { color: #b0b8c8 !important; }
+
+/* Light-theme: Painel Hero */
+.light-theme .painel-hero--aluno {
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.12)) !important;
+  border-color: rgba(99,102,241,0.2) !important;
+}
+.light-theme .painel-hero--prof {
+  background: linear-gradient(135deg, rgba(240,147,251,0.12), rgba(139,92,246,0.1)) !important;
+  border-color: rgba(240,147,251,0.2) !important;
+}
+.light-theme .painel-hero-info h2 { color: #f0f0f5 !important; }
+.light-theme .painel-hero-info p { color: #9ca3b4 !important; }
+.light-theme .painel-stat-lbl { color: #9ca3b4 !important; }
+
+.light-theme .painel-tabs {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.light-theme .painel-tab { color: #9ca3b4 !important; }
+.light-theme .painel-tab:hover { background: rgba(255,255,255,0.08) !important; color: #e2e8f0 !important; }
+
+/* Light-theme: Aluno Cards */
+.light-theme .aluno-card {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .aluno-card:hover {
+  background: rgba(255,255,255,0.08) !important;
+  border-color: rgba(99,102,241,0.25) !important;
+}
+.light-theme .aluno-card-title { color: #f0f0f5 !important; }
+.light-theme .aluno-card-desc { color: #9ca3b4 !important; }
+.light-theme .aluno-card-meta { color: #7a8299 !important; }
+.light-theme .aluno-btn-outline {
+  color: #a78bfa !important;
+  border-color: rgba(167,139,250,0.4) !important;
+}
+.light-theme .aluno-btn-outline:hover { background: rgba(167,139,250,0.1) !important; }
+
+/* Light-theme: Perfil */
+.light-theme .perfil-aluno { color: #e2e8f0 !important; }
+.light-theme .form-perfil {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .campo-perfil label { color: #e2e8f0 !important; }
+.light-theme .campo-perfil input,
+.light-theme .campo-perfil textarea {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: #e2e8f0 !important;
+}
+.light-theme .campo-perfil input:focus,
+.light-theme .campo-perfil textarea:focus {
+  background: rgba(255,255,255,0.1) !important;
+  border-color: #6366f1 !important;
+}
+.light-theme .campo-perfil small { color: rgba(255,255,255,0.5) !important; }
+.light-theme .foto-placeholder { color: rgba(255,255,255,0.5) !important; }
+
+/* Light-theme: Alterar Senha & Desativar */
+.light-theme .alterar-senha-section { border-top-color: rgba(255,255,255,0.08) !important; }
+.light-theme .alterar-senha-section h4 { color: #f0f0f5 !important; }
+.light-theme .form-senha {
+  background: rgba(255,255,255,0.03) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+.light-theme .desativar-conta-section { border-top-color: rgba(255,255,255,0.08) !important; }
+.light-theme .desativar-conta-section h4 { color: #f0f0f5 !important; }
+.light-theme .desativar-conta-section p { color: rgba(255,255,255,0.45) !important; }
+
+/* Light-theme: Visualizar Alunos */
+.light-theme .visualizar-alunos { color: #e2e8f0 !important; }
+.light-theme .aluno-perfil-card {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .aluno-perfil-card:hover { background: rgba(255,255,255,0.08) !important; }
+.light-theme .aluno-info h4 { color: #f0f0f5 !important; }
+.light-theme .nome-real { color: #9ca3b4 !important; }
+.light-theme .email-aluno { color: #7a8299 !important; }
+
+/* Light-theme: Auth Card (Login/Cadastro) */
+.light-theme .auth-card {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.3) !important;
+}
+.light-theme .auth-card-title { color: #f0f0f5 !important; }
+.light-theme .auth-card-subtitle { color: #9ca3b4 !important; }
+.light-theme .auth-field label { color: rgba(255,255,255,0.7) !important; }
+.light-theme .auth-field input,
+.light-theme .auth-field select {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: #e2e8f0 !important;
+}
+.light-theme .auth-field input::placeholder { color: rgba(255,255,255,0.35) !important; }
+.light-theme .auth-field input:focus,
+.light-theme .auth-field select:focus {
+  background: rgba(255,255,255,0.1) !important;
+  border-color: #667eea !important;
+}
+.light-theme .auth-footer-text { color: rgba(255,255,255,0.5) !important; }
+.light-theme .auth-link-btn { color: #a78bfa !important; }
+.light-theme .auth-back-btn {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.5) !important;
+}
+.light-theme .auth-back-btn:hover {
+  background: rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.8) !important;
+}
+
+/* Light-theme: Selection page */
+.light-theme .selection-brand {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .brand-tagline { color: rgba(255,255,255,0.6) !important; }
+.light-theme .selection-content {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.3) !important;
+}
+.light-theme .selection-question { color: #f0f0f5 !important; }
+.light-theme .type-card {
+  background: rgba(255,255,255,0.04) !important;
+  border: 2px solid rgba(255,255,255,0.08) !important;
+}
+.light-theme .type-card:hover {
+  background: rgba(255,255,255,0.07) !important;
+  border-color: var(--accent-color) !important;
+}
+.light-theme .type-card.active {
+  background: rgba(255,255,255,0.08) !important;
+  border-color: var(--accent-color) !important;
+}
+.light-theme .card-icon { color: rgba(255,255,255,0.8) !important; }
+.light-theme .card-label { color: #f0f0f5 !important; }
+.light-theme .card-desc { color: rgba(255,255,255,0.6) !important; }
+
+/* Light-theme: No activities / empty states */
+.light-theme .no-activities {
+  color: rgba(255,255,255,0.5) !important;
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* Light-theme: Password validator */
+.light-theme .password-validator {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.15) !important;
+}
+.light-theme .password-validator h4 { color: #a78bfa !important; }
+
+/* Light-theme: Fazer atividade */
+.light-theme .fazer-atividade { color: #e2e8f0 !important; }
+
+/* Light-theme: Focus visible */
+.light-theme button:focus-visible,
+.light-theme input:focus-visible,
+.light-theme textarea:focus-visible,
+.light-theme select:focus-visible {
+  outline: 2px solid #a78bfa !important;
 }

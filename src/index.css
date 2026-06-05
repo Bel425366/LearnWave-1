@@ -21,9 +21,9 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    color-scheme: light;
-    color: #2d3748;
-    background-color: #f5f7fa;
+    color-scheme: dark;
+    color: #e2e8f0;
+    background-color: #2a2d3e;
   }
 }
 
@@ -58,8 +58,8 @@ body {
 
 .light-theme body,
 .light-theme #root {
-  background-color: #f5f7fa;
-  color: #2d3748;
+  background-color: #2a2d3e;
+  color: #e2e8f0;
 }
 
 h1 {
@@ -125,9 +125,9 @@ p {
 /* Cores para modo claro */
 @media (prefers-color-scheme: light) {
   h1, h2, h3, h4, h5, h6 {
-    color: #2d3748;
+    color: #f0f0f5;
   }
   p {
-    color: #4a5568;
+    color: #b0b8c8;
   }
 }
