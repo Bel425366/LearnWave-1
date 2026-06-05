@@ -58,7 +58,7 @@ body {
 
 .light-theme body,
 .light-theme #root {
-  background-color: #f0f2f8;
+  background: linear-gradient(160deg, #F5F7FB 0%, #EEF1F8 100%);
   color: #1e293b;
 }
 
