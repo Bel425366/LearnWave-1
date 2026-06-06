@@ -5429,3 +5429,17 @@ html {
 .dark-theme .site-logo {
   filter: brightness(1.2);
 }
+
+
+/* ── Fix: texto branco nas tabs ativas (ambos os temas) ── */
+.painel-tab.active,
+.painel-tab.active span,
+.painel-tab.active svg,
+.tabs button.active,
+.tabs button.active span {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.painel-tab.active svg {
+  stroke: #ffffff !important;
+}
