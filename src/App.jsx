@@ -126,7 +126,7 @@ function App() {
               alt="LearnWave Logo" 
               className="site-logo"
             />
-            <h1>LearnWave</h1>
+            <h1><span className="header-learn">Learn</span><span className="header-wave">Wave</span></h1>
           </div>
           <div className="header-actions">
             {currentPage === 'area-aluno' && <Mascot mini isAluno />}

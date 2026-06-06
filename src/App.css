@@ -5405,3 +5405,20 @@ html {
 .footer-modal-close:hover { background: rgba(255, 255, 255, 0.1) !important; color: #e2e8f0 !important; transform: none !important; }
 .light-theme .footer-modal-close { background: rgba(0,0,0,0.04) !important; color: #64748b !important; }
 .light-theme .footer-modal-close:hover { background: rgba(0,0,0,0.08) !important; color: #1e293b !important; }
+
+
+/* ── Header title split: Learn + Wave ── */
+.dark-theme .header h1 .header-learn {
+  -webkit-text-fill-color: #ffffff;
+}
+.dark-theme .header h1 .header-wave {
+  background: linear-gradient(135deg, #60A5FA, #6366F1, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.light-theme .header h1 .header-learn,
+.light-theme .header h1 .header-wave {
+  -webkit-text-fill-color: initial;
+  background: none;
+}

@@ -6,8 +6,8 @@ const USER_TYPES = [
   {
     id: 'aluno',
     label: 'Aluno',
-    description: 'Acesse conteúdos e atividades',
-    accentColor: '#667eea',
+    description: 'Acesse conteúdos, atividades e acompanhe seu progresso.',
+    accentColor: '#38BDF8',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
@@ -18,8 +18,8 @@ const USER_TYPES = [
   {
     id: 'professor',
     label: 'Professor',
-    description: 'Gerencie turmas e materiais',
-    accentColor: '#f093fb',
+    description: 'Gerencie turmas, conteúdos e acompanhe seus alunos.',
+    accentColor: '#A78BFA',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -31,8 +31,8 @@ const USER_TYPES = [
   {
     id: 'administrador',
     label: 'Administrador',
-    description: 'Controle total da plataforma',
-    accentColor: '#4facfe',
+    description: 'Controle total da plataforma e suas funcionalidades.',
+    accentColor: '#22D3EE',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -48,15 +48,7 @@ const HOVER_MESSAGES = {
 }
 
 function UserTypeSelection({ onSelectUserType }) {
-  const [selectedType, setSelectedType] = useState('')
-  const [hoverMessage, setHoverMessage] = useState('Olá! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')
-
-  const handleContinue = () => {
-    if (selectedType) {
-      setHoverMessage('Ótimo! Vamos lá!')
-      setTimeout(() => onSelectUserType(selectedType), 400)
-    }
-  }
+  const [hoverMessage, setHoverMessage] = useState('Oi! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')
 
   return (
     <div className="auth-container">
@@ -71,20 +63,21 @@ function UserTypeSelection({ onSelectUserType }) {
             </div>
             <h1 className="brand-name"><span className="brand-learn">Learn</span><span className="brand-wave">Wave</span></h1>
             <p className="brand-tagline">Plataforma educacional de Língua Portuguesa</p>
+            <div className="brand-bar" />
           </div>
 
           <div className="selection-content">
             <p className="selection-question">Como você deseja acessar?</p>
+            <div className="selection-question-bar" />
 
             <div className="type-cards">
               {USER_TYPES.map(type => (
                 <div
                   key={type.id}
-                  className={`type-card ${selectedType === type.id ? 'active' : ''}`}
-                  onClick={() => { setSelectedType(type.id); setHoverMessage(HOVER_MESSAGES[type.id]) }}
-                  onMouseEnter={() => setHoverMessage(HOVER_MESSAGES[type.id])}
-                  onMouseLeave={() => !selectedType && setHoverMessage('Olá! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')}
+                  className="type-card"
                   style={{ '--accent-color': type.accentColor }}
+                  onMouseEnter={() => setHoverMessage(HOVER_MESSAGES[type.id])}
+                  onMouseLeave={() => setHoverMessage('Oi! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')}
                 >
                   <div className="card-glow" />
                   <div className="card-icon">{type.icon}</div>
@@ -92,28 +85,27 @@ function UserTypeSelection({ onSelectUserType }) {
                     <span className="card-label">{type.label}</span>
                     <span className="card-desc">{type.description}</span>
                   </div>
-                  <div className="card-indicator">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  </div>
+                  <button
+                    className="card-action-btn"
+                    onClick={() => onSelectUserType(type.id)}
+                  >
+                    Acessar como {type.label} →
+                  </button>
                 </div>
               ))}
             </div>
-
-            <button className="btn-start" onClick={handleContinue} disabled={!selectedType}
-              onMouseEnter={() => selectedType && setHoverMessage('Ótimo! Clica para continuar!')}>
-              Continuar
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </button>
           </div>
         </div>
 
         <div className="selection-right">
-          <Mascot mood={selectedType ? 'excited' : 'happy'} message={hoverMessage} />
+          <div className="bob-card">
+            <Mascot mood="happy" />
+            <div className="bob-card-info">
+              <p className="bob-card-greeting">Oi! Eu sou o Bob.</p>
+              <p className="bob-card-text">Selecione como deseja acessar o LearnWave!</p>
+              <span className="bob-card-status"><span className="bob-status-dot" />Online</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
