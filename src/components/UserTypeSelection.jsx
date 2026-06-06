@@ -98,14 +98,7 @@ function UserTypeSelection({ onSelectUserType }) {
         </div>
 
         <div className="selection-right">
-          <div className="bob-card">
-            <Mascot mood="happy" />
-            <div className="bob-card-info">
-              <p className="bob-card-greeting">Oi! Eu sou o Bob.</p>
-              <p className="bob-card-text">Selecione como deseja acessar o LearnWave!</p>
-              <span className="bob-card-status"><span className="bob-status-dot" />Online</span>
-            </div>
-          </div>
+          <Mascot mood="happy" />
         </div>
       </div>
     </div>
