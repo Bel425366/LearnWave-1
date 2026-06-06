@@ -600,11 +600,10 @@
   align-items: center;
   background: rgba(10, 22, 40, 0.85);
   border: 1px solid rgba(99, 102, 241, 0.12);
-  border-radius: 24px;
-  padding: 2rem 1.5rem 1.5rem;
+  border-radius: 20px;
+  padding: 1.5rem 1.2rem 1.2rem;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
-  max-width: 300px;
-  width: 100%;
+  width: 260px;
 }
 .light-theme .bob-card {
   background: rgba(255, 255, 255, 0.85);
@@ -657,5 +656,37 @@
 @media (max-width: 768px) {
   .bob-card {
     display: none;
+  }
+}
+
+
+/* ── Fix: cards mesmo tamanho ── */
+.type-cards {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1rem !important;
+}
+.type-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 220px !important;
+  padding: 1.5rem 1rem !important;
+}
+.type-card .card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .type-cards {
+    grid-template-columns: 1fr !important;
+  }
+  .type-card {
+    min-height: auto !important;
   }
 }

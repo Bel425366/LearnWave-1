@@ -89,7 +89,7 @@ function UserTypeSelection({ onSelectUserType }) {
                     className="card-action-btn"
                     onClick={() => onSelectUserType(type.id)}
                   >
-                    Acessar como {type.label} →
+                    Acessar como {type.label}
                   </button>
                 </div>
               ))}

@@ -5422,3 +5422,19 @@ html {
   -webkit-text-fill-color: initial;
   background: none;
 }
+
+
+/* ── Fix: header title sem espaço entre spans ── */
+.header h1 .header-learn,
+.header h1 .header-wave {
+  letter-spacing: -0.5px;
+}
+.header h1 {
+  gap: 0 !important;
+  word-spacing: 0 !important;
+}
+
+/* ── Fix: garantir logo visível ── */
+.dark-theme .site-logo {
+  filter: brightness(1.2);
+}
