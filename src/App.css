@@ -22,7 +22,7 @@
 }
 
 .light-theme {
-  background: #E8ECF4;
+  background: #D8DCE8;
   color: #1e293b;
   position: relative;
 }
@@ -1753,11 +1753,11 @@ select:focus-visible {
 
 /* Modo claro - Header (overridden by premium block below) */
 .light-theme .header {
-  background: rgba(232, 236, 244, 0.7);
+  background: rgba(216, 220, 232, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
 }
 
 .light-theme .header h1 {
@@ -4686,16 +4686,16 @@ html {
   right: -10%;
   width: 700px;
   height: 700px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 40%, transparent 70%);
-  filter: blur(60px);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0.06) 40%, transparent 70%);
+  filter: blur(50px);
 }
 .light-theme .app::after {
   bottom: -15%;
   left: -10%;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0.04) 40%, transparent 70%);
-  filter: blur(60px);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 40%, transparent 70%);
+  filter: blur(50px);
 }
 
 .light-theme .app > * { position: relative; z-index: 1; }
@@ -4706,11 +4706,11 @@ html {
   /* dark-theme rule below handles dark; this ensures light gets glassmorphism */
 }
 .light-theme .header {
-  background: rgba(232, 236, 244, 0.7) !important;
+  background: rgba(216, 220, 232, 0.75) !important;
   backdrop-filter: blur(16px) saturate(1.8) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.8) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.03) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06) !important;
 }
 .light-theme .header h1 {
   background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
@@ -4746,12 +4746,10 @@ html {
 
 /* ── Auth Card — Glassmorphism ── */
 .light-theme .auth-card {
-  background: rgba(255, 255, 255, 0.88) !important;
-  backdrop-filter: blur(20px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
   border-radius: 24px !important;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1), 0 8px 20px rgba(99, 102, 241, 0.05), inset 0 1px 0 rgba(255,255,255,1) !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1), 0 8px 20px rgba(99, 102, 241, 0.04) !important;
 }
 .light-theme .auth-card-title { color: #0f172a !important; }
 .light-theme .auth-card-subtitle { color: #64748b !important; }
@@ -4798,11 +4796,10 @@ html {
 }
 .light-theme .brand-tagline { color: #64748b !important; }
 .light-theme .selection-content {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(1.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
   border-radius: 24px !important;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255,255,255,1) !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1) !important;
 }
 .light-theme .selection-question { color: #0f172a !important; }
 
@@ -4867,21 +4864,18 @@ html {
 .light-theme .atividade-card,
 .light-theme .video-card,
 .light-theme .material-card {
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
   border-radius: 18px !important;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 4px rgba(15,23,42,0.03) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15,23,42,0.04) !important;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
 }
 .light-theme .atividade-item:hover,
 .light-theme .atividade-card:hover,
 .light-theme .video-card:hover,
 .light-theme .material-card:hover {
-  background: rgba(255, 255, 255, 0.98) !important;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1), 0 6px 16px rgba(99, 102, 241, 0.06) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12), 0 6px 16px rgba(99, 102, 241, 0.06) !important;
   transform: translateY(-3px) !important;
-  border-color: rgba(99, 102, 241, 0.15) !important;
 }
 .light-theme .atividade-item h4, .light-theme .atividade-card h4,
 .light-theme .video-card h4, .light-theme .material-card h4 { color: #0f172a !important; }
@@ -4890,17 +4884,14 @@ html {
 
 /* ── Aluno Cards — Premium ── */
 .light-theme .aluno-card {
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
   border-radius: 20px !important;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 4px rgba(15,23,42,0.03) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15,23,42,0.04) !important;
   transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
 }
 .light-theme .aluno-card:hover {
-  background: rgba(255, 255, 255, 0.98) !important;
-  box-shadow: 0 20px 50px rgba(79, 70, 229, 0.1), 0 8px 20px rgba(15, 23, 42, 0.06) !important;
-  border-color: rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 0 20px 50px rgba(79, 70, 229, 0.1), 0 8px 20px rgba(15, 23, 42, 0.08) !important;
   transform: translateY(-5px) !important;
 }
 .light-theme .aluno-card-title { color: #0f172a !important; }
