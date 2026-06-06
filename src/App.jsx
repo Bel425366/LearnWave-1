@@ -166,7 +166,52 @@ function App() {
         </div>
       </header>
       <main>{renderPage()}</main>
+      <Footer />
     </div>
+  )
+}
+
+function Footer() {
+  const [modal, setModal] = useState(null)
+
+  const conteudos = {
+    sobre: {
+      titulo: 'Sobre o LearnWave',
+      texto: 'O LearnWave é uma plataforma educacional de Língua Portuguesa, criada para conectar alunos e professores em um ambiente de aprendizado moderno e interativo. Nossa missão é tornar o ensino de português mais acessível, dinâmico e eficiente através da tecnologia.'
+    },
+    privacidade: {
+      titulo: 'Política de Privacidade',
+      texto: 'O LearnWave respeita a privacidade dos seus usuários. Coletamos apenas dados necessários para o funcionamento da plataforma (nome, email, progresso acadêmico). Seus dados não são compartilhados com terceiros e são armazenados de forma segura. Você pode solicitar a exclusão dos seus dados a qualquer momento entrando em contato com o administrador.'
+    },
+    termos: {
+      titulo: 'Termos de Uso',
+      texto: 'Ao utilizar o LearnWave, você concorda em: usar a plataforma exclusivamente para fins educacionais; manter suas credenciais de acesso em sigilo; respeitar professores, alunos e demais usuários; não compartilhar conteúdo protegido por direitos autorais. O LearnWave reserva-se o direito de suspender contas que violem estes termos.'
+    }
+  }
+
+  return (
+    <>
+      <footer className="site-footer">
+        <p className="footer-copy">© 2024 LearnWave. Todos os direitos reservados.</p>
+        <div className="footer-links">
+          <button onClick={() => setModal('sobre')}>Sobre</button>
+          <span className="footer-dot" />
+          <button onClick={() => setModal('privacidade')}>Privacidade</button>
+          <span className="footer-dot" />
+          <button onClick={() => setModal('termos')}>Termos</button>
+        </div>
+      </footer>
+
+      {modal && (
+        <div className="footer-modal-overlay" onClick={() => setModal(null)}>
+          <div className="footer-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="footer-modal-close" onClick={() => setModal(null)}>×</button>
+            <h3>{conteudos[modal].titulo}</h3>
+            <p>{conteudos[modal].texto}</p>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

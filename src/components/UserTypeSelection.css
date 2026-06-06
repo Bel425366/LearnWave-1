@@ -497,4 +497,22 @@
     font-size: 1rem;
   }
 }
-
+
+
+
+/* ── Brand name split — Learn + Wave ── */
+.dark-theme .brand-learn {
+  -webkit-text-fill-color: #ffffff;
+}
+.dark-theme .brand-wave {
+  background: linear-gradient(135deg, #60A5FA, #6366F1, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.light-theme .brand-learn {
+  -webkit-text-fill-color: initial;
+}
+.light-theme .brand-wave {
+  -webkit-text-fill-color: initial;
+}
