@@ -929,6 +929,7 @@ function AlterarSenha({ userEmail, userId }) {
   const [senhaData, setSenhaData] = useState({ senhaAtual: '', novaSenha: '', confirmarSenha: '' })
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState(false)
+  const [mostrar, setMostrar] = useState({ atual: false, nova: false, confirmar: false })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -947,22 +948,41 @@ function AlterarSenha({ userEmail, userId }) {
     }
   }
 
+  const BtnOlho = ({ campo }) => (
+    <button type="button" className="btn-olho" onClick={() => setMostrar(p => ({ ...p, [campo]: !p[campo] }))} tabIndex={-1}>
+      {mostrar[campo] ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      )}
+    </button>
+  )
+
   return (
     <div className="alterar-senha-section">
       <h4>Alterar senha</h4>
       <form onSubmit={handleSubmit} className="form-senha">
         <div className="campo-perfil">
           <label>Senha atual</label>
-          <input type="password" value={senhaData.senhaAtual} onChange={(e) => setSenhaData({ ...senhaData, senhaAtual: e.target.value })} placeholder="Digite sua senha atual" required />
+          <div className="input-senha-wrapper">
+            <input type={mostrar.atual ? 'text' : 'password'} value={senhaData.senhaAtual} onChange={(e) => setSenhaData({ ...senhaData, senhaAtual: e.target.value })} placeholder="Digite sua senha atual" required />
+            <BtnOlho campo="atual" />
+          </div>
         </div>
         <div className="campo-perfil">
           <label>Nova senha</label>
-          <input type="password" value={senhaData.novaSenha} onChange={(e) => setSenhaData({ ...senhaData, novaSenha: e.target.value })} placeholder="Crie uma senha forte" required />
+          <div className="input-senha-wrapper">
+            <input type={mostrar.nova ? 'text' : 'password'} value={senhaData.novaSenha} onChange={(e) => setSenhaData({ ...senhaData, novaSenha: e.target.value })} placeholder="Crie uma senha forte" required />
+            <BtnOlho campo="nova" />
+          </div>
         </div>
         {senhaData.novaSenha && <PasswordValidator password={senhaData.novaSenha} />}
         <div className="campo-perfil">
           <label>Confirmar nova senha</label>
-          <input type="password" value={senhaData.confirmarSenha} onChange={(e) => setSenhaData({ ...senhaData, confirmarSenha: e.target.value })} placeholder="Repita a nova senha" required />
+          <div className="input-senha-wrapper">
+            <input type={mostrar.confirmar ? 'text' : 'password'} value={senhaData.confirmarSenha} onChange={(e) => setSenhaData({ ...senhaData, confirmarSenha: e.target.value })} placeholder="Repita a nova senha" required />
+            <BtnOlho campo="confirmar" />
+          </div>
         </div>
         {erro && <p className="senha-erro">{erro}</p>}
         {sucesso && <p className="senha-sucesso">Senha alterada com sucesso.</p>}

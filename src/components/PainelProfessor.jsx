@@ -1121,12 +1121,15 @@ function FormularioQuestoes({ formData, setFormData }) {
           <input type="text" placeholder="Digite a pergunta" value={questao.pergunta || ''} onChange={e => atualizarQuestao(index, 'pergunta', e.target.value)} required />
           <div className="opcoes-grid">
             {['A','B','C','D'].map(letra => (
-              <input key={letra} type="text" placeholder={`Opção ${letra}`} value={questao[`opcao${letra}`] || ''} onChange={e => atualizarQuestao(index, `opcao${letra}`, e.target.value)} required />
+              <div key={letra} className="opcao-input-row">
+                <span className="opcao-letra">{letra})</span>
+                <input type="text" placeholder={`Digite a opção ${letra}...`} value={questao[`opcao${letra}`] || ''} onChange={e => atualizarQuestao(index, `opcao${letra}`, e.target.value)} required />
+              </div>
             ))}
           </div>
           <select value={questao.respostaCorreta || ''} onChange={e => atualizarQuestao(index, 'respostaCorreta', e.target.value)} required>
             <option value="">Resposta Correta</option>
-            {['A','B','C','D'].map(l => <option key={l} value={l}>{l}</option>)}
+            {['A','B','C','D'].map(l => <option key={l} value={l}>{l}) {questao[`opcao${l}`] || ''}</option>)}
           </select>
         </div>
       ))}
@@ -1134,7 +1137,10 @@ function FormularioQuestoes({ formData, setFormData }) {
         <div className="opcoes-multipla">
           <h4>Questão Única</h4>
           {['A','B','C','D'].map(letra => (
-            <input key={letra} type="text" placeholder={`Opção ${letra}`} value={formData[`opcao${letra}`] || ''} onChange={e => setFormData({...formData, [`opcao${letra}`]: e.target.value})} required />
+            <div key={letra} className="opcao-input-row">
+              <span className="opcao-letra">{letra})</span>
+              <input type="text" placeholder={`Digite a opção ${letra}...`} value={formData[`opcao${letra}`] || ''} onChange={e => setFormData({...formData, [`opcao${letra}`]: e.target.value})} required />
+            </div>
           ))}
           <select value={formData.respostaCorreta || ''} onChange={e => setFormData({...formData, respostaCorreta: e.target.value})} required>
             <option value="">Resposta Correta</option>
