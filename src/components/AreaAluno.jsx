@@ -40,6 +40,7 @@ function AreaAluno({ user, onNavigate }) {
   const [downloadsAluno, setDownloadsAluno] = useState([])
   const [progressoGeral, setProgressoGeral] = useState(null)
   const [notasDetalhadas, setNotasDetalhadas] = useState([])
+  const [favoritos, setFavoritos] = useState([])
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -82,7 +83,35 @@ function AreaAluno({ user, onNavigate }) {
       .then(r => r.ok ? r.json() : [])
       .then(data => setNotasDetalhadas(Array.isArray(data) ? data : []))
       .catch(() => setNotasDetalhadas([]))
+
+    // Carregar favoritos
+    fetch(`${API_BASE}/favoritos/aluno/${user.id}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setFavoritos(Array.isArray(data) ? data : []))
+      .catch(() => setFavoritos([]))
   }, [user.id])
+
+  // Favoritar/Desfavoritar professor
+  const favoritarProfessor = async (professorId) => {
+    try {
+      const res = await fetch(`${API_BASE}/favoritos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alunoId: Number(user.id), professorId: Number(professorId) })
+      })
+      if (res.ok) {
+        const novo = await res.json()
+        setFavoritos(prev => [...prev, novo])
+      }
+    } catch {}
+  }
+
+  const desfavoritarProfessor = async (professorId) => {
+    try {
+      await fetch(`${API_BASE}/favoritos/${user.id}/${professorId}`, { method: 'DELETE' })
+      setFavoritos(prev => prev.filter(f => f.professorId !== professorId))
+    } catch {}
+  }
 
   // salvarPerfil envia para a API
 
@@ -305,6 +334,9 @@ function AreaAluno({ user, onNavigate }) {
             progressoAtividades={progressoAtividades}
             userEmail={user.email}
             onAbrirAtividade={setAtividadeAtual}
+            favoritos={favoritos}
+            onFavoritar={favoritarProfessor}
+            onDesfavoritar={desfavoritarProfessor}
           />
         )}
         {activeTab === 'videoaulas' && (
@@ -312,6 +344,9 @@ function AreaAluno({ user, onNavigate }) {
             professores={professores}
             progressoAluno={progressoAluno}
             onMarcar={marcarVideoaulaAssistida}
+            favoritos={favoritos}
+            onFavoritar={favoritarProfessor}
+            onDesfavoritar={desfavoritarProfessor}
           />
         )}
         {activeTab === 'materiais' && (
@@ -319,6 +354,9 @@ function AreaAluno({ user, onNavigate }) {
             professores={professores}
             progressoAluno={progressoAluno}
             onBaixar={baixarMaterial}
+            favoritos={favoritos}
+            onFavoritar={favoritarProfessor}
+            onDesfavoritar={desfavoritarProfessor}
           />
         )}
         {activeTab === 'progresso' && (
@@ -340,9 +378,11 @@ function AreaAluno({ user, onNavigate }) {
   )
 }
 
-function TabAtividades({ atividades, professores, progressoAtividades, userEmail, onAbrirAtividade }) {
+function TabAtividades({ atividades, professores, progressoAtividades, userEmail, onAbrirAtividade, favoritos, onFavoritar, onDesfavoritar }) {
   const publicadas = atividades.filter(a => (a.status === 'Publicada' || a.status === 'PUBLICADO') && a.situacao !== 'lixeira' && a.situacao !== 'excluido')
   const [professorSelecionado, setProfessorSelecionado] = useState(null)
+  const [busca, setBusca] = useState('')
+  const [favoritosAberto, setFavoritosAberto] = useState(true)
 
   const professoresComAtividades = professores.filter(p =>
     publicadas.some(a => a.professorId === p.id)
@@ -396,35 +436,73 @@ function TabAtividades({ atividades, professores, progressoAtividades, userEmail
     return <EstadoVazio mensagem="Nenhuma atividade disponível no momento." />
   }
 
-  return (
-    <div className="aluno-grid">
-      {professoresComAtividades.map(prof => {
-        const qtd = publicadas.filter(a => a.professorId === prof.id).length
-        return (
-          <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer' }} onClick={() => setProfessorSelecionado(prof)}>
-            <div className="aluno-card-header">
-              <span className="aluno-card-tag">Professor</span>
-              <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{qtd} atividade{qtd !== 1 ? 's' : ''}</span>
-            </div>
-            <h3 className="aluno-card-title">{prof.nome}</h3>
-            {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
-            <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
-              Ver atividades
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </span>
+  const filtrados = professoresComAtividades.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()))
+  const favIds = favoritos.map(f => f.professorId)
+  const profsFavoritos = filtrados.filter(p => favIds.includes(p.id))
+  const profsOutros = filtrados
+
+  const renderProfCard = (prof) => {
+    const qtd = publicadas.filter(a => a.professorId === prof.id).length
+    const isFav = favIds.includes(prof.id)
+    return (
+      <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer', position: 'relative' }}>
+        <button className="btn-favorito" onClick={(e) => { e.stopPropagation(); isFav ? onDesfavoritar(prof.id) : onFavoritar(prof.id) }} title={isFav ? 'Remover dos favoritos' : 'Favoritar'}>
+          {isFav ? '⭐' : '☆'}
+        </button>
+        <div onClick={() => setProfessorSelecionado(prof)} style={{ flex: 1 }}>
+          <div className="aluno-card-header">
+            <span className="aluno-card-tag">Professor</span>
+            <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{qtd} atividade{qtd !== 1 ? 's' : ''}</span>
           </div>
-        )
-      })}
+          <h3 className="aluno-card-title">{prof.nome}</h3>
+          {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
+          <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
+            Ver atividades
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <input className="pesquisa-professor" type="text" placeholder="🔍 Pesquisar professor..." value={busca} onChange={e => setBusca(e.target.value)} />
+
+      {profsFavoritos.length > 0 && (
+        <div className="secao-favoritos">
+          <button className="favoritos-toggle" onClick={() => setFavoritosAberto(!favoritosAberto)}>
+            <span>{favoritosAberto ? '▼' : '▶'} ⭐ Meus Professores ({profsFavoritos.length})</span>
+          </button>
+          {favoritosAberto && (
+            <div className="aluno-grid" style={{ marginTop: '0.75rem' }}>
+              {profsFavoritos.map(renderProfCard)}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div>
+        {profsFavoritos.length > 0 && <p style={{ fontSize: '0.85rem', opacity: 0.6, marginBottom: '0.75rem' }}>Todos os Professores</p>}
+        {filtrados.length === 0 ? (
+          <EstadoVazio mensagem="Nenhum professor encontrado." />
+        ) : (
+          <div className="aluno-grid">
+            {profsOutros.map(renderProfCard)}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
-function TabVideoaulas({ professores, progressoAluno, onMarcar }) {
+function TabVideoaulas({ professores, progressoAluno, onMarcar, favoritos, onFavoritar, onDesfavoritar }) {
   const [professorSelecionado, setProfessorSelecionado] = useState(null)
   const [videoaulas, setVideoaulas] = useState([])
   const [todasPublicadas, setTodasPublicadas] = useState([])
   const [professoresComVideo, setProfessoresComVideo] = useState([])
   const [loadingProfessores, setLoadingProfessores] = useState(true)
+  const [busca, setBusca] = useState('')
+  const [favoritosAberto, setFavoritosAberto] = useState(true)
 
   // Extrair ID do YouTube a partir de uma URL
   const getYoutubeId = (url) => {
@@ -548,36 +626,65 @@ function TabVideoaulas({ professores, progressoAluno, onMarcar }) {
     return <EstadoVazio mensagem="Nenhuma videoaula disponível no momento." />
   }
 
-  return (
-    <div className="aluno-grid">
-      {professoresComVideo.map(prof => {
-        const qtd = todasPublicadas.filter(v => v.professorId === prof.id).length
-        return (
-          <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer' }} onClick={() => selecionarProfessor(prof)}>
-            <div className="aluno-card-header">
-              <span className="aluno-card-tag">Professor</span>
-              <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{qtd} videoaula{qtd !== 1 ? 's' : ''}</span>
-            </div>
-            <h3 className="aluno-card-title">{prof.nome}</h3>
-            {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
-            <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
-              Ver videoaulas
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </span>
+  const filtrados = professoresComVideo.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()))
+  const favIds = favoritos.map(f => f.professorId)
+  const profsFavoritos = filtrados.filter(p => favIds.includes(p.id))
+
+  const renderProfCard = (prof) => {
+    const qtd = todasPublicadas.filter(v => v.professorId === prof.id).length
+    const isFav = favIds.includes(prof.id)
+    return (
+      <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer', position: 'relative' }}>
+        <button className="btn-favorito" onClick={(e) => { e.stopPropagation(); isFav ? onDesfavoritar(prof.id) : onFavoritar(prof.id) }} title={isFav ? 'Remover dos favoritos' : 'Favoritar'}>
+          {isFav ? '⭐' : '☆'}
+        </button>
+        <div onClick={() => selecionarProfessor(prof)} style={{ flex: 1 }}>
+          <div className="aluno-card-header">
+            <span className="aluno-card-tag">Professor</span>
+            <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{qtd} videoaula{qtd !== 1 ? 's' : ''}</span>
           </div>
-        )
-      })}
+          <h3 className="aluno-card-title">{prof.nome}</h3>
+          {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
+          <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
+            Ver videoaulas
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <input className="pesquisa-professor" type="text" placeholder="🔍 Pesquisar professor..." value={busca} onChange={e => setBusca(e.target.value)} />
+
+      {profsFavoritos.length > 0 && (
+        <div className="secao-favoritos">
+          <button className="favoritos-toggle" onClick={() => setFavoritosAberto(!favoritosAberto)}>
+            <span>{favoritosAberto ? '▼' : '▶'} ⭐ Meus Professores ({profsFavoritos.length})</span>
+          </button>
+          {favoritosAberto && <div className="aluno-grid" style={{ marginTop: '0.75rem' }}>{profsFavoritos.map(renderProfCard)}</div>}
+        </div>
+      )}
+
+      <div>
+        {profsFavoritos.length > 0 && <p style={{ fontSize: '0.85rem', opacity: 0.6, marginBottom: '0.75rem' }}>Todos os Professores</p>}
+        {filtrados.length === 0 ? <EstadoVazio mensagem="Nenhum professor encontrado." /> : (
+          <div className="aluno-grid">{filtrados.map(renderProfCard)}</div>
+        )}
+      </div>
     </div>
   )
 }
 
-function TabMateriais({ professores, progressoAluno, onBaixar }) {
+function TabMateriais({ professores, progressoAluno, onBaixar, favoritos, onFavoritar, onDesfavoritar }) {
   const [professorSelecionado, setProfessorSelecionado] = useState(null)
   const [materiais, setMateriais] = useState([])
   const [loading, setLoading] = useState(false)
   const [areasAbertas, setAreasAbertas] = useState({})
   const [professoresComMaterial, setProfessoresComMaterial] = useState([])
   const [loadingProfessores, setLoadingProfessores] = useState(true)
+  const [busca, setBusca] = useState('')
+  const [favoritosAberto, setFavoritosAberto] = useState(true)
   const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
 
   useEffect(() => {
@@ -682,10 +789,18 @@ function TabMateriais({ professores, progressoAluno, onBaixar }) {
     return <EstadoVazio mensagem="Nenhum material disponível no momento." />
   }
 
-  return (
-    <div className="aluno-grid">
-      {professoresComMateriais.map(prof => (
-        <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer' }} onClick={() => selecionarProfessor(prof)}>
+  const filtrados = professoresComMateriais.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()))
+  const favIds = favoritos.map(f => f.professorId)
+  const profsFavoritos = filtrados.filter(p => favIds.includes(p.id))
+
+  const renderProfCard = (prof) => {
+    const isFav = favIds.includes(prof.id)
+    return (
+      <div key={prof.id} className="aluno-card" style={{ cursor: 'pointer', position: 'relative' }}>
+        <button className="btn-favorito" onClick={(e) => { e.stopPropagation(); isFav ? onDesfavoritar(prof.id) : onFavoritar(prof.id) }} title={isFav ? 'Remover dos favoritos' : 'Favoritar'}>
+          {isFav ? '⭐' : '☆'}
+        </button>
+        <div onClick={() => selecionarProfessor(prof)} style={{ flex: 1 }}>
           <div className="aluno-card-header">
             <span className="aluno-card-tag">Professor</span>
           </div>
@@ -693,10 +808,31 @@ function TabMateriais({ professores, progressoAluno, onBaixar }) {
           {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
           <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
             Ver materiais
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </span>
         </div>
-      ))}
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <input className="pesquisa-professor" type="text" placeholder="🔍 Pesquisar professor..." value={busca} onChange={e => setBusca(e.target.value)} />
+
+      {profsFavoritos.length > 0 && (
+        <div className="secao-favoritos">
+          <button className="favoritos-toggle" onClick={() => setFavoritosAberto(!favoritosAberto)}>
+            <span>{favoritosAberto ? '▼' : '▶'} ⭐ Meus Professores ({profsFavoritos.length})</span>
+          </button>
+          {favoritosAberto && <div className="aluno-grid" style={{ marginTop: '0.75rem' }}>{profsFavoritos.map(renderProfCard)}</div>}
+        </div>
+      )}
+
+      <div>
+        {profsFavoritos.length > 0 && <p style={{ fontSize: '0.85rem', opacity: 0.6, marginBottom: '0.75rem' }}>Todos os Professores</p>}
+        {filtrados.length === 0 ? <EstadoVazio mensagem="Nenhum professor encontrado." /> : (
+          <div className="aluno-grid">{filtrados.map(renderProfCard)}</div>
+        )}
+      </div>
     </div>
   )
 }

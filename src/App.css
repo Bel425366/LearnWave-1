@@ -5504,3 +5504,74 @@ html {
   flex-direction: column !important;
   gap: 0 !important;
 }
+
+
+/* ── Pesquisa de professor ── */
+.pesquisa-professor {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.pesquisa-professor:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.pesquisa-professor::placeholder { color: rgba(148, 163, 184, 0.7); }
+.light-theme .pesquisa-professor {
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  color: #1e293b;
+}
+.light-theme .pesquisa-professor:focus {
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+}
+.light-theme .pesquisa-professor::placeholder { color: #94a3b8; }
+
+/* ── Seção de favoritos ── */
+.secao-favoritos {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.light-theme .secao-favoritos { border-bottom-color: #E2E8F0; }
+.favoritos-toggle {
+  background: none !important;
+  border: none !important;
+  color: #e2e8f0 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  padding: 0.4rem 0 !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+}
+.favoritos-toggle:hover { color: #a5b4fc !important; transform: none !important; box-shadow: none !important; }
+.light-theme .favoritos-toggle { color: #1e293b !important; }
+.light-theme .favoritos-toggle:hover { color: #4F46E5 !important; }
+
+/* ── Botão favoritar (estrela) ── */
+.btn-favorito {
+  position: absolute !important;
+  top: 0.8rem !important;
+  right: 0.8rem !important;
+  background: none !important;
+  border: none !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  padding: 0.2rem !important;
+  line-height: 1 !important;
+  z-index: 2 !important;
+  box-shadow: none !important;
+  transition: transform 0.2s !important;
+}
+.btn-favorito:hover { transform: scale(1.2) !important; box-shadow: none !important; }
