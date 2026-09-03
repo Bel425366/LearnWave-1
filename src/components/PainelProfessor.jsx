@@ -517,7 +517,7 @@ function GerenciarVideoaulas({ videoaulas, setVideoaulas, professorId }) {
 function GerenciarMateriais({ materiais, setMateriais, professorId }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [formData, setFormData] = useState({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'PUBLICADO' })
+  const [formData, setFormData] = useState({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'RASCUNHO' })
   const [arquivo, setArquivo] = useState(null)
   const [areasAbertas, setAreasAbertas] = useState({})
   const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
@@ -578,7 +578,7 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
       alert('Erro ao salvar material: ' + err.message)
       return
     }
-    setFormData({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'PUBLICADO' })
+    setFormData({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'RASCUNHO' })
     setArquivo(null)
     setShowForm(false)
     setEditingId(null)
@@ -591,7 +591,7 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
       area: material.area || '',
       tipoArquivo: material.tipoArquivo || 'PDF',
       arquivoUrl: material.arquivoUrl || '',
-      status: material.status || 'PUBLICADO'
+      status: material.status || 'RASCUNHO'
     })
     setArquivo(null)
     setEditingId(material.id)
@@ -669,7 +669,7 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
           </select>
           <div className="form-actions">
             <button type="submit">{editingId ? 'Atualizar' : 'Criar'}</button>
-            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setArquivo(null); setFormData({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'PUBLICADO' }) }}>Cancelar</button>
+            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setArquivo(null); setFormData({ titulo: '', descricao: '', area: '', tipoArquivo: 'PDF', arquivoUrl: '', status: 'RASCUNHO' }) }}>Cancelar</button>
           </div>
         </form>
       )}
@@ -842,9 +842,15 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
   }, [activeType, professorId, videoaulas])
 
   const restaurarAtividade = async (id) => {
-    try { await fetch(`https://learnwaveback2.onrender.com/api/atividades/${id}/restaurar`, { method: 'PATCH' }) } catch {}
-    const novas = atividades.map(a => a.id === id ? { ...a, situacao: 'ativo', excluido: false } : a)
-    setAtividades(novas)
+    try {
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/atividades/${id}/restaurar`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      const atividadeAtualizada = await res.json()
+      const novas = atividades.map(a => a.id === id ? { ...a, ...atividadeAtualizada, situacao: 'ativo', excluido: false } : a)
+      setAtividades(novas)
+    } catch (err) {
+      alert('Erro ao restaurar atividade: ' + err.message)
+    }
   }
 
   const excluirPermanente = async (id) => {
@@ -856,8 +862,10 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
 
   const restaurarVideoaula = async (id) => {
     try {
-      await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/restaurar`, { method: 'PATCH' })
-      setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, status: 'RASCUNHO' } : v))
+      const res = await fetch(`https://learnwaveback2.onrender.com/api/videoaulas/${id}/restaurar`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(await res.text())
+      const videoAtualizada = await res.json()
+      setVideoaulas(videoaulas.map(v => v.id === id ? { ...v, ...videoAtualizada } : v))
       setVideoaulasLixeira(videoaulasLixeira.filter(v => v.id !== id))
     } catch (err) {
       alert('Erro ao restaurar videoaula: ' + err.message)
@@ -868,7 +876,8 @@ function Lixeira({ atividades, setAtividades, videoaulas, setVideoaulas, materia
     try {
       const res = await fetch(`https://learnwaveback2.onrender.com/api/materiais/${id}/restaurar`, { method: 'PATCH' })
       if (!res.ok) throw new Error(await res.text())
-      setMateriais(normalizarMateriais(materiais).map(m => m.id === id ? { ...m, status: 'RASCUNHO' } : m))
+      const materialAtualizado = await res.json()
+      setMateriais(normalizarMateriais(materiais).map(m => m.id === id ? materialAtualizado : m))
       setMateriaisLixeira(materiaisLixeira.filter(m => m.id !== id))
     } catch (err) {
       alert('Erro ao restaurar material: ' + err.message)
