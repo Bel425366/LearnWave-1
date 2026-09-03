@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Mascot from './Mascot'
 import PasswordValidator from './PasswordValidator'
 
@@ -14,7 +14,7 @@ const API_BASE = 'https://learnwaveback2.onrender.com/api'
 function AreaAluno({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
   const [atividadeAtual, setAtividadeAtual] = useState(null)
-  const [perfilData, setPerfilData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null })
+  const [perfilData, setPerfilData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null, corAvatar: null, emojiAvatar: null })
 
   // Carregar perfil da API
   useEffect(() => {
@@ -25,7 +25,9 @@ function AreaAluno({ user, onNavigate }) {
           setPerfilData({
             apelido: data.nome || user.nome,
             bio: data.bio || '',
-            fotoPerfil: data.fotoPerfil || null
+            fotoPerfil: data.fotoPerfil || null,
+            corAvatar: data.corAvatar || null,
+            emojiAvatar: data.emojiAvatar || null
           })
         }
       })
@@ -142,7 +144,7 @@ function AreaAluno({ user, onNavigate }) {
       const postRes = await fetch(`${API_BASE}/progresso-atividades`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ alunoId: Number(user.id), atividadeId: Number(atividadeAtual.id) })
+        body: JSON.stringify({ alunoId: Number(user.id), atividadeId: Number(atividadeAtual.id), respostaAluno: resposta })
       })
 
       if (!postRes.ok) {
@@ -240,6 +242,8 @@ function AreaAluno({ user, onNavigate }) {
       const perfilPayload = {}
       if (novosDados.bio !== undefined) perfilPayload.bio = novosDados.bio
       if (novosDados.fotoPerfil !== undefined) perfilPayload.fotoPerfil = novosDados.fotoPerfil
+      if (novosDados.corAvatar !== undefined) perfilPayload.corAvatar = novosDados.corAvatar
+      if (novosDados.emojiAvatar !== undefined) perfilPayload.emojiAvatar = novosDados.emojiAvatar
 
       await fetch(`${API_BASE}/usuarios/${user.id}/perfil`, {
         method: 'PATCH',
@@ -286,10 +290,12 @@ function AreaAluno({ user, onNavigate }) {
     <div className="painel-novo" style={{ position: 'relative' }}>
       {/* Hero */}
       <div className="painel-hero painel-hero--aluno">
-        <div className="painel-hero-avatar">
+        <div className="painel-hero-avatar" style={!perfilData.fotoPerfil && perfilData.corAvatar ? { background: perfilData.corAvatar } : {}}>
           {perfilData.fotoPerfil
             ? <img src={perfilData.fotoPerfil} alt="foto" />
-            : iniciais}
+            : perfilData.emojiAvatar
+              ? <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{perfilData.emojiAvatar}</span>
+              : iniciais}
         </div>
         <div className="painel-hero-info">
           <h2>Olá, {primeiroNome}</h2>
@@ -899,9 +905,32 @@ function EstadoVazio({ mensagem }) {
   )
 }
 
+const CORES_AVATAR = [
+  { label: 'Roxo', value: 'linear-gradient(135deg, #667eea, #764ba2)' },
+  { label: 'Azul', value: 'linear-gradient(135deg, #3b82f6, #6366f1)' },
+  { label: 'Verde', value: 'linear-gradient(135deg, #10b981, #059669)' },
+  { label: 'Rosa', value: 'linear-gradient(135deg, #ec4899, #f43f5e)' },
+  { label: 'Laranja', value: 'linear-gradient(135deg, #f97316, #ef4444)' },
+  { label: 'Ciano', value: 'linear-gradient(135deg, #06b6d4, #3b82f6)' },
+  { label: 'Amarelo', value: 'linear-gradient(135deg, #f59e0b, #f97316)' },
+  { label: 'Cinza', value: 'linear-gradient(135deg, #64748b, #475569)' },
+]
+
+const EMOJIS_AVATAR = ['🎓', '📚', '✏️', '🦁', '🐺', '🦊', '🐉', '🌊', '⚡', '🌟', '🎯', '🔥']
+
 function PerfilAluno({ perfilData, onSalvar, user }) {
-  const [formData, setFormData] = useState(perfilData || { apelido: '', bio: '', fotoPerfil: null })
+  const [formData, setFormData] = useState(perfilData || { apelido: '', bio: '', fotoPerfil: null, corAvatar: null, emojiAvatar: null })
   const [previewFoto, setPreviewFoto] = useState(perfilData?.fotoPerfil || null)
+
+  // Sincronizar quando perfilData mudar (ex: carregamento da API)
+  const prevPerfilRef = useRef(perfilData)
+  useEffect(() => {
+    if (perfilData && perfilData !== prevPerfilRef.current) {
+      prevPerfilRef.current = perfilData
+      setFormData(perfilData)
+      setPreviewFoto(perfilData.fotoPerfil || null)
+    }
+  }, [perfilData])
 
   const handleFotoChange = (e) => {
     const file = e.target.files[0]
@@ -916,20 +945,72 @@ function PerfilAluno({ perfilData, onSalvar, user }) {
   }
 
   const iniciais = (formData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+  const bgAvatar = formData.corAvatar || 'linear-gradient(135deg, #667eea, #764ba2)'
 
   return (
     <div className="perfil-aluno">
       <form onSubmit={(e) => { e.preventDefault(); onSalvar(formData) }} className="form-perfil">
         <div className="foto-perfil-section">
-          <div className="foto-preview" style={{ width: 100, height: 100, fontSize: '1.8rem', fontWeight: 700, color: 'white', background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
+          <div className="foto-preview" style={{ width: 100, height: 100, fontSize: '1.8rem', fontWeight: 700, color: 'white', background: previewFoto ? 'transparent' : bgAvatar }}>
             {previewFoto
               ? <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
-              : iniciais}
+              : formData.emojiAvatar
+                ? <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{formData.emojiAvatar}</span>
+                : iniciais}
           </div>
           <input type="file" id="fotoPerfil" accept="image/*" onChange={handleFotoChange} className="foto-input" />
           <label htmlFor="fotoPerfil" className="btn-foto">
             {previewFoto ? 'Alterar foto' : 'Adicionar foto'}
           </label>
+        </div>
+
+        {/* Seletor de cor do avatar */}
+        <div className="campo-perfil">
+          <label>Cor do avatar</label>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
+            {CORES_AVATAR.map(cor => (
+              <button
+                key={cor.value}
+                type="button"
+                title={cor.label}
+                onClick={() => setFormData({ ...formData, corAvatar: cor.value })}
+                style={{
+                  width: 32, height: 32, borderRadius: '50%', background: cor.value, border: formData.corAvatar === cor.value ? '3px solid #fff' : '3px solid transparent',
+                  boxShadow: formData.corAvatar === cor.value ? '0 0 0 2px #6366f1' : 'none',
+                  cursor: 'pointer', padding: 0, flexShrink: 0
+                }}
+              />
+            ))}
+            {/* opção de remover cor customizada */}
+            {formData.corAvatar && (
+              <button type="button" onClick={() => setFormData({ ...formData, corAvatar: null })}
+                style={{ fontSize: '0.72rem', opacity: 0.6, background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: '0 0.3rem' }}>
+                resetar
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Seletor de emoji do avatar */}
+        <div className="campo-perfil">
+          <label>Emoji do avatar <span style={{ opacity: 0.5, fontWeight: 400, fontSize: '0.82rem' }}>(substitui as iniciais)</span></label>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
+            {EMOJIS_AVATAR.map(emoji => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => setFormData({ ...formData, emojiAvatar: formData.emojiAvatar === emoji ? null : emoji })}
+                style={{
+                  width: 38, height: 38, borderRadius: '10px', fontSize: '1.3rem', lineHeight: 1,
+                  background: formData.emojiAvatar === emoji ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.07)',
+                  border: formData.emojiAvatar === emoji ? '2px solid #6366f1' : '2px solid transparent',
+                  cursor: 'pointer', padding: 0
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="campo-perfil">

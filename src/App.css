@@ -5369,11 +5369,19 @@ html {
   margin: 0 0 1rem;
   font-size: 1.3rem;
   font-weight: 700;
+  color: #e2e8f0;
 }
 .footer-modal p {
   font-size: 0.92rem;
   line-height: 1.7;
   margin: 0 0 0.8rem;
+  color: #cbd5e1;
+}
+.light-theme .footer-modal h3 {
+  color: #0f172a;
+}
+.light-theme .footer-modal p {
+  color: #475569;
 }
 .footer-modal-close {
   position: absolute;

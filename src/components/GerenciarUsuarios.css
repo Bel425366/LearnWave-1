@@ -89,3 +89,37 @@
   background: #dc3545;
   color: white;
 }
+
+/* ── Dark mode overrides ── */
+.dark-theme .usuario-form {
+  background: rgba(10, 22, 40, 0.7);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  color: #e2e8f0;
+}
+
+.dark-theme .usuario-form h3 {
+  color: #e2e8f0;
+}
+
+.dark-theme .usuario-form input,
+.dark-theme .usuario-form select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  border-radius: 6px;
+}
+
+.dark-theme .usuarios-lista table {
+  background: rgba(10, 22, 40, 0.7);
+  color: #e2e8f0;
+}
+
+.dark-theme .usuarios-lista th {
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+}
+
+.dark-theme .usuarios-lista td {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}

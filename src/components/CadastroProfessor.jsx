@@ -24,6 +24,13 @@ function CadastroProfessor({ onNavigate }) {
   const [documento, setDocumento] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  const formatarCpf = (digits) => {
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return digits.slice(0,3) + '.' + digits.slice(3)
+    if (digits.length <= 9) return digits.slice(0,3) + '.' + digits.slice(3,6) + '.' + digits.slice(6)
+    return digits.slice(0,3) + '.' + digits.slice(3,6) + '.' + digits.slice(6,9) + '-' + digits.slice(9,11)
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
     if (name === 'cpf') {
@@ -136,9 +143,10 @@ function CadastroProfessor({ onNavigate }) {
           <input
             type="text"
             name="cpf"
-            placeholder="CPF (somente números)"
-            value={formData.cpf}
+            placeholder="000.000.000-00"
+            value={formatarCpf(formData.cpf)}
             onChange={handleChange}
+            maxLength={14}
             required
           />
           <input
@@ -192,7 +200,7 @@ function CadastroProfessor({ onNavigate }) {
             required
           />
           <div style={{ marginBottom: '1.2rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'rgba(148,163,184,0.9)' }}>
               Documento comprobatório (máx. 2MB)
             </label>
             <input

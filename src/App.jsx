@@ -80,11 +80,7 @@ function App() {
   const handleUserTypeSelection = (type) => {
     setUserType(type)
     localStorage.setItem('userType', type)
-    if (type === 'professor') {
-      navigate('cadastro')
-    } else {
-      navigate('login')
-    }
+    navigate('login')
   }
 
   const renderPage = () => {

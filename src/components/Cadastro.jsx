@@ -130,13 +130,21 @@ function Cadastro({ userType, onNavigate }) {
               </div>
               <div className="auth-field">
                 <label>CPF</label>
-                <input type="text" name="cpf" placeholder="Apenas números" value={formData.cpf}
+                <input type="text" name="cpf" placeholder="000.000.000-00" value={
+                  (() => {
+                    const v = formData.cpf.replace(/\D/g, '')
+                    if (v.length <= 3) return v
+                    if (v.length <= 6) return v.slice(0,3) + '.' + v.slice(3)
+                    if (v.length <= 9) return v.slice(0,3) + '.' + v.slice(3,6) + '.' + v.slice(6)
+                    return v.slice(0,3) + '.' + v.slice(3,6) + '.' + v.slice(6,9) + '-' + v.slice(9,11)
+                  })()
+                }
                   onChange={(e) => {
                     const v = e.target.value.replace(/\D/g, '')
                     if (v.length <= 11) setFormData({ ...formData, cpf: v })
                   }}
-                  onFocus={() => setMascotMessage('Digite seu CPF só com números!')}
-                  maxLength={11} required />
+                  onFocus={() => setMascotMessage('Digite seu CPF!')}
+                  maxLength={14} required />
               </div>
               <div className="auth-field">
                 <label>Telefone</label>
@@ -202,7 +210,7 @@ function Cadastro({ userType, onNavigate }) {
                       onFocus={() => setMascotMessage('Envie um holerite, declaração ou carteira funcional!')}
                       required
                     />
-                    <small style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>
+                    <small style={{ color: 'rgba(148,163,184,0.9)', fontSize: '0.78rem' }}>
                       PDF, JPG ou PNG — máx. 5MB
                     </small>
                   </div>
