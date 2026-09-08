@@ -6,6 +6,7 @@ import CadastroProfessor from './components/CadastroProfessor'
 import PainelProfessor from './components/PainelProfessor'
 import PainelAdmin from './components/PainelAdmin'
 import AreaAluno from './components/AreaAluno'
+import RedefinirSenha from './components/RedefinirSenha'
 import Preloader from './components/Preloader'
 import Mascot from './components/Mascot'
 import { Security } from './utils/security'
@@ -14,6 +15,9 @@ import './admin-styles.css'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
+  const [isRedefinirSenha, setIsRedefinirSenha] = useState(() => {
+    return window.location.pathname === '/redefinir-senha'
+  })
   const [currentPage, setCurrentPage] = useState(() => {
     return localStorage.getItem('currentPage') || 'user-type-selection'
   })
@@ -110,6 +114,29 @@ function App() {
 
   if (isLoading) {
     return <Preloader />
+  }
+
+  if (isRedefinirSenha) {
+    const voltarAoLogin = () => {
+      // Limpa o token da URL e volta ao fluxo normal na tela de login
+      window.history.replaceState({}, '', '/')
+      setIsRedefinirSenha(false)
+      navigate('login')
+    }
+    return (
+      <div className={`app ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
+        <header className="header">
+          <div className="header-content">
+            <div className="logo-container">
+              <img src="/logo.svg" alt="LearnWave Logo" className="site-logo" />
+              <h1><span className="header-learn">Learn</span><span className="header-wave">Wave</span></h1>
+            </div>
+          </div>
+        </header>
+        <main><RedefinirSenha onConcluir={voltarAoLogin} /></main>
+        <Footer />
+      </div>
+    )
   }
 
   return (

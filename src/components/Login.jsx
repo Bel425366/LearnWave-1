@@ -43,6 +43,34 @@ function Login({ userType, onLogin, onNavigate }) {
   const [showEsqueceuSenha, setShowEsqueceuSenha] = useState(false)
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const [mascotMessage, setMascotMessage] = useState('Bem-vindo de volta! Digite seus dados para entrar.')
+  const [emailRecuperacao, setEmailRecuperacao] = useState('')
+  const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false)
+  const [mensagemRecuperacao, setMensagemRecuperacao] = useState('')
+
+  const fecharEsqueceuSenha = () => {
+    setShowEsqueceuSenha(false)
+    setEmailRecuperacao('')
+    setMensagemRecuperacao('')
+    setEnviandoRecuperacao(false)
+  }
+
+  const handleEsqueceuSenha = async (e) => {
+    e.preventDefault()
+    setMensagemRecuperacao('')
+    setEnviandoRecuperacao(true)
+    try {
+      const res = await fetch('https://learnwaveback2.onrender.com/api/usuarios/esqueceu-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailRecuperacao.trim() })
+      })
+      const data = await res.json().catch(() => ({}))
+      setMensagemRecuperacao(data.mensagem || 'Se este email estiver cadastrado, você receberá um link para redefinir a senha.')
+    } catch {
+      setMensagemRecuperacao('Erro ao conectar com o servidor. Tente novamente.')
+    }
+    setEnviandoRecuperacao(false)
+  }
 
   const config = USER_TYPE_CONFIG[userType] || USER_TYPE_CONFIG.aluno
 
@@ -203,7 +231,7 @@ function Login({ userType, onLogin, onNavigate }) {
 
       {/* Modal Esqueceu Senha */}
       {showEsqueceuSenha && (
-        <div className="modal-overlay" onClick={() => setShowEsqueceuSenha(false)}>
+        <div className="modal-overlay" onClick={fecharEsqueceuSenha}>
           <div className="modal-content esqueceu-senha-modal" onClick={(e) => e.stopPropagation()}>
             <div className="esqueceu-senha-header">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -211,21 +239,44 @@ function Login({ userType, onLogin, onNavigate }) {
               </svg>
               <h3>Recuperar Senha</h3>
             </div>
-            <p className="esqueceu-senha-info">
-              Para redefinir sua senha, entre em contato com o administrador da plataforma informando seu email de cadastro.
-            </p>
-            <p className="esqueceu-senha-dica">
-              <strong>Dica:</strong> Verifique se está usando o email correto e tente novamente. Lembre-se que a senha diferencia maiúsculas de minúsculas.
-            </p>
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn-confirm"
-                onClick={() => setShowEsqueceuSenha(false)}
-              >
-                Entendi
-              </button>
-            </div>
+
+            {mensagemRecuperacao ? (
+              <>
+                <p className="esqueceu-senha-info" style={{ marginBottom: '1.5rem' }}>
+                  {mensagemRecuperacao}
+                </p>
+                <div className="modal-actions">
+                  <button type="button" className="btn-confirm" onClick={fecharEsqueceuSenha}>
+                    Entendi
+                  </button>
+                </div>
+              </>
+            ) : (
+              <form onSubmit={handleEsqueceuSenha}>
+                <p className="esqueceu-senha-info" style={{ marginBottom: '1rem' }}>
+                  Informe o email da sua conta. Enviaremos um link para você redefinir sua senha.
+                </p>
+                <div className="auth-field">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={emailRecuperacao}
+                    onChange={(e) => setEmailRecuperacao(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+                <div className="modal-actions" style={{ marginTop: '1rem' }}>
+                  <button type="button" className="btn-cancel" onClick={fecharEsqueceuSenha} disabled={enviandoRecuperacao}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn-confirm" disabled={enviandoRecuperacao}>
+                    {enviandoRecuperacao ? 'Enviando...' : 'Enviar link'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
