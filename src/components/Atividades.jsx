@@ -19,9 +19,12 @@ function Atividades({ area, onNavigate, user }) {
 
   const corrigirAtividade = () => {
     if (!selectedActivity) return
-    
+
+    const temQuestoesMultiplas = selectedActivity.questoes && selectedActivity.questoes.length > 0
+    let notaFinal = 0
+
     // Se tem questões múltiplas
-    if (selectedActivity.questoes && selectedActivity.questoes.length > 0) {
+    if (temQuestoesMultiplas) {
       // Verificar se todas foram respondidas
       const questoesNaoRespondidas = selectedActivity.questoes.filter(q => !respostas[q.id])
       if (questoesNaoRespondidas.length > 0) {
@@ -37,26 +40,22 @@ function Atividades({ area, onNavigate, user }) {
         }
       })
       
-      const nota = (acertos / selectedActivity.questoes.length) * 10
+      notaFinal = (acertos / selectedActivity.questoes.length) * 10
       
       setResultado({ 
         acertos, 
         total: selectedActivity.questoes.length, 
-        nota: nota.toFixed(1) 
+        nota: notaFinal.toFixed(1) 
       })
     } else {
       // Questão única (formato antigo)
       if (!respostas.unica) return
       const acertou = respostas.unica === selectedActivity.respostaCorreta
-      const nota = acertou ? 10 : 0
-      setResultado({ acertou, nota, respostaCorreta: selectedActivity.respostaCorreta })
+      notaFinal = acertou ? 10 : 0
+      setResultado({ acertou, nota: notaFinal, respostaCorreta: selectedActivity.respostaCorreta })
     }
     
     // Salvar resultado
-    const notaFinal = selectedActivity.questoes && selectedActivity.questoes.length > 0 
-      ? (acertos / selectedActivity.questoes.length) * 10
-      : (respostas.unica === selectedActivity.respostaCorreta ? 10 : 0)
-      
     const submissao = {
       id: Date.now(),
       atividadeId: selectedActivity.id,

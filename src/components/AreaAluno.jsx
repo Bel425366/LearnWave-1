@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Mascot from './Mascot'
 import PasswordValidator from './PasswordValidator'
+import Avatar from './Avatar'
 
 const SENHA_FORTE = (pwd) =>
   pwd.length >= 8 &&
@@ -284,19 +285,12 @@ function AreaAluno({ user, onNavigate }) {
   }
 
   const primeiroNome = (perfilData.apelido || user.nome).split(' ')[0]
-  const iniciais = (perfilData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
   return (
     <div className="painel-novo" style={{ position: 'relative' }}>
       {/* Hero */}
       <div className="painel-hero painel-hero--aluno">
-        <div className="painel-hero-avatar" style={!perfilData.fotoPerfil && perfilData.corAvatar ? { background: perfilData.corAvatar } : {}}>
-          {perfilData.fotoPerfil
-            ? <img src={perfilData.fotoPerfil} alt="foto" />
-            : perfilData.emojiAvatar
-              ? <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{perfilData.emojiAvatar}</span>
-              : iniciais}
-        </div>
+        <Avatar usuario={{ ...perfilData, nome: perfilData.apelido || user.nome }} size={64} />
         <div className="painel-hero-info">
           <h2>Olá, {primeiroNome}</h2>
           <p>{user.email}</p>
@@ -944,20 +938,14 @@ function PerfilAluno({ perfilData, onSalvar, user }) {
     }
   }
 
-  const iniciais = (formData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-  const bgAvatar = formData.corAvatar || 'linear-gradient(135deg, #667eea, #764ba2)'
-
   return (
     <div className="perfil-aluno">
       <form onSubmit={(e) => { e.preventDefault(); onSalvar(formData) }} className="form-perfil">
         <div className="foto-perfil-section">
-          <div className="foto-preview" style={{ width: 100, height: 100, fontSize: '1.8rem', fontWeight: 700, color: 'white', background: previewFoto ? 'transparent' : bgAvatar }}>
-            {previewFoto
-              ? <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
-              : formData.emojiAvatar
-                ? <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{formData.emojiAvatar}</span>
-                : iniciais}
-          </div>
+          <Avatar
+            usuario={{ nome: formData.apelido || user.nome, fotoPerfil: previewFoto, corAvatar: formData.corAvatar, emojiAvatar: formData.emojiAvatar }}
+            size={100}
+          />
           <input type="file" id="fotoPerfil" accept="image/*" onChange={handleFotoChange} className="foto-input" />
           <label htmlFor="fotoPerfil" className="btn-foto">
             {previewFoto ? 'Alterar foto' : 'Adicionar foto'}

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import Modal from './Modal'
 import PasswordValidator from './PasswordValidator'
+import Avatar from './Avatar'
 
 const CORES_AVATAR = [
   { label: 'Roxo',     value: 'linear-gradient(135deg, #667eea, #764ba2)' },
@@ -77,8 +78,6 @@ function PainelProfessor({ user, onNavigate }) {
   }
 
   const primeiroNome = (perfilData.apelido || user.nome).split(' ')[0]
-  const iniciais = (perfilData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-  const bgAvatarHero = perfilData.corAvatar || 'linear-gradient(135deg, #667eea, #764ba2)'
 
   const tabs = [
     { id: 'atividades', label: 'Atividades',       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> },
@@ -94,13 +93,8 @@ function PainelProfessor({ user, onNavigate }) {
     <div className="painel-novo">
       {/* Hero */}
       <div className="painel-hero painel-hero--prof">
-        <div className="painel-hero-avatar painel-hero--prof" style={!perfilData.fotoPerfil ? { background: bgAvatarHero } : {}}>
-          {perfilData.fotoPerfil
-            ? <img src={perfilData.fotoPerfil} alt="foto" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-            : perfilData.emojiAvatar
-              ? <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{perfilData.emojiAvatar}</span>
-              : iniciais}
-        </div>
+        <Avatar usuario={{ ...perfilData, nome: perfilData.apelido || user.nome }} size={64} />
+
         <div className="painel-hero-info">
           <h2>Olá, {primeiroNome}</h2>
           <p>{user.email}</p>
@@ -1031,21 +1025,15 @@ function PerfilProfessor({ user, perfilData: perfilDataProp, onPerfilAtualizado 
     }
   }
 
-  const iniciaisProfessor = (formData.apelido || user.nome).split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-  const bgAvatarProfessor = formData.corAvatar || 'linear-gradient(135deg, #667eea, #764ba2)'
-
   return (
     <div className="perfil-aluno">
       <h3>Meu Perfil</h3>
       <form onSubmit={handleSubmit} className="form-perfil">
         <div className="foto-perfil-section">
-          <div className="foto-preview" style={{ width: 100, height: 100, fontSize: '1.8rem', fontWeight: 700, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', background: previewFoto ? 'transparent' : bgAvatarProfessor }}>
-            {previewFoto
-              ? <img src={previewFoto} alt="Foto de perfil" className="foto-perfil-img" />
-              : formData.emojiAvatar
-                ? <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{formData.emojiAvatar}</span>
-                : iniciaisProfessor}
-          </div>
+          <Avatar
+            usuario={{ nome: formData.apelido || user.nome, fotoPerfil: previewFoto, corAvatar: formData.corAvatar, emojiAvatar: formData.emojiAvatar }}
+            size={100}
+          />
           <input type="file" id="fotoPerfil" accept="image/*" onChange={handleFotoChange} className="foto-input" />
           <label htmlFor="fotoPerfil" className="btn-foto">{previewFoto ? 'Alterar Foto' : 'Adicionar Foto'}</label>
         </div>
@@ -1136,7 +1124,7 @@ function VisualizarAlunos() {
         {alunos.map(aluno => (
             <div key={aluno.id} className="aluno-perfil-card">
               <div className="aluno-foto">
-                {aluno.fotoPerfil ? <img src={aluno.fotoPerfil} alt="Foto do aluno" className="foto-aluno" /> : <div className="foto-placeholder-aluno"><span>A</span></div>}
+                <Avatar usuario={aluno} size={64} />
               </div>
               <div className="aluno-info">
                 <h4>{aluno.nome}</h4>

@@ -7,6 +7,7 @@ import PainelProfessor from './components/PainelProfessor'
 import PainelAdmin from './components/PainelAdmin'
 import AreaAluno from './components/AreaAluno'
 import RedefinirSenha from './components/RedefinirSenha'
+import Avatar from './components/Avatar'
 import Preloader from './components/Preloader'
 import Mascot from './components/Mascot'
 import { Security } from './utils/security'
@@ -172,9 +173,7 @@ function App() {
             </button>
             {user && (
               <div className="user-info">
-                {userPerfil?.fotoPerfil && (
-                  <img src={userPerfil.fotoPerfil} alt="Perfil" className="header-foto-perfil" />
-                )}
+                <Avatar usuario={{ ...userPerfil, nome: userPerfil?.nome || user.nome }} size={36} className="header-foto-perfil" />
                 <span>Olá, {Security.sanitizeInput(userPerfil?.nome || user.nome)}! ({user.tipo})</span>
                 <button onClick={() => { 
                   setUser(null)
