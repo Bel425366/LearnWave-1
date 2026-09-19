@@ -382,7 +382,7 @@ function TabAtividades({ atividades, professores, progressoAtividades, userEmail
   const publicadas = atividades.filter(a => (a.status === 'Publicada' || a.status === 'PUBLICADO') && a.situacao !== 'lixeira' && a.situacao !== 'excluido')
   const [professorSelecionado, setProfessorSelecionado] = useState(null)
   const [busca, setBusca] = useState('')
-  const [favoritosAberto, setFavoritosAberto] = useState(true)
+  const [favoritosAberto, setFavoritosAberto] = useState(false)
 
   const professoresComAtividades = professores.filter(p =>
     publicadas.some(a => a.professorId === p.id)
@@ -503,7 +503,7 @@ function TabVideoaulas({ professores, progressoAluno, onMarcar, favoritos, onFav
   const [professoresComVideo, setProfessoresComVideo] = useState([])
   const [loadingProfessores, setLoadingProfessores] = useState(true)
   const [busca, setBusca] = useState('')
-  const [favoritosAberto, setFavoritosAberto] = useState(true)
+  const [favoritosAberto, setFavoritosAberto] = useState(false)
 
   // Extrair ID do YouTube a partir de uma URL
   const getYoutubeId = (url) => {
@@ -685,7 +685,7 @@ function TabMateriais({ professores, progressoAluno, onBaixar, favoritos, onFavo
   const [professoresComMaterial, setProfessoresComMaterial] = useState([])
   const [loadingProfessores, setLoadingProfessores] = useState(true)
   const [busca, setBusca] = useState('')
-  const [favoritosAberto, setFavoritosAberto] = useState(true)
+  const [favoritosAberto, setFavoritosAberto] = useState(false)
   const toggleArea = (area) => setAreasAbertas(prev => ({ ...prev, [area]: !prev[area] }))
 
   useEffect(() => {

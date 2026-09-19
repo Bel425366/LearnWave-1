@@ -4,13 +4,34 @@
   box-sizing: border-box;
 }
 
+/* ── Design tokens ── */
+:root {
+  --cor-primaria: #6366f1;
+  --cor-primaria-2: #7c3aed;
+  --cor-accent: #22d3ee;
+  --glow-primario: 0 0 24px rgba(99, 102, 241, 0.45);
+  --glow-accent: 0 0 22px rgba(34, 211, 238, 0.4);
+  --fonte-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --fonte-corpo: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
 .app {
   min-height: 100vh;
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--fonte-corpo);
   width: 100%;
   display: flex;
   flex-direction: column;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Títulos com fonte display tech */
+h1, h2, h3,
+.brand-text h1,
+.painel-hero-info h2,
+.aluno-card-title,
+.preloader-title {
+  font-family: var(--fonte-display);
+  letter-spacing: -0.02em;
 }
 
 .dark-theme {
@@ -19,6 +40,54 @@
     radial-gradient(ellipse at 80% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
     #050816;
   color: #e2e8f0;
+  position: relative;
+}
+
+/* Grid tech de fundo (blueprint) */
+.dark-theme::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
+}
+
+/* Orbs coloridos flutuando */
+.dark-theme::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(124, 58, 237, 0.18) 0%, transparent 22%),
+    radial-gradient(circle at 85% 70%, rgba(34, 211, 238, 0.12) 0%, transparent 20%),
+    radial-gradient(circle at 60% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 18%);
+  animation: orbsFloat 20s ease-in-out infinite alternate;
+}
+
+@keyframes orbsFloat {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(2%, -1.5%, 0) scale(1.05); }
+  100% { transform: translate3d(-1.5%, 2%, 0) scale(0.98); }
+}
+
+/* Garante que o conteúdo fique acima das camadas de fundo */
+.dark-theme .header,
+.dark-theme main,
+.dark-theme .site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dark-theme::after { animation: none; }
 }
 
 .light-theme {
@@ -1626,7 +1695,10 @@ textarea[name="experiencia"] {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #2d1b69 100%);
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(99, 102, 241, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(34, 211, 238, 0.15) 0%, transparent 50%),
+    linear-gradient(135deg, #05070f 0%, #0a0f24 50%, #140b32 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1638,36 +1710,86 @@ textarea[name="experiencia"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 1.2rem;
+}
+
+.preloader-logo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: plLogoIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.preloader-logo-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
+  animation: plGlowPulse 2s ease-in-out infinite;
+  z-index: -1;
 }
 
 .preloader-logo {
-  width: 100px;
-  height: 100px;
-  animation: pulse 2s ease-in-out infinite;
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  animation: pulse 2.4s ease-in-out infinite;
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
 }
 
 .preloader-title {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #8b5cf6, #a855f7, #c084fc);
+  margin: 0;
+  letter-spacing: -0.02em;
+  animation: slideUp 0.9s ease-out 0.15s both;
+}
+.preloader-title .pl-learn { color: #ffffff; }
+.preloader-title .pl-wave {
+  background: linear-gradient(135deg, #60a5fa, #6366f1, #22d3ee);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: slideUp 1s ease-out;
 }
 
-.preloader-spinner {
-  position: relative;
+.preloader-sub {
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.7);
+  margin: 0;
+  animation: slideUp 0.9s ease-out 0.3s both;
 }
 
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 3px solid rgba(139, 92, 246, 0.3);
-  border-top: 3px solid #8b5cf6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.preloader-bar {
+  width: 200px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-top: 0.8rem;
+}
+.preloader-bar-fill {
+  height: 100%;
+  width: 40%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+  animation: plBarSlide 1.5s ease-in-out infinite;
+}
+
+@keyframes plBarSlide {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+@keyframes plGlowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 0.9; transform: scale(1.12); }
+}
+@keyframes plLogoIn {
+  0%   { opacity: 0; transform: scale(0.6) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes spin {
@@ -5254,20 +5376,24 @@ html {
 }
 
 /* ── Bob card no dark ── */
-.dark-theme .mascot-mini-wrapper .mascot-mini-bubble {
-  background: rgba(10, 22, 40, 0.95) !important;
-  border: 1px solid rgba(99, 102, 241, 0.12) !important;
+/* Balão do mascote (renderizado via portal no body) — visual dark consistente */
+.mascot-mini-bubble {
+  background: #0b1628 !important;
+  border: 1px solid rgba(99, 102, 241, 0.25) !important;
   border-radius: 18px !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.04) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(99, 102, 241, 0.15) !important;
 }
-.dark-theme .mascot-mini-wrapper .mini-bubble-tail {
-  background: rgba(10, 22, 40, 0.95) !important;
-  border-left: 1px solid rgba(99, 102, 241, 0.12) !important;
-  border-top: 1px solid rgba(99, 102, 241, 0.12) !important;
-}
-.dark-theme .mascot-mini-wrapper .mini-bubble-text { color: #e2e8f0 !important; }
-.dark-theme .mascot-mini-wrapper .mini-bubble-link {
+.mascot-mini-bubble .mini-bubble-text { color: #e2e8f0 !important; }
+.mascot-mini-bubble .mini-bubble-link {
   background: linear-gradient(135deg, #4F46E5, #6366F1) !important;
+}
+.mascot-mini-bubble .mini-bubble-close {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+.mascot-mini-bubble .mini-bubble-close:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
 }
 
 /* ── Lixeira ── */
@@ -5583,3 +5709,49 @@ html {
   transition: transform 0.2s !important;
 }
 .btn-favorito:hover { transform: scale(1.2) !important; box-shadow: none !important; }
+
+
+/* ═══════════════════════════════════════════════
+   Melhorias visuais — glow neon (#2)
+   ═══════════════════════════════════════════════ */
+
+/* Glow nos botões primários (dark) */
+.dark-theme .btn-primary,
+.dark-theme .auth-btn-primary,
+.dark-theme .btn-salvar-perfil,
+.dark-theme .aluno-btn:not(.aluno-btn-outline) {
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3), var(--glow-primario) !important;
+}
+.dark-theme .btn-primary:hover,
+.dark-theme .auth-btn-primary:hover,
+.dark-theme .btn-salvar-perfil:hover,
+.dark-theme .aluno-btn:not(.aluno-btn-outline):hover {
+  box-shadow: 0 8px 26px rgba(79, 70, 229, 0.5), 0 0 32px rgba(99, 102, 241, 0.55) !important;
+}
+
+/* Glow na tab ativa */
+.dark-theme .painel-tab.active {
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35), var(--glow-primario) !important;
+}
+
+/* Linha de destaque ciano no topo do hero */
+.dark-theme .painel-hero::before {
+  background: linear-gradient(90deg, transparent, var(--cor-accent), transparent) !important;
+  opacity: 0.7;
+}
+
+/* Card em foco/hover ganha borda e glow ciano sutil */
+.dark-theme .aluno-card:hover {
+  border-color: rgba(34, 211, 238, 0.4) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25), 0 0 26px rgba(34, 211, 238, 0.12) !important;
+}
+
+/* Número das estatísticas com brilho */
+.dark-theme .painel-stat-val {
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.35));
+}
+
+/* Logo com glow suave no dark */
+.dark-theme .site-logo {
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4), 0 0 20px rgba(34, 211, 238, 0.15);
+}

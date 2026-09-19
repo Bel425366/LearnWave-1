@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import './Mascot.css'
 
 const IDLE_MESSAGES = [
@@ -9,7 +10,18 @@ const IDLE_MESSAGES = [
   'Estou aqui se precisar!',
 ]
 
-function Mascot({ mood = 'happy', message = '', position = 'left', mini = false, isAluno = false }) {
+const MOBILE_LINK = 'https://learnwave.pages.dev/'
+
+function Mascot({
+  mood = 'happy',
+  message = '',
+  position = 'left',
+  mini = false,
+  isAluno = false,
+  isProfessor = false,
+  bubbleMessage,
+  bubbleLink = MOBILE_LINK,
+}) {
   const [isBlinking, setIsBlinking] = useState(false)
   const [currentMessage, setCurrentMessage] = useState(message)
   const [showMessage, setShowMessage] = useState(false)
@@ -19,8 +31,29 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false,
   const [currentMood, setCurrentMood] = useState(mood)
   const [showMiniBubble, setShowMiniBubble] = useState(false)
   const [miniBubbleFading, setMiniBubbleFading] = useState(false)
+  const [bubblePos, setBubblePos] = useState(null)
   const hideTimer = useRef(null)
   const miniBubbleTimer = useRef(null)
+  const miniRef = useRef(null)
+
+  // Calcula a posição do balão logo abaixo do mascote (centralizado nele)
+  const posicionarBalao = () => {
+    const el = miniRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const larguraBalao = 280
+    const isMobile = window.innerWidth <= 768
+    if (isMobile) {
+      setBubblePos(null) // no mobile o CSS cuida (fixa embaixo)
+      return
+    }
+    // centro do mascote
+    const centro = r.left + r.width / 2
+    let left = centro - larguraBalao / 2
+    // não deixar sair da tela
+    left = Math.max(12, Math.min(left, window.innerWidth - larguraBalao - 12))
+    setBubblePos({ top: r.bottom + 12, left })
+  }
 
   const showBubble = (msg, duration = 3000) => {
     clearTimeout(hideTimer.current)
@@ -78,14 +111,21 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false,
     else setCurrentMood('happy')
   }
 
-  // Auto-mostrar balão na primeira visita do aluno
+  const interativo = isAluno || isProfessor
+  const chaveVisita = isProfessor ? 'mascoteMensagemVistaProf' : 'mascoteMensagemVista'
+  const textoBalao = bubbleMessage || (isProfessor
+    ? 'Ei, professor! Acesse pelo celular para gerenciar suas aulas!'
+    : 'Ei! Acesse pelo celular para conversar com seu professor!')
+
+  // Auto-mostrar balão na primeira visita
   useEffect(() => {
-    if (mini && isAluno) {
-      const jaViu = localStorage.getItem('mascoteMensagemVista')
+    if (mini && interativo) {
+      const jaViu = localStorage.getItem(chaveVisita)
       if (!jaViu) {
         const timer = setTimeout(() => {
+          posicionarBalao()
           setShowMiniBubble(true)
-          localStorage.setItem('mascoteMensagemVista', 'true')
+          localStorage.setItem(chaveVisita, 'true')
           // Auto-fechar após 8 segundos
           miniBubbleTimer.current = setTimeout(() => {
             setMiniBubbleFading(true)
@@ -95,10 +135,11 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false,
         return () => clearTimeout(timer)
       }
     }
-  }, [mini, isAluno])
+  }, [mini, interativo, chaveVisita])
 
   const handleMiniBubbleOpen = () => {
     clearTimeout(miniBubbleTimer.current)
+    posicionarBalao()
     setMiniBubbleFading(false)
     setShowMiniBubble(true)
     // Auto-fechar após 8 segundos
@@ -115,9 +156,29 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false,
   }
 
   if (mini) {
+    const balao = (isProfessor || isAluno) && showMiniBubble && (
+      <div
+        className={`mascot-mini-bubble ${miniBubbleFading ? 'fading-out' : ''}`}
+        style={bubblePos ? { top: bubblePos.top, left: bubblePos.left, right: 'auto' } : undefined}
+      >
+        <button className="mini-bubble-close" onClick={(e) => { e.stopPropagation(); handleMiniBubbleClose() }} aria-label="Fechar">×</button>
+        <div className="mini-bubble-tail" />
+        <p className="mini-bubble-text">{textoBalao}</p>
+        <a
+          href={bubbleLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mini-bubble-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Acessar App Mobile →
+        </a>
+      </div>
+    )
+
     return (
-      <div className="mascot-mini-wrapper">
-        <div className="mascot-mini" onClick={isAluno ? handleMiniBubbleOpen : undefined} style={isAluno ? { cursor: 'pointer' } : undefined}>
+      <div className="mascot-mini-wrapper" ref={miniRef}>
+        <div className="mascot-mini" onClick={interativo ? handleMiniBubbleOpen : undefined} style={interativo ? { cursor: 'pointer' } : undefined}>
           <div className="mascot mascot-happy">
             <div className="mascot-body">
               <div className="mascot-head">
@@ -146,23 +207,8 @@ function Mascot({ mood = 'happy', message = '', position = 'left', mini = false,
           </div>
         </div>
 
-        {/* Balão interativo para aluno */}
-        {isAluno && showMiniBubble && (
-          <div className={`mascot-mini-bubble ${miniBubbleFading ? 'fading-out' : ''}`}>
-            <button className="mini-bubble-close" onClick={(e) => { e.stopPropagation(); handleMiniBubbleClose() }} aria-label="Fechar">×</button>
-            <div className="mini-bubble-tail" />
-            <p className="mini-bubble-text">Ei! Acesse pelo celular para conversar com seu professor!</p>
-            <a
-              href="https://github.com/biadionisio/LearnWave.git"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mini-bubble-link"
-              onClick={(e) => e.stopPropagation()}
-            >
-              Acessar App Mobile →
-            </a>
-          </div>
-        )}
+        {/* Balão interativo — via portal no body para escapar do contexto do header */}
+        {balao && createPortal(balao, document.body)}
       </div>
     )
   }

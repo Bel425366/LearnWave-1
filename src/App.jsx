@@ -154,6 +154,7 @@ function App() {
           </div>
           <div className="header-actions">
             {currentPage === 'area-aluno' && <Mascot mini isAluno />}
+            {currentPage === 'painel-professor' && <Mascot mini isProfessor />}
             <button 
               className="theme-toggle" 
               onClick={() => {
