@@ -65,7 +65,7 @@ function PainelProfessor({ user, onNavigate }) {
       case 'materiais':
         return <GerenciarMateriais materiais={materiais} setMateriais={setMateriais} professorId={user.id} />
       case 'progresso':
-        return <AcompanharProgresso />
+        return <AcompanharProgresso professorId={user.id} />
       case 'lixeira':
         return <Lixeira atividades={atividades} setAtividades={setAtividades} videoaulas={videoaulas} setVideoaulas={setVideoaulas} materiais={materiais} setMateriais={setMateriais} professorId={user.id} />
       case 'perfil':
@@ -744,10 +744,11 @@ function GerenciarMateriais({ materiais, setMateriais, professorId }) {
   )
 }
 
-function AcompanharProgresso() {
+function AcompanharProgresso({ professorId }) {
   const [progressos, setProgressos] = useState([])
   const [usuarios, setUsuarios] = useState([])
   const [atividades, setAtividades] = useState([])
+  const [progressoPorAluno, setProgressoPorAluno] = useState({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -759,10 +760,11 @@ function AcompanharProgresso() {
         ])
         const alunos = alunosRes.ok ? await alunosRes.json() : []
         const atividadesData = atividadesRes.ok ? await atividadesRes.json() : []
-        setUsuarios(alunos.filter(a => a.status !== 'inativo'))
+        const alunosAtivos = alunos.filter(a => a.status !== 'inativo')
+        setUsuarios(alunosAtivos)
         setAtividades(atividadesData)
 
-        // Buscar progresso de cada atividade
+        // Buscar progresso de cada atividade (para a fila de correção pendente)
         const todosProgressos = []
         await Promise.all(atividadesData.map(async (atividade) => {
           try {
@@ -771,14 +773,24 @@ function AcompanharProgresso() {
               const data = await res.json()
               if (Array.isArray(data)) todosProgressos.push(...data)
             }
-          } catch {}
+          } catch { /* ignora atividade sem progresso */ }
         }))
         setProgressos(todosProgressos)
-      } catch {}
+
+        // Buscar média/progresso de cada aluno considerando SÓ as atividades deste professor
+        const mapa = {}
+        await Promise.all(alunosAtivos.map(async (aluno) => {
+          try {
+            const res = await fetch(`https://learnwaveback2.onrender.com/api/notas/progresso/${aluno.id}/professor/${professorId}`)
+            if (res.ok) mapa[aluno.id] = await res.json()
+          } catch { /* aluno sem progresso com este professor */ }
+        }))
+        setProgressoPorAluno(mapa)
+      } catch { /* falha geral no carregamento */ }
       setLoading(false)
     }
     carregarDados()
-  }, [])
+  }, [professorId])
 
   const darNota = async (progressoId, nota) => {
     const notaNum = parseFloat(nota)
@@ -802,15 +814,15 @@ function AcompanharProgresso() {
       <div className="secao-correcao">
         <h4>Alunos Cadastrados ({usuarios.length})</h4>
         {usuarios.map(aluno => {
-          const progressosAluno = progressos.filter(p => p.alunoId === aluno.id && p.nota != null)
-          const notaMedia = progressosAluno.length > 0
-            ? (progressosAluno.reduce((acc, p) => acc + p.nota, 0) / progressosAluno.length).toFixed(1)
-            : 0
+          const prog = progressoPorAluno[aluno.id]
+          const media = prog && prog.media != null ? Number(prog.media).toFixed(1) : '—'
+          const concluidas = prog?.atividadesConcluidas ?? 0
+          const total = prog?.totalAtividades ?? 0
           return (
             <div key={aluno.id} className="aluno-progresso">
               <h5>{aluno.nome} ({aluno.email})</h5>
-              <p>Atividades realizadas: {progressosAluno.length}</p>
-              <p>Nota média: {notaMedia}</p>
+              <p>Atividades concluídas: {concluidas}{total ? `/${total}` : ''}</p>
+              <p>Nota média (nas suas atividades): {media}</p>
             </div>
           )
         })}

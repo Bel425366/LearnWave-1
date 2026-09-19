@@ -456,6 +456,7 @@ function TabAtividades({ atividades, professores, progressoAtividades, userEmail
           </div>
           <h3 className="aluno-card-title">{prof.nome}</h3>
           {prof.areaEnsino && <p className="aluno-card-desc">{prof.areaEnsino}</p>}
+          {prof.bio && <p className="aluno-card-bio" style={{ fontSize: '0.85rem', opacity: 0.75, margin: '0.4rem 0 0', lineHeight: 1.5 }}>{prof.bio}</p>}
           <span className="aluno-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
             Ver atividades
           </span>
