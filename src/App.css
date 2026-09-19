@@ -43,21 +43,6 @@ h1, h2, h3,
   position: relative;
 }
 
-/* Grid tech de fundo (blueprint) */
-.dark-theme::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
-}
-
 /* Orbs coloridos flutuando */
 .dark-theme::after {
   content: '';

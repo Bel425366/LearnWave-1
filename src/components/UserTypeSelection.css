@@ -690,3 +690,73 @@
     min-height: auto !important;
   }
 }
+
+
+/* ── Bob 3D (imagem) na lateral da seleção ── */
+.bob-3d-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.bob-3d {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 20px 40px rgba(79, 70, 229, 0.35));
+  animation: bobFloat 5s ease-in-out infinite;
+}
+
+/* Brilho ambiente atrás do Bob */
+.bob-3d-glow {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  width: 78%;
+  height: 78%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(124, 58, 237, 0.15) 40%, transparent 70%);
+  filter: blur(30px);
+  z-index: 1;
+  animation: bobGlowPulse 5s ease-in-out infinite;
+}
+
+/* Sombra no chão que acompanha a flutuação */
+.bob-3d-shadow {
+  position: absolute;
+  bottom: -2%;
+  left: 50%;
+  width: 55%;
+  height: 26px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.35) 0%, transparent 70%);
+  filter: blur(8px);
+  z-index: 0;
+  animation: bobShadow 5s ease-in-out infinite;
+}
+
+@keyframes bobFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-18px); }
+}
+@keyframes bobGlowPulse {
+  0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.06); }
+}
+@keyframes bobShadow {
+  0%, 100% { opacity: 0.5; width: 55%; }
+  50%      { opacity: 0.3; width: 46%; }
+}
+
+.light-theme .bob-3d {
+  filter: drop-shadow(0 20px 40px rgba(124, 58, 237, 0.25));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bob-3d, .bob-3d-glow, .bob-3d-shadow { animation: none; }
+}

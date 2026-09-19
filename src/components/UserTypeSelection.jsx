@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import Mascot from './Mascot'
 import './UserTypeSelection.css'
 
 const USER_TYPES = [
@@ -41,15 +39,7 @@ const USER_TYPES = [
   }
 ]
 
-const HOVER_MESSAGES = {
-  aluno: 'Boa escolha! Como aluno você terá acesso a atividades, videoaulas e materiais.',
-  professor: 'Que ótimo! Como professor você pode criar atividades e acompanhar seus alunos.',
-  administrador: 'Acesso total à plataforma. Bem-vindo, administrador!'
-}
-
 function UserTypeSelection({ onSelectUserType }) {
-  const [hoverMessage, setHoverMessage] = useState('Oi! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')
-
   return (
     <div className="auth-container">
       <div className="selection-wrapper-split">
@@ -76,8 +66,6 @@ function UserTypeSelection({ onSelectUserType }) {
                   key={type.id}
                   className="type-card"
                   style={{ '--accent-color': type.accentColor }}
-                  onMouseEnter={() => setHoverMessage(HOVER_MESSAGES[type.id])}
-                  onMouseLeave={() => setHoverMessage('Oi! Eu sou o Bob. Selecione como deseja acessar o LearnWave!')}
                 >
                   <div className="card-glow" />
                   <div className="card-icon">{type.icon}</div>
@@ -98,7 +86,11 @@ function UserTypeSelection({ onSelectUserType }) {
         </div>
 
         <div className="selection-right">
-          <Mascot mood="happy" />
+          <div className="bob-3d-wrapper">
+            <img src="/bobFinal.png" alt="Bob, o mascote do LearnWave" className="bob-3d" />
+            <div className="bob-3d-glow" />
+            <div className="bob-3d-shadow" />
+          </div>
         </div>
       </div>
     </div>
