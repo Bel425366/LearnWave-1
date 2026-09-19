@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Mascot from './Mascot'
 import PasswordValidator from './PasswordValidator'
 import Avatar from './Avatar'
+import ContadorAnimado from './ContadorAnimado'
 
 const SENHA_FORTE = (pwd) =>
   pwd.length >= 8 &&
@@ -16,6 +17,19 @@ function AreaAluno({ user, onNavigate }) {
   const [activeTab, setActiveTab] = useState('atividades')
   const [atividadeAtual, setAtividadeAtual] = useState(null)
   const [perfilData, setPerfilData] = useState({ apelido: user.nome, bio: '', fotoPerfil: null, corAvatar: null, emojiAvatar: null })
+
+  // Spotlight que segue o mouse nos cards (.aluno-card)
+  useEffect(() => {
+    const handleMove = (e) => {
+      const card = e.target.closest?.('.aluno-card')
+      if (!card) return
+      const r = card.getBoundingClientRect()
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`)
+      card.style.setProperty('--my', `${e.clientY - r.top}px`)
+    }
+    document.addEventListener('mousemove', handleMove)
+    return () => document.removeEventListener('mousemove', handleMove)
+  }, [])
 
   // Carregar perfil da API
   useEffect(() => {
@@ -297,15 +311,15 @@ function AreaAluno({ user, onNavigate }) {
         </div>
         <div className="painel-hero-stats">
           <div className="painel-stat">
-            <span className="painel-stat-val">{progressoGeral?.atividadesConcluidas ?? 0}</span>
+            <span className="painel-stat-val"><ContadorAnimado valor={progressoGeral?.atividadesConcluidas ?? 0} /></span>
             <span className="painel-stat-lbl">Atividades</span>
           </div>
           <div className="painel-stat">
-            <span className="painel-stat-val">{progressoVideoaulas.filter(p => p.status === 'CONCLUIDO').length}</span>
+            <span className="painel-stat-val"><ContadorAnimado valor={progressoVideoaulas.filter(p => p.status === 'CONCLUIDO').length} /></span>
             <span className="painel-stat-lbl">Videoaulas</span>
           </div>
           <div className="painel-stat">
-            <span className="painel-stat-val">{notaMedia}</span>
+            <span className="painel-stat-val">{notaMedia === '—' ? '—' : <ContadorAnimado valor={notaMedia} decimais={1} />}</span>
             <span className="painel-stat-lbl">Média</span>
           </div>
         </div>

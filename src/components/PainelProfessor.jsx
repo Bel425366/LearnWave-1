@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import Modal from './Modal'
 import PasswordValidator from './PasswordValidator'
 import Avatar from './Avatar'
+import ContadorAnimado from './ContadorAnimado'
 
 const CORES_AVATAR = [
   { label: 'Roxo',     value: 'linear-gradient(135deg, #667eea, #764ba2)' },
@@ -101,15 +102,15 @@ function PainelProfessor({ user, onNavigate }) {
         </div>
         <div className="painel-hero-stats">
           <div className="painel-stat">
-            <span className="painel-stat-val">{atividades.filter(a => !a.excluido).length}</span>
+            <span className="painel-stat-val"><ContadorAnimado valor={atividades.filter(a => !a.excluido).length} /></span>
             <span className="painel-stat-lbl">Atividades</span>
           </div>
           <div className="painel-stat">
-            <span className="painel-stat-val">{videoaulas.filter(v => v.status !== 'LIXEIRA').length}</span>
+            <span className="painel-stat-val"><ContadorAnimado valor={videoaulas.filter(v => v.status !== 'LIXEIRA').length} /></span>
             <span className="painel-stat-lbl">Videoaulas</span>
           </div>
           <div className="painel-stat">
-            <span className="painel-stat-val">{normalizarMateriais(materiais).filter(m => !m.excluido).length}</span>
+            <span className="painel-stat-val"><ContadorAnimado valor={normalizarMateriais(materiais).filter(m => !m.excluido).length} /></span>
             <span className="painel-stat-lbl">Materiais</span>
           </div>
         </div>

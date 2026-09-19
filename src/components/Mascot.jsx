@@ -114,7 +114,7 @@ function Mascot({
   const interativo = isAluno || isProfessor
   const chaveVisita = isProfessor ? 'mascoteMensagemVistaProf' : 'mascoteMensagemVista'
   const textoBalao = bubbleMessage || (isProfessor
-    ? 'Ei, professor! Acesse pelo celular para gerenciar suas aulas!'
+    ? 'Ei, professor! Acesse pelo celular para conversar com seus alunos!'
     : 'Ei! Acesse pelo celular para conversar com seu professor!')
 
   // Auto-mostrar balão na primeira visita
