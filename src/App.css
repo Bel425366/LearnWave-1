@@ -5838,3 +5838,40 @@ html {
   .dark-theme .auth-btn-primary::after,
   .aluno-grid > * { animation: none; }
 }
+
+
+/* ═══════════════════════════════════════════════
+   Legibilidade da tela "Fazer atividade" (dark)
+   ═══════════════════════════════════════════════ */
+.dark-theme .fazer-atividade,
+.dark-theme .fazer-atividade p,
+.dark-theme .atividade-container p {
+  color: #e8ecf5 !important;
+}
+
+/* Descrição da atividade — texto nítido sobre o bloco claro */
+.dark-theme .descricao-atividade,
+.dark-theme .descricao-atividade p {
+  color: #f1f5f9 !important;
+}
+.dark-theme .descricao-atividade {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enunciado das questões */
+.dark-theme .questao-bloco h4,
+.dark-theme .opcoes-resposta h4,
+.dark-theme .resposta-dissertativa h4,
+.dark-theme .atividade-container h2 {
+  color: #ffffff !important;
+}
+.dark-theme .questao-bloco p {
+  color: #e8ecf5 !important;
+}
+
+/* Texto "Área:" e labels das alternativas bem legíveis */
+.dark-theme .opcao-label,
+.dark-theme .opcao-label span {
+  color: #f1f5f9 !important;
+}
